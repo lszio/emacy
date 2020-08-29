@@ -1,0 +1,17 @@
+#+TITLE: Lemacs
+
+* Projects
+- spacemacs
+- doomemacs
+- chemacs
+
+* Todos
+- [ ] doom-emacs
+- [ ] spacemacs
+- [ ] scripts
+
+* folders
+** bin
+** configs
+** emacs
+** scripts
