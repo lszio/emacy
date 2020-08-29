@@ -1,0 +1,13 @@
+[submodule "config/doomemacs"]
+	path = config/doomemacs
+	url = https://github.com/hlissner/doom-emacs
+[submodule "config/spacemacs"]
+	path = config/spacemacs
+	url = https://github.com/syl20bnr/spacemacs
+	branch = develop
+[submodule "config/.doom.d"]
+	path = config/.doom.d
+	url = https://github.com/Liszt21/.doom.d
+[submodule "config/.spacemacs.d"]
+	path = config/.spacemacs.d
+	url = https://github.com/Liszt21/.spacemacs.d
