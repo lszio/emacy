@@ -17,7 +17,10 @@ if ($ENV:USERNAME -eq 'liszt'){
 }
 
 function Check {
-    if (!$(Get-Command lemacs)){
+    if (!$ENV:LEMACS){
+        if ($LEMACS_DEBUG){
+            $LEMACS = "."
+        }
         Write-Output "Lemacs isn't installed!"
 
         if(!$(Get-Command emacs)){
@@ -36,14 +39,20 @@ function Check {
         scoop install lemacs
         $ENV:LEMACS = ($ENV:SCOOP + "/apps/lemacs/current")
         [environment]::setEnvironmentVariable('LEMACS',$ENV:LEMACS,'User')
-    }
-    if ($LEMACS_DEBUG){
-        $LEMACS = "."
+        Set-Location ($ENV:LEMACS + "\..")
+        Remove-Tiem -r master
+        git clone https://github.com/Liszt21/Lemacs master
+        Set-Location master
+        git submodule init
+        git submodule update
+        sudo ln -s ($ENV:LEMACS + "/src/lemacs.el") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
+        if ($ISME) {
+            sudo ln -s $ENV:LEMACS C:/Liszt/Projects/Lemacs
+        }
     }else {
         $LEMACS = $ENV:LEMACS
     }
-
-    cd $LEMACS
+    Set-Location $LEMACS
 }
 
 function Help {
@@ -52,7 +61,9 @@ function Help {
 
 function Update {
     Write-Output "Update"
-
+    git fetch origin master
+    git submodule foreach git fetch 
+    git submodule update
 }
 
 Write-Output "Lemacs"
@@ -60,11 +71,7 @@ Check
 
 if (!$args){
     Update
-    cd $env:scoop
 } else {
-    Write-Output "$args"
-    Write-Output $args.Count
-    Write-Output $args[1..$args.Count]
     switch ($args[0]){
         'doom' {
             Write-Output "Doom"
