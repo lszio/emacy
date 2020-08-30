@@ -47,14 +47,15 @@ function Check {
             }
             scoop bucket add dragon https://github.com/Liszt21/Dragon
             scoop install lemacs
-            Set-Location $ENV:LEMACS
-            Set-Location ..
-            Remove-Item -r master
-            git clone https://github.com/Liszt21/Lemacs master
-            Set-Location master
-            git submodule init
-            git submodule update
+            
         }
+        Set-Location $ENV:LEMACS
+        Set-Location ..
+        Remove-Item -r master
+        git clone https://github.com/Liszt21/Lemacs master
+        Set-Location master
+        git submodule init
+        git submodule update
         $ENV:LEMACS = ($ENV:SCOOP + "/apps/lemacs/current")
         [environment]::setEnvironmentVariable('LEMACS',$ENV:LEMACS,'User')
         sudo ln -s ($ENV:LEMACS + "/src/lemacs.el") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
@@ -62,7 +63,7 @@ function Check {
             sudo ln -s $ENV:LEMACS C:/Liszt/Projects/Lemacs
         }
     }
-    Set-Location $LEMACS
+    Set-Location $ENV:LEMACS
 }
 
 function Help {
