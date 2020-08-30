@@ -40,7 +40,7 @@ function Check {
         $ENV:LEMACS = ($ENV:SCOOP + "/apps/lemacs/current")
         [environment]::setEnvironmentVariable('LEMACS',$ENV:LEMACS,'User')
         Set-Location ($ENV:LEMACS + "\..")
-        Remove-Tiem -r master
+        Remove-Item -r master
         git clone https://github.com/Liszt21/Lemacs master
         Set-Location master
         git submodule init
