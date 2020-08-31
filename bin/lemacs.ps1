@@ -1,18 +1,3 @@
-
-               
-# function Show-Logo {
-#     Write-Output "  ██▓    ▓█████  ███▄ ▄███▓ ▄▄▄       ▄████▄    ██████"
-#     Write-Output " ▓██▒    ▓█   ▀ ▓██▒▀█▀ ██▒▒████▄    ▒██▀ ▀█  ▒██    ▒ "
-#     Write-Output " ▒██░    ▒███   ▓██    ▓██░▒██  ▀█▄  ▒▓█    ▄ ░ ▓██▄   "
-#     Write-Output " ▒██░    ▒▓█  ▄ ▒██    ▒██ ░██▄▄▄▄██ ▒▓▓▄ ▄██▒  ▒   ██▒"
-#     Write-Output " ░██████▒░▒████▒▒██▒   ░██▒ ▓█   ▓██▒▒ ▓███▀ ░▒██████▒▒"
-#     Write-Output " ░ ▒░▓  ░░░ ▒░ ░░ ▒░   ░  ░ ▒▒   ▓▒█░░ ░▒ ▒  ░▒ ▒▓▒ ▒ ░"
-#     Write-Output " ░ ░ ▒  ░ ░ ░  ░░  ░      ░  ▒   ▒▒ ░  ░  ▒   ░ ░▒  ░ ░"
-#     Write-Output "   ░ ░      ░   ░      ░     ░   ▒   ░        ░  ░  ░  "
-#     Write-Output "     ░  ░   ░  ░       ░         ░  ░░ ░            ░  "
-#     Write-Output "                                     ░  "
-# }
-
 if ($ENV:USERNAME -eq 'liszt'){
     $ISME = $true
 }else{
@@ -25,11 +10,15 @@ if ($ENV:LEMACS) {
     $LEMACS = "."
 }
 
+$Origin_Location = Get-Location
+function Debug-Lemacs($message) {
+    if ($DEBUG){
+        Write-Output "$message"
+    }
+}
+
 function Check {
     if (!$ENV:LEMACS){
-        if ($LEMACS_DEBUG){
-            $LEMACS = "."
-        }
         if (!$(Get-Command lemacs)) {
             Write-Output "Lemacs isn't installed!"
 
@@ -47,22 +36,24 @@ function Check {
             }
             scoop bucket add dragon https://github.com/Liszt21/Dragon
             scoop install lemacs
-            
         }
-        Set-Location $ENV:LEMACS
-        Set-Location ..
-        Remove-Item -r master
-        git clone https://github.com/Liszt21/Lemacs master
-        Set-Location master
-        git submodule init
-        git submodule update
         $ENV:LEMACS = ($ENV:SCOOP + "/apps/lemacs/current")
         [environment]::setEnvironmentVariable('LEMACS',$ENV:LEMACS,'User')
+        Set-Location $ENV:LEMACS
+        if (!(Test-Path .git)){
+            Set-Location ..
+            Remove-Item -r master
+            git clone https://github.com/Liszt21/Lemacs master
+            Set-Location master
+        }
+        git submodule init
+        git submodule update
         sudo ln -s ($ENV:LEMACS + "/src/lemacs.el") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
         if ($ISME) {
             sudo ln -s $ENV:LEMACS C:/Liszt/Projects/Lemacs
         }
     }
+    Write-Debug "Lemacs is already installed"
     Set-Location $ENV:LEMACS
 }
 
@@ -77,12 +68,14 @@ function Update {
     git submodule update
 }
 
-Show-Logo
 Check
 
-
-if (!$args){
-    Update
+if (!$args -or !$args[0] -eq "update"){
+    try {
+        Update
+    }catch {
+        Write-Output "Error occured while updating"
+    }
 } else {
     switch ($args[0]){
         'doom' {
@@ -99,5 +92,10 @@ if (!$args){
                 Write-Output $args[1..$args.Count]
             }
         }
+        'clean' {
+            Write-Output "Clean"
+        }
     }
 }
+
+Set-Location $Origin_Location
