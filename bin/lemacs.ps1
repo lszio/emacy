@@ -11,6 +11,7 @@ if ($ENV:LEMACS) {
 }
 
 $Origin_Location = Get-Location
+
 function Debug-Lemacs($message) {
     if ($DEBUG){
         Write-Output "$message"
@@ -38,9 +39,9 @@ function Check {
             scoop install lemacs
         }
         $ENV:LEMACS = ($ENV:SCOOP + "/apps/lemacs/current")
-        [environment]::setEnvironmentVariable('LEMACS',$ENV:LEMACS,'User')
         Set-Location $ENV:LEMACS
         if (!(Test-Path .git)){
+            Write-Debug "lemacs isn't a git folder"
             Set-Location ..
             Remove-Item -r master
             git clone https://github.com/Liszt21/Lemacs master
@@ -50,11 +51,17 @@ function Check {
         git submodule update
         sudo ln -s ($ENV:LEMACS + "/src/lemacs.el") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
         if ($ISME) {
-            sudo ln -s $ENV:LEMACS C:/Liszt/Projects/Lemacs
+            Set-Location ..
+            if(Test-Path C:/Liszt/Projects/Lemacs){
+                Remove-Item -r master
+            }else{
+                Move-Item master C:/Liszt/Projects/Lemacs
+            }
+            sudo ln -s C:/Liszt/Projects/Lemacs ./master
         }
+        [environment]::setEnvironmentVariable('LEMACS',$ENV:LEMACS,'User')
     }
     Write-Debug "Lemacs is already installed"
-    Set-Location $ENV:LEMACS
 }
 
 function Help {
@@ -62,10 +69,21 @@ function Help {
 }
 
 function Update {
+    Set-Location $LEMACS
+    if (!(Test-Path .git)){
+        Write-Debug "lemacs isn't a git folder"
+        $current = Get-Location
+        $folder = ($current -split "\\")[-1]
+        Set-Location ..
+        Remove-Item -r $folder
+        git clone https://github.com/Liszt21/Lemacs $folder
+        Set-Location $folder
+    }
     Write-Output "Update"
     git fetch origin master
     git submodule foreach git fetch 
     git submodule update
+    Set-Location $Origin_Location
 }
 
 Check
@@ -98,4 +116,3 @@ if (!$args -or !$args[0] -eq "update"){
     }
 }
 
-Set-Location $Origin_Location
