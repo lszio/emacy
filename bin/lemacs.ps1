@@ -18,6 +18,22 @@ function Debug-Lemacs($message) {
     }
 }
 
+function Update-Git {
+    if( !(Test-Path bin/lemacs.ps1)){
+        Write-Output "Not in Lemacs"
+        return 
+    }
+    $current = Get-Location
+    $folder = ($current -split "\\")[-1]
+    if ($folder -eq 'current') {
+        $folder = 'master'
+    }
+    Set-Location ..
+    Remove-Item -r $folder
+    git clone https://github.com/Liszt21/Lemacs $folder
+    Set-Location $folder
+}
+
 function Check {
     if (!$ENV:LEMACS){
         if (!$(Get-Command lemacs)) {
@@ -42,10 +58,7 @@ function Check {
         Set-Location $ENV:LEMACS
         if (!(Test-Path .git)){
             Write-Debug "lemacs isn't a git folder"
-            Set-Location ..
-            Remove-Item -r master
-            git clone https://github.com/Liszt21/Lemacs master
-            Set-Location master
+            Update-Git
         }
         git submodule init
         git submodule update
@@ -70,15 +83,6 @@ function Help {
 
 function Update {
     Set-Location $LEMACS
-    if (!(Test-Path .git)){
-        Write-Debug "lemacs isn't a git folder"
-        $current = Get-Location
-        $folder = ($current -split "\\")[-1]
-        Set-Location ..
-        Remove-Item -r $folder
-        git clone https://github.com/Liszt21/Lemacs $folder
-        Set-Location $folder
-    }
     Write-Output "Update"
     git fetch origin master
     git submodule foreach git fetch 
@@ -112,6 +116,9 @@ if (!$args -or !$args[0] -eq "update"){
         }
         'clean' {
             Write-Output "Clean"
+        }
+        'uninstall' {
+            Write-Output "Uninstall"
         }
     }
 }
