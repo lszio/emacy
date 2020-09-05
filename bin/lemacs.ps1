@@ -55,13 +55,6 @@ function Check {
             scoop install lemacs
         }
         $ENV:LEMACS = ($ENV:SCOOP + "/apps/lemacs/current")
-        Set-Location $ENV:LEMACS
-        if (!(Test-Path .git)){
-            Write-Debug "lemacs isn't a git folder"
-            Update-Git
-        }
-        git submodule init
-        git submodule update
         sudo ln -s ($ENV:LEMACS + "/src/lemacs.el") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
         if ($ISME) {
             Set-Location ..
@@ -74,7 +67,11 @@ function Check {
         }
         [environment]::setEnvironmentVariable('LEMACS',$ENV:LEMACS,'User')
     }
-    Write-Debug "Lemacs is already installed"
+    Set-Location $LEMACS
+    if (!(Test-Path .git)){
+        Write-Debug "lemacs isn't a git folder"
+        Update-Git
+    }
 }
 
 function Help {
@@ -82,10 +79,9 @@ function Help {
 }
 
 function Update {
-    Set-Location $LEMACS
     Write-Output "Update"
     git fetch origin master
-    git submodule foreach git fetch 
+    git submodule init
     git submodule update
     Set-Location $Origin_Location
 }
