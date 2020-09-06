@@ -56,6 +56,10 @@ function Check {
         }
         $ENV:LEMACS = ($ENV:SCOOP + "/apps/lemacs/current")
         sudo ln -s ($ENV:LEMACS + "/src/lemacs.el") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
+        sudo ln -s ($ENV:LEMACS + "/config/spacemacs") ("C:/Users/$ENV:USERNAME/AppData/Roaming/spacemacs")
+        sudo ln -s ($ENV:LEMACS + "/config/doomemacs") ("C:/Users/$ENV:USERNAME/AppData/Roaming/doomemacs")
+        sudo ln -s ($ENV:LEMACS + "/config/.doom.d") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.doom.d")
+        sudo ln -s ($ENV:LEMACS + "/config/.spacemacs.d") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.spacamacs.d")
         if ($ISME) {
             Set-Location ..
             if(Test-Path C:/Liszt/Projects/Lemacs){
@@ -115,6 +119,12 @@ if (!$args -or !$args[0] -eq "update"){
         }
         'uninstall' {
             Write-Output "Uninstall"
+            Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
+            Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
+            Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.doom.d")
+            Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.spacemacs.d")
+            Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/spacemacs")
+            Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/doomemacs")
         }
     }
 }

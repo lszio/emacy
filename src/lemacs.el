@@ -5,7 +5,7 @@
 
 (when (not (file-exists-p lemacs-profiles-path))
   (with-temp-file lemacs-profiles-path
-    (insert "((\"default\" . ((user-emacs-directory . \"~/.emacs.d\"))))")))
+    (insert "((\"default\" . ((user-emacs-directory . \"~/doomemacs\")))\n (\"spacemacs\" . ((user-emacs-directory . \"~/spacemacs\")))\n (\"origin\" . ((user-emacs-directory . \"~/.emacs.d\"))))")))
 
 (defvar lemacs-emacs-profiles
   (with-temp-buffer
