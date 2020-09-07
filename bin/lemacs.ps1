@@ -55,11 +55,7 @@ function Check {
             scoop install lemacs
         }
         $ENV:LEMACS = ($ENV:SCOOP + "/apps/lemacs/current")
-        sudo ln -s ($ENV:LEMACS + "/src/lemacs.el") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
-        sudo ln -s ($ENV:LEMACS + "/config/spacemacs") ("C:/Users/$ENV:USERNAME/AppData/Roaming/spacemacs")
-        sudo ln -s ($ENV:LEMACS + "/config/doomemacs") ("C:/Users/$ENV:USERNAME/AppData/Roaming/doomemacs")
-        sudo ln -s ($ENV:LEMACS + "/config/.doom.d") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.doom.d")
-        sudo ln -s ($ENV:LEMACS + "/config/.spacemacs.d") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.spacamacs.d")
+        
         if ($ISME) {
             Set-Location ..
             if(Test-Path C:/Liszt/Projects/Lemacs){
@@ -83,11 +79,49 @@ function Help {
 }
 
 function Update {
-    Write-Output "Update"
+    Write-Output "Updating"
     git fetch origin master
     git submodule init
     git submodule update
-    Set-Location $Origin_Location
+}
+
+function Install {
+    Write-Output "Installing"
+    sudo ln -s ($LEMACS + "/src/lemacs.el") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
+    sudo ln -s ($LEMACS + "/config/spacemacs") ("C:/Users/$ENV:USERNAME/AppData/Roaming/spacemacs")
+    sudo ln -s ($LEMACS + "/config/doomemacs") ("C:/Users/$ENV:USERNAME/AppData/Roaming/doomemacs")
+    sudo ln -s ($LEMACS + "/config/.doom.d") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.doom.d")
+    sudo ln -s ($LEMACS + "/config/.spacemacs.d") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.spacamacs.d")
+}
+
+function Uninstall {
+    Write-Output "Uninstalling"
+    Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
+    Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.doom.d")
+    Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.spacemacs.d")
+    Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/spacemacs")
+    Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/doomemacs")
+}
+
+function Run($command) {
+    if(!$command){
+        $command = "Default"
+    }
+    switch -regex ($command){
+        "Default" {
+            Write-Output "Default"
+            Start-Job {emacs}
+            return
+        }
+        "^d" {
+            Write-Output "Doomemacs"
+            Start-Job {emacs --with-profile doomemacs}
+        }
+        "^s" {
+            Write-Output "Spacemacs"
+            Start-Job {emacs --with-profile spacemacs}
+        }
+    }
 }
 
 Check
@@ -108,24 +142,15 @@ if (!$args -or !$args[0] -eq "update"){
             Write-Output "Spacemacs"
         }
         'run' {
-            if (!$args[1]){
-                Write-Output "None specific command was given"
-            }else{
-                Write-Output $args[1..$args.Count]
-            }
+            Run $args[1]
         }
-        'clean' {
-            Write-Output "Clean"
+        'install' {
+            Install
         }
         'uninstall' {
-            Write-Output "Uninstall"
-            Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
-            Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
-            Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.doom.d")
-            Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.spacemacs.d")
-            Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/spacemacs")
-            Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/doomemacs")
+            Uninstall
         }
     }
 }
 
+Set-Location $Origin_Location

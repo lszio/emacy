@@ -1,0 +1,1 @@
+Start-Job {emacs --with-profile doomemacs}
