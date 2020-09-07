@@ -80,7 +80,7 @@ function Help {
 
 function Update {
     Write-Output "Updating"
-    git fetch origin master
+    git pull origin master
     git submodule init
     git submodule update
 }
@@ -127,11 +127,7 @@ function Run($command) {
 Check
 
 if (!$args -or !$args[0] -eq "update"){
-    try {
-        Update
-    }catch {
-        Write-Output "Error occured while updating"
-    }
+    Run
 } else {
     switch ($args[0]){
         'doom' {
@@ -149,6 +145,9 @@ if (!$args -or !$args[0] -eq "update"){
         }
         'uninstall' {
             Uninstall
+        }
+        'update' {
+            Update
         }
     }
 }
