@@ -1,3 +1,5 @@
+;;; package --- Summary
+;;; Code:
 (message "Lemacs")
 
 (defvar lemacs-profiles-path "~/.emacs-profiles.el")
@@ -111,4 +113,5 @@
 (lemacs-check-command-line-args command-line-args)
 
 (provide '.emacs)
-;;; .emacs ends here
+;;; Commentary:
+;;; lemacs.el ends here
