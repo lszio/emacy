@@ -1,0 +1,93 @@
+#!/bin/sh
+
+OLD_PWD=(pwd)
+if [ $LEMACS ];then
+    INSTALLED=true
+else
+    LEMACS=~/Apps/lemacs
+fi
+if [ $WSL_DISTRO_NAME ];then
+    IN_WSL=true
+fi
+if [[ $USER == 'liszt' ]];then
+    IS_ME=true
+fi
+
+install() {
+    echo "Installing"
+    if [ ! -d $LEMACS ];then
+        git clone https://github.com/Liszt21/lemacs $LEMACS
+    fi
+    if [ ! -L ~/.emacs ];then
+        cd $LEMACS
+        ln -s $LEMACS/src/lemacs.el ~/.emacs
+        ln -s $LEMACS/config/spacemacs ~/spacemacs
+        ln -s $LEMACS/config/doomemacs ~/doomemacs
+        ln -s $LEMACS/config/.doom.d ~/.doom.d
+        ln -s $LEMACS/config/.spacemacs.d ~/.spacemacs.d
+        cd $OLDPWD
+    fi
+    echo "source $LEMACS/src/entry" >> ~/.zshrc
+}
+
+uninstall() {
+    echo "Uninstalling"
+    
+    rm  ~/.emacs
+    rm  ~/spacemacs
+    rm  ~/doomemacs
+    rm  ~/.doom.d
+    rm  ~/.spacemacs.d
+    rm -rf $LEMACS
+}
+
+check() {
+    if [ $INSTALLED ];then
+        return
+    fi
+    install
+}
+
+update() {
+    echo "Updating"
+    git pull origin master
+    git submodule init
+    git submodule update
+}
+
+check
+cd $LEMACS
+update
+
+case $1 in
+    U|uninstall)
+        echo "uninstall"
+        uninstall
+        ;;
+    I|install)
+        echo "Install"
+        install
+        ;;
+    D|doom)
+        echo "Doom"
+        $LEMACS/config/doomemacs/bin/doom $2
+        ;;
+    R|run)
+        echo "Run "
+        case $2 in
+            [sS]pacemacs)
+                echo "Spacemacs"
+                ;;
+            [dD]oom)
+                echo "Doom"
+                ;;
+        esac
+        ;;
+    *)
+        echo "Help"
+        # update
+        ;;
+esac
+
+cd $OLDPWD
+ 

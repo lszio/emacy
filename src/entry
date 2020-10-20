@@ -1,0 +1,4 @@
+LEMACS=${LEMACS:-~/Apps/lemacs}
+export LEMACS
+
+export PATH=$LEMACS/bin:$LEMACS/config/doomemacs/bin:$PATH
