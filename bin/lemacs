@@ -16,18 +16,28 @@ fi
 install() {
     echo "Installing"
     if [ ! -d $LEMACS ];then
-        git clone https://github.com/Liszt21/lemacs $LEMACS
+        if [ IN_WSL ] && [IS_ME] && [ -d /mnt/c/Liszt/Projects/Lemacs ];then
+            ln -s /mnt/c/Liszt/Projects/Lemacs $LEMACS
+        else
+            git clone https://github.com/Liszt21/lemacs $LEMACS
+        fi
+    fi
+    if [ -f ~/.emacs ];then
+        mv ~/.emacs ~/.emacs.bak
     fi
     if [ ! -L ~/.emacs ];then
-        cd $LEMACS
         ln -s $LEMACS/src/lemacs.el ~/.emacs
         ln -s $LEMACS/config/spacemacs ~/spacemacs
         ln -s $LEMACS/config/doomemacs ~/doomemacs
         ln -s $LEMACS/config/.doom.d ~/.doom.d
         ln -s $LEMACS/config/.spacemacs.d ~/.spacemacs.d
-        cd $OLDPWD
     fi
-    echo "source $LEMACS/src/entry" >> ~/.zshrc
+    if [ ! -f ~/.zshrc ];then
+        PROFILE=~/.bashrc
+    else
+        PROFILE=~/.zshrc
+    fi
+    echo "source $LEMACS/src/entry" >> $PROFILE
 }
 
 uninstall() {
@@ -77,9 +87,11 @@ case $1 in
         case $2 in
             [sS]pacemacs)
                 echo "Spacemacs"
+                emacs --with-profile spacemacs
                 ;;
             [dD]oom)
                 echo "Doom"
+                emacs --with-profile doomemacs
                 ;;
         esac
         ;;
