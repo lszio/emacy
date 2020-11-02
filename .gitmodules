@@ -1,6 +1,7 @@
 [submodule "config/doomemacs"]
 	path = config/doomemacs
 	url = https://github.com/hlissner/doom-emacs
+	branch = develop
 [submodule "config/spacemacs"]
 	path = config/spacemacs
 	url = https://github.com/syl20bnr/spacemacs
@@ -8,6 +9,8 @@
 [submodule "config/.doom.d"]
 	path = config/.doom.d
 	url = https://github.com/Liszt21/.doom.d
+	branch = master
 [submodule "config/.spacemacs.d"]
 	path = config/.spacemacs.d
 	url = https://github.com/Liszt21/.spacemacs.d
+	branch = master
