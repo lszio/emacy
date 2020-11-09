@@ -94,8 +94,8 @@ function Install {
     sudo ln -s ($LEMACS + "/config/.spacemacs.d") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.spacemacs.d")
 }
 
-function Uninstall {
-    Write-Output "Uninstalling"
+function Clean{
+    Write-Output "Clean"
     Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
     Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.doom.d")
     Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.spacemacs.d")
@@ -127,7 +127,7 @@ function Run($command) {
 Check
 
 if (!$args -or !$args[0] -eq "update"){
-    Run
+    Update
 } else {
     switch ($args[0]){
         'doom' {
@@ -143,8 +143,8 @@ if (!$args -or !$args[0] -eq "update"){
         'install' {
             Install
         }
-        'uninstall' {
-            Uninstall
+        'clean' {
+            Clean
         }
         'update' {
             Update

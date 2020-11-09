@@ -40,15 +40,15 @@ install() {
     echo "source $LEMACS/src/entry" >> $PROFILE
 }
 
-uninstall() {
-    echo "Uninstalling"
+clean() {
+    echo "Clean"
     
     rm  ~/.emacs
     rm  ~/spacemacs
     rm  ~/doomemacs
     rm  ~/.doom.d
     rm  ~/.spacemacs.d
-    rm -rf $LEMACS
+    # rm -rf $LEMACS
 }
 
 check() {
@@ -68,12 +68,11 @@ update() {
 
 check
 cd $LEMACS
-update
 
 case $1 in
-    U|uninstall)
-        echo "uninstall"
-        uninstall
+    C|clean)
+        echo "clean"
+        clean
         ;;
     I|install)
         echo "Install"
@@ -82,6 +81,10 @@ case $1 in
     D|doom)
         echo "Doom"
         $LEMACS/config/doomemacs/bin/doom $2
+        ;;
+    U|update)
+        echo "Update"
+        update
         ;;
     R|run)
         echo "Run "
