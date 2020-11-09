@@ -19,7 +19,7 @@ install() {
         if [ IN_WSL ] && [IS_ME] && [ -d /mnt/c/Liszt/Projects/Lemacs ];then
             ln -s /mnt/c/Liszt/Projects/Lemacs $LEMACS
         else
-            git clone https://github.com/Liszt21/lemacs $LEMACS
+            git clone --recursive https://github.com/Liszt21/lemacs $LEMACS
         fi
     fi
     if [ -f ~/.emacs ];then
@@ -60,9 +60,10 @@ check() {
 
 update() {
     echo "Updating"
-    git pull origin master
-    git submodule init
-    git submodule update
+    # git pull origin master
+    # git submodule init
+    # git submodule update
+    git submodule foreach git pull
 }
 
 check
