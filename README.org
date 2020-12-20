@@ -6,12 +6,20 @@
 - chemacs
 
 * Todos
-- [ ] doom-emacs
-- [ ] spacemacs
-- [ ] scripts
+- [X] doom-emacs
+- [X] spacemacs
+- [X] scripts
 
-* folders
-** bin
-** configs
-** emacs
-** scripts
+* Installition
+#+BEGIN_SRC shell
+# github
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/Liszt21/Lemacs/master/bin/lemacs)"
+#+END_SRC
+
+* Usage
+#+begin_src shell
+lemacs update # update lemacs & submodules
+
+lemacs doom $COMMANDS # exec doom
+lemacs doom sync
+#+end_src
