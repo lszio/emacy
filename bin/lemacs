@@ -16,7 +16,7 @@ fi
 install() {
     echo "Installing"
     if [ ! -d $LEMACS ];then
-        if [ IN_WSL ] && [IS_ME] && [ -d /mnt/c/Liszt/Projects/Lemacs ];then
+        if [ $IN_WSL ] && [ $IS_ME ] && [ -d /mnt/c/Liszt/Projects/Lemacs ];then
             ln -s /mnt/c/Liszt/Projects/Lemacs $LEMACS
         else
             git clone --recursive https://github.com/Liszt21/lemacs $LEMACS
@@ -67,7 +67,7 @@ update() {
 }
 
 check
-cd $LEMACS
+cd $LEMACS || exit
 
 case $1 in
     C|clean)
@@ -105,5 +105,5 @@ case $1 in
         ;;
 esac
 
-cd $OLDPWD
+cd $OLDPWD || exit
  
