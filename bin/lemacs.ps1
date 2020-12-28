@@ -83,10 +83,8 @@ function Help {
 
 function Update {
     Write-Output "Updating"
-    # git pull origin master
-    # git submodule init
-    # git submodule update
-    git submodule foreach git pull
+    git pull --ff-only
+    git submodule foreach git pull --ff-only
 }
 
 function Install {
