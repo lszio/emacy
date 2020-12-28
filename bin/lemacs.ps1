@@ -87,7 +87,8 @@ function Update {
 
 function Install {
     Write-Output "Installing"
-    sudo ln -s ($LEMACS + "/src/lemacs.el") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
+    sudo ln -s ($LEMACS + "/src/profile.el") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs-profiles.el")
+    sudo ln -s ($LEMACS + "/config/chemacs2") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs.d")
     sudo ln -s ($LEMACS + "/config/spacemacs") ("C:/Users/$ENV:USERNAME/AppData/Roaming/spacemacs")
     sudo ln -s ($LEMACS + "/config/doomemacs") ("C:/Users/$ENV:USERNAME/AppData/Roaming/doomemacs")
     sudo ln -s ($LEMACS + "/config/.doom.d") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.doom.d")
@@ -96,7 +97,8 @@ function Install {
 
 function Clean{
     Write-Output "Clean"
-    Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs")
+    Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs.d")
+    Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs-profiles.el")
     Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.doom.d")
     Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/.spacemacs.d")
     Remove-Item ("C:/Users/$ENV:USERNAME/AppData/Roaming/spacemacs")

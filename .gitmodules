@@ -14,3 +14,6 @@
 	path = config/.spacemacs.d
 	url = https://github.com/Liszt21/.spacemacs.d
 	branch = master
+[submodule "config/chemacs2"]
+	path = config/chemacs2
+	url = https://github.com/plexus/chemacs2.git

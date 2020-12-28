@@ -31,6 +31,8 @@ install() {
         ln -s $LEMACS/config/doomemacs ~/doomemacs
         ln -s $LEMACS/config/.doom.d ~/.doom.d
         ln -s $LEMACS/config/.spacemacs.d ~/.spacemacs.d
+        ln -s $LEMACS/config/chemac2 ~/.emacs.d
+        ln -s $LEMACS/src/profile.el ~/.emacs-profiles.el
     fi
     if [ ! -f ~/.zshrc ];then
         PROFILE=~/.bashrc
@@ -43,7 +45,8 @@ install() {
 clean() {
     echo "Clean"
     
-    rm  ~/.emacs
+    rm  ~/.emacs.d
+    rm ~/.emacs-profiles.el
     rm  ~/spacemacs
     rm  ~/doomemacs
     rm  ~/.doom.d
