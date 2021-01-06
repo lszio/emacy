@@ -26,8 +26,8 @@ install() {
         mv ~/.emacs ~/.emacs.bak
     fi
     if [ ! -L ~/.emacs ];then
-        ln -s $LEMACS/config/spacemacs ~/spacemacs
-        ln -s $LEMACS/config/doomemacs ~/doomemacs
+        ln -s $LEMACS/config/spacemacs ~/.spacemacs
+        ln -s $LEMACS/config/doomemacs ~/.doomemacs
         ln -s $LEMACS/config/.doom.d ~/.doom.d
         ln -s $LEMACS/config/.spacemacs.d ~/.spacemacs.d
         ln -s $LEMACS/config/chemacs2 ~/.emacs.d
@@ -48,8 +48,8 @@ clean() {
     rm ~/.emacs-profiles.el
     rm ~/.doom.d
     rm ~/.spacemacs.d
-    rm ~/spacemacs
-    rm ~/doomemacs
+    rm ~/.spacemacs
+    rm ~/.doomemacs
 }
 
 check() {
