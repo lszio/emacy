@@ -26,11 +26,11 @@ install() {
         mv ~/.emacs ~/.emacs.bak
     fi
     if [ ! -L ~/.emacs ];then
-        ln -s $LEMACS/config/spacemacs ~/.spacemacs
-        ln -s $LEMACS/config/doomemacs ~/.doomemacs
+        ln -s $LEMACS/config/spacemacs ~/spacemacs
+        ln -s $LEMACS/config/doomemacs ~/doomemacs
         ln -s $LEMACS/config/.doom.d ~/.doom.d
         ln -s $LEMACS/config/.spacemacs.d ~/.spacemacs.d
-        ln -s $LEMACS/config/chemacs2 ~/.emacs.d
+        ln -s $LEMACS/config/chemac2 ~/.emacs.d
         ln -s $LEMACS/src/profile.el ~/.emacs-profiles.el
     fi
     if [ ! -f ~/.zshrc ];then
@@ -44,12 +44,13 @@ install() {
 clean() {
     echo "Clean"
     
-    rm ~/.emacs.d
+    rm  ~/.emacs.d
     rm ~/.emacs-profiles.el
-    rm ~/.doom.d
-    rm ~/.spacemacs.d
-    rm ~/.spacemacs
-    rm ~/.doomemacs
+    rm  ~/spacemacs
+    rm  ~/doomemacs
+    rm  ~/.doom.d
+    rm  ~/.spacemacs.d
+    # rm -rf $LEMACS
 }
 
 check() {
@@ -61,8 +62,10 @@ check() {
 
 update() {
     echo "Updating"
-    git pull --ff-only
-    git submodule foreach git pull --ff-only
+    # git pull origin master
+    # git submodule init
+    # git submodule update
+    git submodule foreach git pull
 }
 
 check
