@@ -1,56 +1,55 @@
-#!/bin/sh
+#!/bin/bash
 
-OLD_PWD=(pwd)
-if [ $LEMACS ];then
+if [ "$LEMACS_HOME" ];then
     INSTALLED=true
 else
-    LEMACS=~/Apps/lemacs
+    LEMACS_HOME=~/Apps/lemacs
 fi
-if [ $WSL_DISTRO_NAME ];then
+if [ "$WSL_DISTRO_NAME" ];then
     IN_WSL=true
 fi
-if [[ $USER == 'liszt' ]];then
+if [ "$USER" = 'liszt' ];then
     IS_ME=true
 fi
 
 install() {
     echo "Installing"
-    if [ ! -d $LEMACS ];then
+    if [ ! -d $LEMACS_HOME ];then
         if [ $IN_WSL ] && [ $IS_ME ] && [ -d /mnt/c/Liszt/Projects/Lemacs ];then
-            ln -s /mnt/c/Liszt/Projects/Lemacs $LEMACS
+            ln -s /mnt/c/Liszt/Projects/Lemacs $LEMACS_HOME
         else
-            git clone --recursive https://github.com/Liszt21/lemacs $LEMACS
+            git clone --recursive https://github.com/Liszt21/lemacs $LEMACS_HOME
         fi
     fi
     if [ -f ~/.emacs ];then
         mv ~/.emacs ~/.emacs.bak
     fi
     if [ ! -L ~/.emacs ];then
-        ln -s $LEMACS/config/spacemacs ~/spacemacs
-        ln -s $LEMACS/config/doomemacs ~/doomemacs
-        ln -s $LEMACS/config/.doom.d ~/.doom.d
-        ln -s $LEMACS/config/.spacemacs.d ~/.spacemacs.d
-        ln -s $LEMACS/config/chemacs2 ~/.emacs.d
-        ln -s $LEMACS/src/profile.el ~/.emacs-profiles.el
+        ln -s $LEMACS_HOME/config/spacemacs ~/spacemacs
+        ln -s $LEMACS_HOME/config/doomemacs ~/doomemacs
+        ln -s $LEMACS_HOME/config/.doom.d ~/.doom.d
+        ln -s $LEMACS_HOME/config/.spacemacs.d ~/.spacemacs.d
+        ln -s $LEMACS_HOME/config/chemacs2 ~/.emacs.d
+        ln -s $LEMACS_HOME/src/profile.el ~/.emacs-profiles.el
     fi
-    if [ ! -f ~/.zshrc ];then
-        PROFILE=~/.bashrc
-    else
-        PROFILE=~/.zshrc
-    fi
-    echo "source $LEMACS/src/entry" >> $PROFILE
+    # if [ ! -f ~/.zshrc ];then
+    #     PROFILE=~/.bashrc
+    # else
+    #     PROFILE=~/.zshrc
+    # fi
+    # echo "source $LEMACS_HOME/src/entry" >> $PROFILE
 }
 
 clean() {
     echo "Clean"
     
-    rm  ~/.emacs.d
+    rm ~/.emacs.d
     rm ~/.emacs-profiles.el
-    rm  ~/spacemacs
-    rm  ~/doomemacs
-    rm  ~/.doom.d
-    rm  ~/.spacemacs.d
-    # rm -rf $LEMACS
+    rm ~/spacemacs
+    rm ~/doomemacs
+    rm ~/.doom.d
+    rm ~/.spacemacs.d
+    # rm -rf $LEMACS_HOME
 }
 
 check() {
@@ -69,7 +68,7 @@ update() {
 }
 
 check
-cd $LEMACS || exit
+cd $LEMACS_HOME || exit
 
 case $1 in
     C|clean)
@@ -82,7 +81,7 @@ case $1 in
         ;;
     D|doom)
         echo "Doom"
-        $LEMACS/config/doomemacs/bin/doom $2
+        $LEMACS_HOME/config/doomemacs/bin/doom "$2"
         ;;
     U|update)
         echo "Update"
@@ -107,5 +106,5 @@ case $1 in
         ;;
 esac
 
-cd $OLDPWD || exit
+cd "$OLDPWD" || exit
  

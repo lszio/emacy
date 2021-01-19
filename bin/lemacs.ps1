@@ -5,11 +5,11 @@ else {
     $ISME = $false
 }
 
-if ($ENV:LEMACS) {
-    $LEMACS = $ENV:LEMACS
+if ($ENV:LEMACS_HOME) {
+    $LEMACS_HOME = $ENV:LEMACS_HOME
 }
 else {
-    $LEMACS = "."
+    $LEMACS_HOME = "."
 }
 
 $Origin_Location = Get-Location
@@ -37,7 +37,7 @@ function Update-Git {
 }
 
 function Check {
-    if (!$ENV:LEMACS) {
+    if (!$ENV:LEMACS_HOME) {
         if (!$(Get-Command lemacs)) {
             Write-Output "Lemacs isn't installed!"
 
@@ -56,7 +56,7 @@ function Check {
             scoop bucket add dragon https://github.com/Liszt21/Dragon
             scoop install lemacs
         }
-        $ENV:LEMACS = ($ENV:SCOOP + "/apps/lemacs/current")
+        $ENV:LEMACS_HOME = ($ENV:SCOOP + "/apps/lemacs/current")
         
         if ($ISME) {
             Set-Location ..
@@ -68,9 +68,9 @@ function Check {
             }
             sudo ln -s C:/Liszt/Projects/Lemacs ./master
         }
-        [environment]::setEnvironmentVariable('LEMACS', $ENV:LEMACS, 'User')
+        [environment]::setEnvironmentVariable('LEMACS_HOME', $ENV:LEMACS, 'User')
     }
-    Set-Location $LEMACS
+    Set-Location $LEMACS_HOME
     if (!(Test-Path .git)) {
         Write-Debug "lemacs isn't a git folder"
         Update-Git
@@ -91,12 +91,12 @@ function Update {
 
 function Install {
     Write-Output "Installing"
-    sudo ln -s ($LEMACS + "/src/profile.el") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs-profiles.el")
-    sudo ln -s ($LEMACS + "/config/chemacs2") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs.d")
-    sudo ln -s ($LEMACS + "/config/spacemacs") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.spacemacs")
-    sudo ln -s ($LEMACS + "/config/doomemacs") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.doomemacs")
-    sudo ln -s ($LEMACS + "/config/.doom.d") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.doom.d")
-    sudo ln -s ($LEMACS + "/config/.spacemacs.d") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.spacemacs.d")
+    sudo ln -s ($LEMACS_HOME + "/src/profile.el") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs-profiles.el")
+    sudo ln -s ($LEMACS_HOME + "/config/chemacs2") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.emacs.d")
+    sudo ln -s ($LEMACS_HOME + "/config/spacemacs") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.spacemacs")
+    sudo ln -s ($LEMACS_HOME + "/config/doomemacs") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.doomemacs")
+    sudo ln -s ($LEMACS_HOME + "/config/.doom.d") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.doom.d")
+    sudo ln -s ($LEMACS_HOME + "/config/.spacemacs.d") ("C:/Users/$ENV:USERNAME/AppData/Roaming/.spacemacs.d")
 }
 
 function Clean {
