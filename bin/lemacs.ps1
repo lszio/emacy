@@ -86,7 +86,7 @@ function Update {
     # git pull origin master
     # git submodule init
     # git submodule update
-    git submodule foreach git pull
+    git submodule foreach git pull --ff-only
 }
 
 function Install {
