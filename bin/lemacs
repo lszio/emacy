@@ -1,110 +1,100 @@
-#!/bin/bash
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  #+quicklisp(ql:quickload '(uiop) :silent t))
+  
 
-if [ "$LEMACS_HOME" ];then
-    INSTALLED=true
-else
-    LEMACS_HOME=~/Apps/lemacs
-fi
-if [ "$WSL_DISTRO_NAME" ];then
-    IN_WSL=true
-fi
-if [ "$USER" = 'liszt' ];then
-    IS_ME=true
-fi
+(defpackage :ros.script.lemacs
+  (:use :cl))
+(in-package :ros.script.lemacs)
 
-install() {
-    echo "Installing"
-    if [ ! -d $LEMACS_HOME ];then
-        if [ $IN_WSL ] && [ $IS_ME ] && [ -d /mnt/c/Liszt/Projects/Lemacs ];then
-            ln -s /mnt/c/Liszt/Projects/Lemacs $LEMACS_HOME
-        else
-            git clone --recursive https://github.com/Liszt21/lemacs $LEMACS_HOME
-        fi
-    fi
-    if [ -f ~/.emacs ];then
-        mv ~/.emacs ~/.emacs.bak
-    fi
-    if [ ! -L ~/.emacs ];then
-        ln -s $LEMACS_HOME/config/spacemacs ~/spacemacs
-        ln -s $LEMACS_HOME/config/doomemacs ~/doomemacs
-        ln -s $LEMACS_HOME/config/.doom.d ~/.doom.d
-        ln -s $LEMACS_HOME/config/.spacemacs.d ~/.spacemacs.d
-        ln -s $LEMACS_HOME/config/chemacs2 ~/.emacs.d
-        ln -s $LEMACS_HOME/src/profile.el ~/.emacs-profiles.el
-    fi
-    # if [ ! -f ~/.zshrc ];then
-    #     PROFILE=~/.bashrc
-    # else
-    #     PROFILE=~/.zshrc
-    # fi
-    # echo "source $LEMACS_HOME/src/entry" >> $PROFILE
-}
+(defparameter *home* (or (uiop:getenv "LEMACS") (namestring (merge-pathnames "Lemacs" (user-homedir-pathname)))))
 
-clean() {
-    echo "Clean"
-    
-    rm ~/.emacs.d
-    rm ~/.emacs-profiles.el
-    rm ~/spacemacs
-    rm ~/doomemacs
-    rm ~/.doom.d
-    rm ~/.spacemacs.d
-    # rm -rf $LEMACS_HOME
-}
+(defun clone ()
+  (let ((code
+         (third
+          (multiple-value-list
+           (uiop:run-program
+            (format nil "git clone --recursive https://github.com/Liszt21/Lemacs ~A" *home*)
+            ;; (format nil "git clone https://github.com/Liszt21/Lemacs ~A" *home*)
+            :error-output *standard-output*)))))
+    (if (zerop code)
+        (print "Successful installed lemacs")
+      (progn
+        (print "Install failed, deleting folder...")))))
 
-check() {
-    if [ $INSTALLED ];then
-        return
-    fi
-    install
-}
+(defun config ()
+  (let ((chemacs (merge-pathnames ".emacs.d" (user-homedir-pathname))))
+    (when (uiop:directory-exists-p chemacs)
+      (rename-file chemacs (merge-pathnames ".emacs.d.bak" (user-homedir-pathname))))
+    (uiop:run-program (format nil "~A ~A" #+os-windows "powershell ln -s" #-os-windows "ln -s" (namestring chemacs))))
 
-update() {
-    echo "Updating"
-    # git pull origin master
-    # git submodule init
-    # git submodule update
-    git submodule foreach git pull --ff-only
-}
+  (let ((profile (merge-pathnames ".emacs-profile.el" (user-homedir-pathname))))
+    (when (uiop:directory-exists-p profile)
+      (rename-file profile (merge-pathnames ".emacs-profile.bak" (user-homedir-pathname))))
+    (with-open-file (out profile :direction :output :if-exists :supersede)
+      (with-standard-io-syntax
+        ;; TODO Optimise
+        (eval `(princ
+                (format nil
+                        (concatenate 'string
+                                     "((\"default\" . ((user-emacs-directory . \"~A\")~%"
+                                     "                 (env . ((\"DOOMDIR\" . \"~A\")))))~%"
+                                     "(\"spacemacs\" . ((user-emacs-directory . \"~A\")~%"
+                                     "                 (env . ((\"SPACEMACSDIR\" . \"~A\"))))))")
+                        ,@(mapcar #'(lambda (path) (concatenate 'string *home* path))
+                                  (list "/config/doomemacs"
+                                        "/config/.doom.d"
+                                        "/config/spacemacs"
+                                        "/config/.spacemacs.d"))) ,out))))
+    (print profile)))
 
-check
-cd $LEMACS_HOME || exit
 
-case $1 in
-    C|clean)
-        echo "clean"
-        clean
-        ;;
-    I|install)
-        echo "Install"
-        install
-        ;;
-    D|doom)
-        echo "Doom"
-        $LEMACS_HOME/config/doomemacs/bin/doom "$2"
-        ;;
-    U|update)
-        echo "Update"
-        update
-        ;;
-    R|run)
-        echo "Run "
-        case $2 in
-            [sS]pacemacs)
-                echo "Spacemacs"
-                emacs --with-profile spacemacs
-                ;;
-            [dD]oom)
-                echo "Doom"
-                emacs --with-profile doomemacs
-                ;;
-        esac
-        ;;
-    *)
-        echo "Help"
-        # update
-        ;;
-esac
+(defun install ()
+  (print "Installing lemacs...~%")
+  (if (uiop:directory-exists-p (parse-namestring *home*))
+      (print (format nil "Folder ~A exists...exit" *home*))
+      (clone)))
 
-cd "$OLDPWD" || exit
- 
+(defun update ()
+  (print "Updating lemacs...~%")
+  (uiop:run-program (format nil "~A cd ~A;git pull --ff-only;git submodule foreach git pull --ff-only;cd $OLDPWD"
+                            #+os-windows "powershell"
+                            #-os-windows ""
+                            *home*)))
+
+(defun uninstall ()
+  ;; TODO Optimise
+  (print "Uninstall")
+  ;; (uiop:delete-directory-tree (uiop:physicalize-pathname "C:/Liszt/Projects/Temp/test"))
+  (uiop:run-program (format nil "~A ~A" #+os-windows "powershell rm -r -Force" #-os-windows "rm -rf" *home*)))
+
+(defun doom (&optional (command "help"))
+  (uiop:run-program (format nil "~A ~A" (concatenate 'string *home*
+                                                     #+os-windows "/config/doomemacs/bin/doom"
+                                                     #-os-windows "/config/doomemacs/bin/doom.exe") command) :error-output *standard-output*))
+
+(defun help ()
+  (print "Help~%"))
+
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (let ((command (first argv))
+        (params (cdr argv)))
+    (cond
+     ((equalp command "install")
+      (install))
+     ((equalp command "update")
+      (update))
+     ((equalp command "uninstall")
+      (uninstall))
+     ((equalp command "doom")
+      (apply #'doom params))
+     (t
+      (help))
+     )))
+;;; vim: set ft=lisp lisp:

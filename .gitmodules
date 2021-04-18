@@ -17,3 +17,4 @@
 [submodule "config/chemacs2"]
 	path = config/chemacs2
 	url = https://github.com/plexus/chemacs2.git
+	branch = master
