@@ -12,26 +12,36 @@ exec ros -Q -- $0 "$@"
   (:use :cl))
 (in-package :ros.script.lemacs)
 
-(defparameter *home* (or (uiop:getenv "LEMACS") (namestring (merge-pathnames "Lemacs" (user-homedir-pathname)))))
+(defparameter *home* (or (uiop:getenv "LEMACS")
+                         (namestring (merge-pathnames "Lemacs" (user-homedir-pathname)))))
+
+(defun shell (command)
+  (let ((code (third
+               (multiple-value-list
+                (uiop:run-program
+                 (format nil "~A ~A"
+                         #+os-windows "powershell $OLDPWD=pwd;"
+                         #-os-windows ""
+                         command)
+                 :output *standard-output*
+                 :error-output *standard-output*)))))
+    code))
 
 (defun clone ()
-  (let ((code
-         (third
-          (multiple-value-list
-           (uiop:run-program
-            (format nil "git clone --recursive https://github.com/Liszt21/Lemacs ~A" *home*)
-            ;; (format nil "git clone https://github.com/Liszt21/Lemacs ~A" *home*)
-            :error-output *standard-output*)))))
-    (if (zerop code)
-        (print "Successful installed lemacs")
-      (progn
-        (print "Install failed, deleting folder...")))))
+  (if (zerop (shell (format nil "git clone --recursive https://github.com/Liszt21/Lemacs ~A" *home*)))
+    (print "Successful installed lemacs")
+    (print "Install failed, deleting folder...")))
 
 (defun config ()
   (let ((chemacs (merge-pathnames ".emacs.d" (user-homedir-pathname))))
     (when (uiop:directory-exists-p chemacs)
       (rename-file chemacs (merge-pathnames ".emacs.d.bak" (user-homedir-pathname))))
-    (uiop:run-program (format nil "~A ~A" #+os-windows "powershell ln -s" #-os-windows "ln -s" (namestring chemacs))))
+    (shell (format nil "~A ~A ~A"
+                   "sudo ln -s"
+                   (concatenate 'string
+                                *home*
+                                "/config/chemacs2")
+                   (namestring chemacs))))
 
   (let ((profile (merge-pathnames ".emacs-profile.el" (user-homedir-pathname))))
     (when (uiop:directory-exists-p profile)
@@ -53,7 +63,6 @@ exec ros -Q -- $0 "$@"
                                         "/config/.spacemacs.d"))) ,out))))
     (print profile)))
 
-
 (defun install ()
   (print "Installing lemacs...~%")
   (if (uiop:directory-exists-p (parse-namestring *home*))
@@ -62,24 +71,20 @@ exec ros -Q -- $0 "$@"
 
 (defun update ()
   (print "Updating lemacs...~%")
-  (uiop:run-program (format nil "~A cd ~A;git pull --ff-only;git submodule foreach git pull --ff-only;cd $OLDPWD"
-                            #+os-windows "powershell"
-                            #-os-windows ""
-                            *home*)))
+  (shell (format nil "cd ~A;git pull --ff-only;git submodule foreach git pull --ff-only;cd $OLDPWD" *home*)))
 
 (defun uninstall ()
   ;; TODO Optimise
   (print "Uninstall")
   ;; (uiop:delete-directory-tree (uiop:physicalize-pathname "C:/Liszt/Projects/Temp/test"))
-  (uiop:run-program (format nil "~A ~A" #+os-windows "powershell rm -r -Force" #-os-windows "rm -rf" *home*)))
+  (shell (format nil "~A ~A" #+os-windows "rm -r -Force" #-os-windows "rm -rf" *home*)))
 
 (defun doom (&optional (command "help"))
-  (uiop:run-program (format nil "~A ~A" (concatenate 'string *home*
-                                                     #+os-windows "/config/doomemacs/bin/doom"
-                                                     #-os-windows "/config/doomemacs/bin/doom.exe") command) :error-output *standard-output*))
+  (shell (format nil "~A ~A" (concatenate 'string *home*
+                                          "/config/doomemacs/bin/doom") command)))
 
 (defun help ()
-  (print "Help~%"))
+  (print "Help"))
 
 (defun main (&rest argv)
   (declare (ignorable argv))
@@ -88,6 +93,8 @@ exec ros -Q -- $0 "$@"
     (cond
      ((equalp command "install")
       (install))
+     ((equalp command "config")
+      (config))
      ((equalp command "update")
       (update))
      ((equalp command "uninstall")
@@ -95,6 +102,6 @@ exec ros -Q -- $0 "$@"
      ((equalp command "doom")
       (apply #'doom params))
      (t
-      (help))
-     )))
+      (help)))))
+     
 ;;; vim: set ft=lisp lisp:
