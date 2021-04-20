@@ -43,7 +43,7 @@ exec ros -Q -- $0 "$@"
                                 "/config/chemacs2")
                    (namestring chemacs))))
 
-  (let ((profile (merge-pathnames ".emacs-profile.el" (user-homedir-pathname))))
+  (let ((profile (merge-pathnames ".emacs-profiles.el" (user-homedir-pathname))))
     (when (uiop:directory-exists-p profile)
       (rename-file profile (merge-pathnames ".emacs-profile.bak" (user-homedir-pathname))))
     (with-open-file (out profile :direction :output :if-exists :supersede)
