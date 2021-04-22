@@ -23,8 +23,9 @@ exec ros -Q -- $0 "$@"
                          #+os-windows "powershell $OLDPWD=pwd;"
                          #-os-windows ""
                          command)
-                 :output *standard-output*
-                 :error-output *standard-output*)))))
+                 :output :interactive
+                 :error-output :interactive
+		 )))))
     code))
 
 (defun clone ()
