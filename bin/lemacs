@@ -33,17 +33,46 @@ exec ros -Q -- $0 "$@"
     (print "Successful installed lemacs")
     (print "Install failed, deleting folder...")))
 
-(defun config ()
-  (let ((chemacs (merge-pathnames ".emacs.d" (user-homedir-pathname))))
-    (when (uiop:directory-exists-p chemacs)
-      (rename-file chemacs (merge-pathnames ".emacs.d.bak" (user-homedir-pathname))))
+(defun backup-file (name)
+  (let ((path (if (eq (type-of name) 'pathname)
+                  name
+                  (parse-namestring name))))
+    (when (uiop:directory-exists-p path)
+      (let ((bak (parse-namestring
+                  (concatenate 'string
+                               (namestring path)
+                               ".bak"))))
+        (rename-file path bak)))))
+
+(defun link-file (source target)
+  (let ((src (if (eq (type-of source) 'pathname) (namestring source) source))
+        (tgt (if (eq (type-of target) 'pathname) (namestring source) target)))
+    (print (format nil "Link ~A => ~A" src tgt))
     (shell (format nil "~A ~A ~A"
                    "sudo ln -s"
-                   (concatenate 'string
-                                *home*
-                                "/config/chemacs2")
-                   (namestring chemacs))))
+                   src
+                   tgt))))
 
+(defun config ()
+  (let ((chemacs (merge-pathnames ".emacs.d" (user-homedir-pathname))))
+    (backup-file chemacs)
+    (link-file (concatenate 'string *home* "/config/chemacs2")
+               (namestring chemacs)))
+  
+  (let ((doomemacs (merge-pathnames ".doom.d" (user-homedir-pathname))))
+    (backup-file doomemacs)
+    (link-file (parse-namestring (concatenate 'string
+                                              *home*
+                                              "/config/.doom.d"))
+               (namestring doomemacs)))
+  
+  (let ((spacemacs (merge-pathnames ".spacemacs.d" (user-homedir-pathname))))
+    (backup-file spacemacs)
+    (link-file (parse-namestring (concatenate 'string
+                                              *home*
+                                              "/config/.spacemacs.d"))
+               (namestring spacemacs)))
+  
   (let ((profile (merge-pathnames ".emacs-profiles.el" (user-homedir-pathname))))
     (when (uiop:directory-exists-p profile)
       (rename-file profile (merge-pathnames ".emacs-profile.bak" (user-homedir-pathname))))
