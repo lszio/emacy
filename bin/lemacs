@@ -55,25 +55,14 @@ exec ros -Q -- $0 "$@"
 
 (defun config ()
   (shell (format nil "cd ~A;git submodule update --init;cd $OLDPWD" *home*))
-  (let ((chemacs (merge-pathnames ".emacs.d" (user-homedir-pathname))))
-    (backup-file chemacs)
-    (link-file (concatenate 'string *home* "/config/chemacs2")
-               (namestring chemacs)))
-  
-  (let ((doomemacs (merge-pathnames ".doom.d" (user-homedir-pathname))))
-    (backup-file doomemacs)
-    (link-file (parse-namestring (concatenate 'string
-                                              *home*
-                                              "/config/.doom.d"))
-               (namestring doomemacs)))
-  
-  (let ((spacemacs (merge-pathnames ".spacemacs.d" (user-homedir-pathname))))
-    (backup-file spacemacs)
-    (link-file (parse-namestring (concatenate 'string
-                                              *home*
-                                              "/config/.spacemacs.d"))
-               (namestring spacemacs)))
-  
+  (dolist (item (pairlis '(".emacs.d" ".doom.d" ".spacemacs.d")
+                         '("chemacs2" ".doom.d" ".spacemacs.d")))
+    (let ((target (merge-pathnames (car item) (user-homedir-pathname))))
+        (backup-file target)
+        (link-file (concatenate 'string *home* "/config/" (cdr item))
+                (namestring target)))
+    )
+
   (let ((profile (merge-pathnames ".emacs-profiles.el" (user-homedir-pathname))))
     (when (uiop:directory-exists-p profile)
       (rename-file profile (merge-pathnames ".emacs-profile.bak" (user-homedir-pathname))))
