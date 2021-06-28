@@ -54,6 +54,7 @@ exec ros -Q -- $0 "$@"
                    tgt))))
 
 (defun config ()
+  (shell (format nil "cd ~A;git submodule update --init;cd $OLDPWD" *home*))
   (let ((chemacs (merge-pathnames ".emacs.d" (user-homedir-pathname))))
     (backup-file chemacs)
     (link-file (concatenate 'string *home* "/config/chemacs2")
@@ -101,12 +102,15 @@ exec ros -Q -- $0 "$@"
 
 (defun update ()
   (print "Updating lemacs...~%")
+  (dolist (item (pairlis '("doomemacs" "spacemacs" "chemacs2" ".doom.d" ".spacemacs.d")
+                         '("develop" "develop" "master" "master" "master")))
+    (let ((folder (concatenate 'string *home* "/config/" (car item)))
+          (branch (cdr item)))
+        (shell (format nil "cd ~A;git checkout ~A; cd $OLDPWD" folder branch))))
   (shell (format nil "cd ~A;git pull --ff-only;git submodule foreach git pull --ff-only;cd $OLDPWD" *home*)))
 
 (defun uninstall ()
-  ;; TODO Optimise
   (print "Uninstall")
-  ;; (uiop:delete-directory-tree (uiop:physicalize-pathname "C:/Liszt/Projects/Temp/test"))
   (shell (format nil "~A ~A" #+os-windows "rm -r -Force" #-os-windows "rm -rf" *home*)))
 
 (defun doom (&optional (command "help"))
