@@ -5,15 +5,14 @@ exec ros -Q -- $0 "$@"
 |#
 (progn ;;init forms
   (ros:ensure-asdf)
-  #+quicklisp(ql:quickload '(uiop) :silent t))
-  
+  #+quicklisp(ql:quickload '(uiop clish) :silent t))
 
-(defpackage :ros.script.lemacs
+(defpackage :ros.script.emacy
   (:use :cl))
-(in-package :ros.script.lemacs)
+(in-package :ros.script.emacy)
 
-(defparameter *home* (or (uiop:getenv "LEMACS")
-                         (namestring (merge-pathnames "Lemacs" (user-homedir-pathname)))))
+(defparameter *home* (or (uiop:getenv "EMACY")
+                         (namestring (merge-pathnames ".emacy" (user-homedir-pathname)))))
 
 (defun shell (command)
   (let ((code (third
@@ -30,7 +29,7 @@ exec ros -Q -- $0 "$@"
 
 (defun clone ()
   (if (zerop (shell (format nil "git clone --recursive https://github.com/Liszt21/Lemacs ~A" *home*)))
-    (print "Successful installed lemacs")
+    (print "Successful installed emacy")
     (print "Install failed, deleting folder...")))
 
 (defun backup-file (name)
@@ -84,13 +83,13 @@ exec ros -Q -- $0 "$@"
     (print profile)))
 
 (defun install ()
-  (print "Installing lemacs...~%")
+  (print "Installing emacy...~%")
   (if (uiop:directory-exists-p (parse-namestring *home*))
       (print (format nil "Folder ~A exists...exit" *home*))
       (clone)))
 
 (defun update ()
-  (print "Updating lemacs...~%")
+  (print "Updating emacy...~%")
   (dolist (item (pairlis '("doomemacs" "spacemacs" "chemacs2" ".doom.d" ".spacemacs.d")
                          '("develop" "develop" "master" "master" "master")))
     (let ((folder (concatenate 'string *home* "/config/" (car item)))

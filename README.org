@@ -13,13 +13,13 @@
 * Installition
 #+BEGIN_SRC shell
 # github
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/Liszt21/Lemacs/master/bin/lemacs)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/Liszt21/Lemacs/master/bin/emacy)"
 #+END_SRC
 
 * Usage
 #+begin_src shell
-lemacs update # update lemacs & submodules
+emacy update # update emacy & submodules
 
-lemacs doom $COMMANDS # exec doom
-lemacs doom sync
+emacy doom $COMMANDS # exec doom
+emacy doom sync
 #+end_src

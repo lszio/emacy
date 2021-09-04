@@ -1,4 +1,4 @@
-LEMACS_HOME=${LEMACS_HOME:-~/Lemacs}
-export LEMACS_HOME
+EMACY_HOME=${EMACY_HOME:-~/Lemacs}
+export EMACY_HOME
 
-export PATH=$LEMACS_HOME/bin:$LEMACS_HOME/config/doomemacs/bin:$PATH
+export PATH=$EMACY_HOME/bin:$EMACY_HOME/config/doomemacs/bin:$PATH
