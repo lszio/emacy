@@ -114,14 +114,19 @@ exec ros -Q -- $0 "$@"
   ;; TODO
   nil)
 
-(defun doom ()
+(defun doom (&optional (command ""))
   ;;TODO
-  nil)
+  (shell (format nil "~A~A --doomdir ~A ~A"
+                 (merge-pathnames "local/doom/module/bin/doom" *home*)
+                 #+os-windows ".cmd" #-os-windows ""
+                 (merge-pathnames "local/doom/config")
+                 command)))
 
 (clish:defcli cli
   (nil #'update)
   (install #'install)
   (update #'update)
+  (doom #'doom)
   (:pre (lambda (&rest rest) (declare (ignorable rest)) (check))))
 
 (defun main (&rest argv)
