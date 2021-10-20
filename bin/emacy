@@ -5,125 +5,118 @@ exec ros -Q -- $0 "$@"
 |#
 (progn ;;init forms
   (ros:ensure-asdf)
-  #+quicklisp(ql:quickload '(uiop clish) :silent t))
+  #+quicklisp (ql:quickload '(uiop clish str) :silent t))
 
 (defpackage :ros.script.emacy
   (:use :cl))
 (in-package :ros.script.emacy)
 
-(defparameter *home* (or (uiop:getenv "EMACY")
-                         (namestring (merge-pathnames ".emacy" (user-homedir-pathname)))))
+(defun folder-exists (path)
+  (let ((p (and path (probe-file path))))
+    (when (and p (not (pathname-name p))) p)))
 
-(defun shell (command)
-  (let ((code (third
-               (multiple-value-list
-                (uiop:run-program
-                 (format nil "~A ~A"
-                         #+os-windows "powershell $OLDPWD=pwd;"
-                         #-os-windows ""
-                         command)
-                 :output :interactive
-                 :error-output :interactive
-		 )))))
-    code))
+(defun shell (&rest cmds)
+  (let ((command (str:join ";" cmds)))
+    (third
+     (multiple-value-list
+      (uiop:run-program
+       (format nil "~A~A"
+               #+os-windows "powershell $OLDPWD=pwd;"
+               #-os-windows ""
+               command)
+       :output :interactive
+       :ignore-error-status t
+       :error-output :interactive)))))
 
-(defun clone ()
-  (if (zerop (shell (format nil "git clone --recursive https://github.com/Liszt21/Lemacs ~A" *home*)))
-    (print "Successful installed emacy")
-    (print "Install failed, deleting folder...")))
+(defun clone-repo (remote &optional (target nil))
+  (if (and target (probe-file target))
+      (format t "Repo ~A already cloned, skip...~%" remote)
+      (format t "Cloning ~A...~A~%"
+              remote
+              (if (> (shell (format nil "git clone ~A ~A" remote target)) 0)
+                  " failed"
+                  nil))))
 
-(defun backup-file (name)
-  (let ((path (if (eq (type-of name) 'pathname)
-                  name
-                  (parse-namestring name))))
-    (when (uiop:directory-exists-p path)
-      (let ((bak (parse-namestring
-                  (concatenate 'string
-                               (namestring path)
-                               ".bak"))))
-        (rename-file path bak)))))
+(defun link (source target &key (force nil))
+  (format t "Linking ~A to ~A~%" target source)
+  (when (probe-file target)
+        (print "111")
+        (if (or force (y-or-n-p (format t "~A already exists, remove?" target)))
+            (shell "rm -rf ~A" target)
+            (return-from link 128)))
+  (shell (format nil "ln -s ~A ~A" source target)))
 
-(defun link-file (source target)
-  (let ((src (if (eq (type-of source) 'pathname) (namestring source) source))
-        (tgt (if (eq (type-of target) 'pathname) (namestring source) target)))
-    (print (format nil "Link ~A => ~A" src tgt))
-    (shell (format nil "~A ~A ~A"
-                   "sudo ln -s"
-                   src
-                   tgt))))
+(defun update-repo (target)
+  (if (probe-file target)
+      (shell (format nil "cd ~A; git pull --ff-only; cd $OLDPWD" target))
+      (format t "Target ~A does not exist~%" target)))
 
-(defun config ()
-  (shell (format nil "cd ~A;git submodule update --init;cd $OLDPWD" *home*))
-  (dolist (item (pairlis '(".emacs.d" ".doom.d" ".spacemacs.d")
-                         '("chemacs2" ".doom.d" ".spacemacs.d")))
-    (let ((target (merge-pathnames (car item) (user-homedir-pathname))))
-        (backup-file target)
-        (link-file (concatenate 'string *home* "/config/" (cdr item))
-                (namestring target)))
-    )
+(defparameter *home*
+  (let ((s (car
+            (member-if
+             #'folder-exists
+             (list ".emacy" "Emacy" "../.emacy" "../Emacy"
+                   (uiop:getenv "EMACY") "~/.emacy" "~/Emacy")))))
+    (if s (probe-file s) s)))
 
-  (let ((profile (merge-pathnames ".emacs-profiles.el" (user-homedir-pathname))))
-    (when (uiop:directory-exists-p profile)
-      (rename-file profile (merge-pathnames ".emacs-profile.bak" (user-homedir-pathname))))
-    (with-open-file (out profile :direction :output :if-exists :supersede)
-      (with-standard-io-syntax
-        ;; TODO Optimise
-        (eval `(princ
-                (format nil
-                        (concatenate 'string
-                                     "((\"default\" . ((user-emacs-directory . \"~A\")~%"
-                                     "                 (env . ((\"DOOMDIR\" . \"~A\")))))~%"
-                                     "(\"spacemacs\" . ((user-emacs-directory . \"~A\")~%"
-                                     "                 (env . ((\"SPACEMACSDIR\" . \"~A\"))))))")
-                        ,@(mapcar #'(lambda (path) (concatenate 'string *home* path))
-                                  (list "/config/doomemacs"
-                                        "/config/.doom.d"
-                                        "/config/spacemacs"
-                                        "/config/.spacemacs.d"))) ,out))))
-    (print profile)))
+(defparameter *profiles* '((doom .
+                            ((module . "https://github.com/hlissner/doom-emacs")
+                             (config . "https://github.com/Liszt21/.doom.d")))
+                           (spacemacs .
+                            ((module . "https://github.com/syl20bnr/spacemacs")
+                             (config . "https://github.com/Liszt21/.spacemacs.d")))))
+
+(defun check ()
+  (format t "Checking...~%")
+  (when (not *home*)
+        (setf *home* (merge-pathnames #+os-windows "Emacy" #+linux ".emacy" (user-homedir-pathname))))
+  (format t "Emacy home: ~A~%" *home*)
+  (when (not (probe-file (merge-pathnames "bin/emacy" *home*)))
+        (format t "Emacy was not installed, cloning...~%")
+        (shell (format nil
+                       "rm -rf ~A; git clone http://github.com/Liszt21/Emacy ~A"
+                       *home* *home*))))
+
+(defun get-repos (&optional (profiles *profiles*) (home *home*))
+  (cons
+   (cons "https://github.com/plexus/chemacs2" (merge-pathnames "local/chemacs2" home))
+   (loop for profile in profiles
+         for name = (string-downcase (string (car profile)))
+         for module = (cdr (assoc 'module (cdr profile)))
+         for config = (cdr (assoc 'config (cdr profile)))
+         collect (cons module (merge-pathnames (format nil "local/~A/module" name) home))
+         collect (cons config (merge-pathnames (format nil "local/~A/config" name) home)))))
+
+(defun generate-profile-content (&optional (target #p"~/.emacs-profile.el") (profiles *profiles*) (home *home*))
+  (loop for profile in profiles
+        for name = (string-downcase (string (car profile)))
+        for module = (namestring (merge-pathnames (format nil "local/~A/module" name) home))
+        for config = (namestring (merge-pathnames (format nil "local/~A/config" name) home))
+        collect (format nil "(\"~A\" (user-emacs-directory . \"~A\") (env (\"~A\" . \"~A\")))"
+                        name module (format nil "~ADIR" (car profile)) config)))
 
 (defun install ()
-  (print "Installing emacy...~%")
-  (if (uiop:directory-exists-p (parse-namestring *home*))
-      (print (format nil "Folder ~A exists...exit" *home*))
-      (clone)))
+  (format t "Installing...~%")
+  (dolist (repo (get-repos))
+          (clone-repo (car repo) (cdr repo)))
+  (with-open-file (out #p"~/.emacs-profiles.el" :direction :output :if-exists :supersede)
+    (princ (generate-profile-content) out))
+  (with-open-file (out #p"~/.emacs-profile" :direction :output :if-exists :supersede)
+    (princ (string-downcase (string (caar *profiles*))) out)))
 
 (defun update ()
-  (print "Updating emacy...~%")
-  (dolist (item (pairlis '("doomemacs" "spacemacs" "chemacs2" ".doom.d" ".spacemacs.d")
-                         '("develop" "develop" "master" "master" "master")))
-    (let ((folder (concatenate 'string *home* "/config/" (car item)))
-          (branch (cdr item)))
-        (shell (format nil "cd ~A;git checkout ~A; cd $OLDPWD" folder branch))))
-  (shell (format nil "cd ~A;git pull --ff-only;git submodule foreach git pull --ff-only;cd $OLDPWD" *home*)))
+  (format t "Updating...~%")
+  (update-repo *home*)
+  (dolist (repo (get-repos))
+          (update-repo (cdr repo))))
 
-(defun uninstall ()
-  (print "Uninstall")
-  (shell (format nil "~A ~A" #+os-windows "rm -r -Force" #-os-windows "rm -rf" *home*)))
-
-(defun doom (&optional (command "help"))
-  (shell (format nil "~A ~A" (concatenate 'string *home*
-                                          "/config/doomemacs/bin/doom") command)))
-
-(defun help ()
-  (print "Help"))
+(clish:defcli cli
+  (nil (lambda () (update)))
+  (install #'install)
+  (:pre (lambda (&rest rest) (declare (ignorable rest)) (check))))
 
 (defun main (&rest argv)
   (declare (ignorable argv))
-  (let ((command (first argv))
-        (params (cdr argv)))
-    (cond
-     ((equalp command "install")
-      (install))
-     ((equalp command "config")
-      (config))
-     ((equalp command "update")
-      (update))
-     ((equalp command "uninstall")
-      (uninstall))
-     ((equalp command "doom")
-      (apply #'doom params))
-     (t
-      (help)))))
-     
+  (apply #'cli argv))
+
 ;;; vim: set ft=lisp lisp:

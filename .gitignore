@@ -1,3 +1,9 @@
 .vscode
 
+*ipynb_checkpoints
+
+.local
+local
+
+tmp
 temp
