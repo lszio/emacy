@@ -40,9 +40,8 @@ exec ros -Q -- $0 "$@"
 (defun link (source target &key (force nil))
   (format t "Linking ~A to ~A~%" target source)
   (when (probe-file target)
-        (print "111")
-        (if (or force (y-or-n-p (format t "~A already exists, remove?" target)))
-            (shell "rm -rf ~A" target)
+        (if (or force (y-or-n-p "~A already exists, remove?" target))
+            (shell (format nil "rm -rf ~A" target))
             (return-from link 128)))
   (shell (format nil "ln -s ~A ~A" source target)))
 
@@ -102,7 +101,8 @@ exec ros -Q -- $0 "$@"
   (with-open-file (out #p"~/.emacs-profiles.el" :direction :output :if-exists :supersede)
     (princ (generate-profile-content) out))
   (with-open-file (out #p"~/.emacs-profile" :direction :output :if-exists :supersede)
-    (princ (string-downcase (string (caar *profiles*))) out)))
+    (princ (string-downcase (string (caar *profiles*))) out))
+  (link (merge-pathnames "local/chemacs2" *home*) #p"~/.emacs.d"))
 
 (defun update ()
   (format t "Updating...~%")
@@ -110,9 +110,18 @@ exec ros -Q -- $0 "$@"
   (dolist (repo (get-repos))
           (update-repo (cdr repo))))
 
+(defun config ()
+  ;; TODO
+  nil)
+
+(defun doom ()
+  ;;TODO
+  nil)
+
 (clish:defcli cli
-  (nil (lambda () (update)))
+  (nil #'update)
   (install #'install)
+  (update #'update)
   (:pre (lambda (&rest rest) (declare (ignorable rest)) (check))))
 
 (defun main (&rest argv)

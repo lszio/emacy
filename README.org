@@ -1,4 +1,4 @@
-#+TITLE: Lemacs
+#+TITLE: Emacy
 
 * Projects
 - spacemacs
