@@ -15,25 +15,21 @@ exec ros -Q -- $0 "$@"
   (let ((p (and path (probe-file path))))
     (when (and p (not (pathname-name p))) p)))
 
-(defun shell (&rest cmds)
-  (let ((command (str:join ";" cmds)))
-    (third
-     (multiple-value-list
-      (uiop:run-program
-       (format nil "~A~A"
-               #+os-windows "powershell $OLDPWD=pwd;"
-               #-os-windows ""
-               command)
-       :output :interactive
-       :ignore-error-status t
-       :error-output :interactive)))))
+(defun shell (string &rest arguments)
+  (third
+    (multiple-value-list
+        (uiop:run-program
+            (apply #'format (cons nil (cons (format nil "~A~A" #+os-windows "powershell $OLDPWD-pwd;" #-os-windows "" string) arguments)))
+            :ignore-error-status t
+            :output :interactive
+            :error-output :interactive))))
 
 (defun clone-repo (remote &optional (target nil))
   (if (and target (probe-file target))
       (format t "Repo ~A already cloned, skip...~%" remote)
       (format t "Cloning ~A...~A~%"
               remote
-              (if (> (shell (format nil "git clone ~A ~A" remote target)) 0)
+              (if (> (shell "git clone ~A ~A" remote target) 0)
                   " failed"
                   nil))))
 
@@ -41,13 +37,13 @@ exec ros -Q -- $0 "$@"
   (format t "Linking ~A to ~A~%" target source)
   (when (probe-file target)
         (if (or force (y-or-n-p "~A already exists, remove?" target))
-            (shell (format nil "rm -rf ~A" target))
+            (shell "rm -rf ~A" target)
             (return-from link 128)))
-  (shell (format nil "ln -s ~A ~A" source target)))
+  (shell "ln -s ~A ~A" source target))
 
 (defun update-repo (target)
   (if (probe-file target)
-      (shell (format nil "cd ~A; git pull --ff-only; cd $OLDPWD" target))
+      (shell "cd ~A; git pull --ff-only; cd $OLDPWD" target)
       (format t "Target ~A does not exist~%" target)))
 
 (defparameter *home*
@@ -58,12 +54,13 @@ exec ros -Q -- $0 "$@"
                    (uiop:getenv "EMACY") "~/.emacy" "~/Emacy")))))
     (if s (probe-file s) s)))
 
-(defparameter *profiles* '((doom .
-                            ((module . "https://github.com/hlissner/doom-emacs")
-                             (config . "https://github.com/Liszt21/.doom.d")))
-                           (spacemacs .
-                            ((module . "https://github.com/syl20bnr/spacemacs")
-                             (config . "https://github.com/Liszt21/.spacemacs.d")))))
+(defparameter *profiles*
+  '((doom .
+     ((module . "https://github.com/hlissner/doom-emacs")
+      (config . "https://github.com/Liszt21/.doom.d")))
+    (spacemacs .
+     ((module . "https://github.com/syl20bnr/spacemacs")
+      (config . "https://github.com/Liszt21/.spacemacs.d")))))
 
 (defun check ()
   (format t "Checking...~%")
@@ -72,9 +69,7 @@ exec ros -Q -- $0 "$@"
   (format t "Emacy home: ~A~%" *home*)
   (when (not (probe-file (merge-pathnames "bin/emacy" *home*)))
         (format t "Emacy was not installed, cloning...~%")
-        (shell (format nil
-                       "rm -rf ~A; git clone http://github.com/Liszt21/Emacy ~A"
-                       *home* *home*))))
+        (shell "rm -rf ~A; git clone http://github.com/Liszt21/Emacy ~A" *home* *home*)))
 
 (defun get-repos (&optional (profiles *profiles*) (home *home*))
   (cons
@@ -86,7 +81,7 @@ exec ros -Q -- $0 "$@"
          collect (cons module (merge-pathnames (format nil "local/~A/module" name) home))
          collect (cons config (merge-pathnames (format nil "local/~A/config" name) home)))))
 
-(defun generate-profile-content (&optional (target #p"~/.emacs-profile.el") (profiles *profiles*) (home *home*))
+(defun generate-profile-content (&optional (profiles *profiles*) (home *home*))
   (loop for profile in profiles
         for name = (string-downcase (string (car profile)))
         for module = (namestring (merge-pathnames (format nil "local/~A/module" name) home))
@@ -115,12 +110,10 @@ exec ros -Q -- $0 "$@"
   nil)
 
 (defun doom (&optional (command ""))
-  ;;TODO
-  (shell (format nil "~A~A --doomdir ~A ~A"
-                 (merge-pathnames "local/doom/module/bin/doom" *home*)
-                 #+os-windows ".cmd" #-os-windows ""
-                 (merge-pathnames "local/doom/config")
-                 command)))
+  (shell "~A~A --doomdir ~A ~A"
+         (merge-pathnames "local/doom/module/bin/doom" *home*)
+         #+os-windows ".cmd" #-os-windows ""
+         (merge-pathnames "local/doom/config") command))
 
 (clish:defcli cli
   (nil #'update)
