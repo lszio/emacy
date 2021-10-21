@@ -19,9 +19,10 @@ exec ros -Q -- $0 "$@"
   (third
     (multiple-value-list
         (uiop:run-program
-            (apply #'format (cons nil (cons (format nil "~A~A" #+os-windows "powershell $OLDPWD-pwd;" #-os-windows "" string) arguments)))
+            (apply #'format (cons nil (cons (format nil "~A~A" #+os-windows "powershell $OLDPWD=pwd;" #-os-windows "" string) arguments)))
             :ignore-error-status t
             :output :interactive
+            :input :interactive
             :error-output :interactive))))
 
 (defun clone-repo (remote &optional (target nil))
@@ -110,10 +111,12 @@ exec ros -Q -- $0 "$@"
   nil)
 
 (defun doom (&optional (command ""))
-  (shell "~A~A --doomdir ~A ~A"
+  (shell "~ADOOMDIR='~A'; ~A~A ~A"
+         #+os-windows "$env:" #-os-windows "export "
+         (merge-pathnames "local/doom/config")
          (merge-pathnames "local/doom/module/bin/doom" *home*)
          #+os-windows ".cmd" #-os-windows ""
-         (merge-pathnames "local/doom/config") command))
+         command))
 
 (clish:defcli cli
   (nil #'update)
