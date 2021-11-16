@@ -63,7 +63,7 @@ exec ros -Q -- $0 "$@"
     (spacemacs .
      ((module . "https://github.com/syl20bnr/spacemacs")
       (config . "https://github.com/Liszt21/.spacemacs.d")
-      (dirname . "SPACMEACSDIR")))))
+      (dirname . "SPACEMACSDIR")))))
 
 (defun check ()
   (format t "Checking...~%")
