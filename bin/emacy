@@ -56,7 +56,7 @@ exec ros -Q -- $0 "$@"
     (if s (probe-file s) s)))
 
 (defparameter *profiles*
-  '((doom .
+  '((doomemacs .
      ((module . "https://github.com/hlissner/doom-emacs")
       (config . "https://github.com/Liszt21/.doom.d")))
     (spacemacs .
@@ -113,8 +113,8 @@ exec ros -Q -- $0 "$@"
 (defun doom (&optional (command ""))
   (shell "~ADOOMDIR='~A'; ~A~A ~A"
          #+os-windows "$env:" #-os-windows "export "
-         (merge-pathnames "local/doom/config")
-         (merge-pathnames "local/doom/module/bin/doom" *home*)
+         (merge-pathnames "local/doomemacs/config")
+         (merge-pathnames "local/doomemacs/module/bin/doom" *home*)
          #+os-windows ".cmd" #-os-windows ""
          command))
 
