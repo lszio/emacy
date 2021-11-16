@@ -58,10 +58,12 @@ exec ros -Q -- $0 "$@"
 (defparameter *profiles*
   '((doomemacs .
      ((module . "https://github.com/hlissner/doom-emacs")
-      (config . "https://github.com/Liszt21/.doom.d")))
+      (config . "https://github.com/Liszt21/.doom.d")
+      (dirname . "DOOMDIR")))
     (spacemacs .
      ((module . "https://github.com/syl20bnr/spacemacs")
-      (config . "https://github.com/Liszt21/.spacemacs.d")))))
+      (config . "https://github.com/Liszt21/.spacemacs.d")
+      (dirname . "SPACMEACSDIR")))))
 
 (defun check ()
   (format t "Checking...~%")
@@ -85,10 +87,11 @@ exec ros -Q -- $0 "$@"
 (defun generate-profile-content (&optional (profiles *profiles*) (home *home*))
   (loop for profile in profiles
         for name = (string-downcase (string (car profile)))
+        for dirname = (cdr (assoc 'dirname (cdr profile)))
         for module = (namestring (merge-pathnames (format nil "local/~A/module" name) home))
         for config = (namestring (merge-pathnames (format nil "local/~A/config" name) home))
         collect (format nil "(\"~A\" (user-emacs-directory . \"~A\") (env (\"~A\" . \"~A\")))"
-                        name module (format nil "~ADIR" (car profile)) config)))
+                        name module dirname config)))
 
 (defun install ()
   (format t "Installing...~%")
