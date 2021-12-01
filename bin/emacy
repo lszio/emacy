@@ -101,6 +101,10 @@ exec ros -Q -- $0 "$@"
     (princ (generate-profile-content) out))
   (with-open-file (out #p"~/.emacs-profile" :direction :output :if-exists :supersede)
     (princ (string-downcase (string (caar *profiles*))) out))
+  (clish:with-profile (ctx :section "emacy")
+    (setf ctx (list (clish:generate-alias-define "emacy" "ros ./bin/emacy" *home*)
+                    (clish:generate-alias-define "spacemacs" "emacs --with-profile spacemacs")
+                    (clish:generate-alias-define "doomemacs" "emacs --with-profile doomemacs"))))
   (link (merge-pathnames "local/chemacs2" *home*) #p"~/.emacs.d"))
 
 (defun update ()
@@ -113,6 +117,17 @@ exec ros -Q -- $0 "$@"
   ;; TODO
   nil)
 
+(defun use (&optional name)
+  (with-open-file (out #p"~/.emacs-profile" :direction :output :if-exists :supersede)
+    (princ
+     (string-downcase
+      (string
+       (if (and name
+                (some (lambda (profile) (string= (string-downcase (string (car profile))) name)) *profiles*))
+           name
+           (caar *profiles*))))
+     out)))
+
 (defun doom (&optional (command ""))
   (shell "~ADOOMDIR='~A'; ~A~A ~A"
          #+os-windows "$env:" #-os-windows "export "
@@ -123,9 +138,10 @@ exec ros -Q -- $0 "$@"
 
 (clish:defcli cli
   (nil #'update)
-  (install #'install)
-  (update #'update)
+  (use #'use)
   (doom #'doom)
+  (update #'update)
+  (install #'install)
   (:pre (lambda (&rest rest) (declare (ignorable rest)) (check))))
 
 (defun main (&rest argv)
