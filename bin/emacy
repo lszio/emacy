@@ -5,11 +5,12 @@ exec ros -Q -- $0 "$@"
 |#
 (progn ;;init forms
   (ros:ensure-asdf)
-  #+quicklisp (ql:quickload '(uiop clish str) :silent t))
+  #+quicklisp (ql:quickload '(uiop clish str log4cl) :silent t))
+(log:config :nopretty :notime :nopackage :nofile)
 
-(defpackage :ros.script.emacy
+(defpackage :emacy
   (:use :cl))
-(in-package :ros.script.emacy)
+(in-package :emacy)
 
 (defun folder-exists (path)
   (let ((p (and path (probe-file path))))
@@ -27,15 +28,15 @@ exec ros -Q -- $0 "$@"
 
 (defun clone-repo (remote &optional (target nil))
   (if (and target (probe-file target))
-      (format t "Repo ~A already cloned, skip...~%" remote)
-      (format t "Cloning ~A...~A~%"
-              remote
-              (if (> (shell "git clone ~A ~A" remote target) 0)
-                  " failed"
-                  nil))))
+      (log:info "Repo ~A already cloned, skip..." remote)
+      (progn
+        (log:info "Cloning repo ~A to ~A" remote target)
+        (if (zerop (shell "git clone ~A ~A" remote target))
+          (log:info "Repo ~A cloned." remote)
+          (log:warn "Clone ~A failed!" remote)))))
 
-(defun link (source target &key (force nil))
-  (format t "Linking ~A to ~A~%" target source)
+(defun link (source target &key force)
+  (log:info "Linking ~A to ~A" target source)
   (when (probe-file target)
         (if (or force (y-or-n-p "~A already exists, remove?" target))
             (shell "rm -rf ~A" target)
@@ -44,8 +45,11 @@ exec ros -Q -- $0 "$@"
 
 (defun update-repo (target)
   (if (probe-file target)
-      (shell "cd ~A; git pull --ff-only; cd $OLDPWD" target)
-      (format t "Target ~A does not exist~%" target)))
+      (progn
+        (log:info "Updating ~A..." target)
+        (when (> (shell "cd ~A; git pull --ff-only; cd $OLDPWD" target) 0)
+           (log:warn "update failed")))
+      (log:warn "Target ~A does not exist" target)))
 
 (defparameter *home*
   (let ((s (car
@@ -66,13 +70,14 @@ exec ros -Q -- $0 "$@"
       (dirname . "SPACEMACSDIR")))))
 
 (defun check ()
-  (format t "Checking...~%")
+  (log:info "Checking...")
   (when (not *home*)
         (setf *home* (merge-pathnames #+os-windows "Emacy" #+linux ".emacy" (user-homedir-pathname))))
-  (format t "Emacy home: ~A~%" *home*)
+  (log:info "Emacy home: ~A" *home*)
   (when (not (probe-file (merge-pathnames "bin/emacy" *home*)))
-        (format t "Emacy was not installed, cloning...~%")
+        (log:info "Emacy was not installed, cloning...")
         (shell "rm -rf ~A; git clone http://github.com/Liszt21/Emacy ~A" *home* *home*)))
+
 
 (defun get-repos (&optional (profiles *profiles*) (home *home*))
   (cons
@@ -94,7 +99,7 @@ exec ros -Q -- $0 "$@"
                         name module dirname config)))
 
 (defun install ()
-  (format t "Installing...~%")
+  (format t "Installing...")
   (dolist (repo (get-repos))
           (clone-repo (car repo) (cdr repo)))
   (with-open-file (out #p"~/.emacs-profiles.el" :direction :output :if-exists :supersede)
@@ -108,7 +113,7 @@ exec ros -Q -- $0 "$@"
   (link (merge-pathnames "local/chemacs2" *home*) #p"~/.emacs.d"))
 
 (defun update ()
-  (format t "Updating...~%")
+  (log:info "Updating...")
   (update-repo *home*)
   (dolist (repo (get-repos))
           (update-repo (cdr repo))))
