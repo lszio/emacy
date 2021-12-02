@@ -45,13 +45,9 @@ exec ros -Q -- $0 "$@"
           (log:info "Repo ~A cloned." remote)
           (log:warn "Clone ~A failed!" remote)))))
 
-(defun link (source target &key force)
-  (log:info "Linking ~A to ~A" target source)
-  (when (probe-file target)
-        (if (or force (y-or-n-p "~A already exists, remove?" target))
-            (shell "rm -rf ~A" target)
-            (return-from link 128)))
-  (shell "ln -s ~A ~A" source target))
+(defun link (target link)
+  (log:info "Linking ~A to ~A" target link)
+  (shell "~Aln -s ~A ~A -b" #+os-windows "sudo " #-os-windows "" target link))
 
 (defun lower-case-interns (string &rest interns)
   (dolist (itn interns)
@@ -79,7 +75,7 @@ exec ros -Q -- $0 "$@"
 
 (defun generate-default-profiles ()
   '(("doomemacs"
-     (env ("DOOMDIR" . ""))
+     (env ("DOOMDIR"))
      (repo
       (module . "https://github.com/hlissner/doom-emacs")
       (config . "https://github.com/Liszt21/.doom.d")))
@@ -126,6 +122,17 @@ exec ros -Q -- $0 "$@"
       (log:warn "Profile ~A doesn't exists" name))
   (save-profiles))
 
+(defun use-profile (&optional name)
+  (with-open-file (out #p"~/.emacs-profile" :direction :output :if-exists :supersede)
+    (princ
+     (string-downcase
+      (string
+       (if (and name
+                (some (lambda (profile) (string= (string-downcase (string (car profile))) name)) *profiles*))
+           name
+           (caar *profiles*))))
+     out)))
+
 (defun check ()
   (log:info "Checking...")
   (load-profiles)
@@ -140,44 +147,33 @@ exec ros -Q -- $0 "$@"
   (cons
    (cons "https://github.com/plexus/chemacs2" (merge-pathnames "local/chemacs2" home))
    (loop for profile in profiles
-         for name = (string-downcase (string (car profile)))
-         for module = (cdr (assoc 'module (cdr profile)))
-         for config = (cdr (assoc 'config (cdr profile)))
-         collect (cons module (merge-pathnames (format nil "local/~A/module" name) home))
-         collect (cons config (merge-pathnames (format nil "local/~A/config" name) home)))))
+         for name = (car profile)
+         for content = (cdr profile)
+         for repo = (cdr (assoc 'repo content))
+         for module-path = (cdr (assoc 'user-emacs-directory content))
+         for config-path = (cdadr (assoc 'env content))
+         for module = (cdr (assoc 'module repo))
+         for config = (cdr (assoc 'module repo))
+         collect (cons module module-path)
+         collect (cons config config-path))))
 
 (defun install ()
   (format t "Installing...")
   (dolist (repo (get-repos))
           (clone-repo (car repo) (cdr repo)))
-  (with-open-file (out #p"~/.emacs-profile" :direction :output :if-exists :supersede)
-    (princ (string-downcase (string (caar *profiles*))) out))
+  (use-profile)
   (clish:with-profile (ctx :section "emacy")
     (setf ctx (list (clish:generate-alias-define "emacy" "ros ./bin/emacy" *home*)
                     (clish:generate-alias-define "spacemacs" "emacs --with-profile spacemacs")
                     (clish:generate-alias-define "doomemacs" "emacs --with-profile doomemacs"))))
-  (link (merge-pathnames "local/chemacs2" *home*) #p"~/.emacs.d"))
+  (link (merge-pathnames "local/chemacs2" *home*)
+        (merge-pathnames (user-homedir-pathname) ".emacs.d")))
 
 (defun update ()
   (log:info "Updating...")
   (update-repo *home*)
   (dolist (repo (get-repos))
           (update-repo (cdr repo))))
-
-(defun config ()
-  ;; TODO
-  nil)
-
-(defun use (&optional name)
-  (with-open-file (out #p"~/.emacs-profile" :direction :output :if-exists :supersede)
-    (princ
-     (string-downcase
-      (string
-       (if (and name
-                (some (lambda (profile) (string= (string-downcase (string (car profile))) name)) *profiles*))
-           name
-           (caar *profiles*))))
-     out)))
 
 (defun doom (&optional (command ""))
   (shell "~ADOOMDIR='~A'; ~A~A ~A"
@@ -195,17 +191,17 @@ exec ros -Q -- $0 "$@"
 
 (clish:defcli cli
   (nil #'update)
-  (use #'use)
   (doom #'doom)
   (list #'list-profiles)
   (update #'update)
   (install #'install)
   (new #'new-profile)
-  (remove #'remove-profile)
-  (:pre (lambda (&rest rest) (declare (ignorable rest)) (check))))
+  (use #'use-profile)
+  (remove #'remove-profile))
 
 (defun main (&rest argv)
   (declare (ignorable argv))
+  (check)
   (apply #'cli argv))
 
 ;;; vim: set ft=lisp lisp:
