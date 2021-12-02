@@ -153,7 +153,7 @@ exec ros -Q -- $0 "$@"
          for module-path = (cdr (assoc 'user-emacs-directory content))
          for config-path = (cdadr (assoc 'env content))
          for module = (cdr (assoc 'module repo))
-         for config = (cdr (assoc 'module repo))
+         for config = (cdr (assoc 'config repo))
          collect (cons module module-path)
          collect (cons config config-path))))
 
