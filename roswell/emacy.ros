@@ -8,9 +8,7 @@ exec ros -Q -- $0 "$@"
   #+quicklisp (ql:quickload '(uiop clish str log4cl emacy) :silent t))
 (log:config :nopretty :notime :nopackage :nofile)
 
-(defpackage :emacy.script
-  (:use :cl))
-(in-package :emacy.script)
+(in-package :emacy)
 
 (defun main (&rest argv)
   (declare (ignorable argv))
