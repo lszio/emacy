@@ -9,7 +9,13 @@
   (let ((p (and path (probe-file path))))
     (when (and p (not (pathname-name p))) p)))
 
-(defparameter *home* (uiop:ensure-directory-pathname (pathname (or (uiop:getenv "EMACY") #+os-windows "~/Emacy" #-os-windows "~/.emacy"))))
+(defparameter *home* (uiop:ensure-directory-pathname 
+                       (pathname 
+                         (or 
+                           (uiop:getenv "EMACY") 
+                           (concatenate 'string (uiop:getenv "HOME") 
+                                        #+os-windows "/Emacy"
+                                        #-os-windows "/.emacy")))))
 
 (defparameter *profiles* '())
 
