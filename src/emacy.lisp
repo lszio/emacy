@@ -1,28 +1,15 @@
-#!/bin/sh
-#|-*- mode:lisp -*-|#
-#|
-exec ros -Q -- $0 "$@"
-|#
-(progn ;;init forms
-  (ros:ensure-asdf)
-  #+quicklisp (ql:quickload '(uiop clish str log4cl) :silent t))
-(log:config :nopretty :notime :nopackage :nofile)
+(defpackage emacy
+  (:use :cl)
+  (:export
+   :cli))
 
-(defpackage :emacy
-  (:use :cl))
 (in-package :emacy)
 
 (defun folder-exists (path)
   (let ((p (and path (probe-file path))))
     (when (and p (not (pathname-name p))) p)))
 
-(defparameter *home*
-  (let ((s (car
-            (member-if
-             #'folder-exists
-             (list ".emacy" "Emacy" "../.emacy" "../Emacy"
-                   (uiop:getenv "EMACY") "~/.emacy" "~/Emacy")))))
-    (if s (probe-file s) s)))
+(defparameter *home* (uiop:ensure-directory-pathname (pathname (or (uiop:getenv "EMACY") #+os-windows "~/Emacy" #-os-windows "~/.emacy"))))
 
 (defparameter *profiles* '())
 
@@ -62,15 +49,15 @@ exec ros -Q -- $0 "$@"
            (log:warn "update failed")))
       (log:warn "Target ~A does not exist" target)))
 
-(defun update-profiles-path (&optional (home *home*))
+(defun update-profiles-path ()
   (setf *profiles*
         (loop for profile in *profiles*
               for name = (car profile)
               for content = (cdr profile)
               for repo = (cdr (assoc "REPO" content :key #'string :test #'equal))
               for env = (cdr (assoc "ENV" content :key #'string :test #'equal))
-              collect (cons name (list (cons 'user-emacs-directory (format nil "~Alocal/~A/module" home name))
-                                       (cons 'env (list (cons (caar env) (format nil "~Alocal/~A/config" home name))))
+              collect (cons name (list (cons 'user-emacs-directory (format nil "~A~A/module" *home* name))
+                                       (cons 'env (list (cons (caar env) (format nil "~A~A/config" *home* name))))
                                        (cons 'repo repo))))))
 
 (defun generate-default-profiles ()
@@ -104,10 +91,10 @@ exec ros -Q -- $0 "$@"
 
 (defun generate-profile (name module &optional config dirname)
   (cons name
-        (list (cons 'user-emacs-directory (format nil "~Alocal/~A/module" *home* name))
+        (list (cons 'user-emacs-directory (format nil "~A~A/module" *home* name))
               (cons 'repo (list (cons 'module module) (when config (cons 'config config))))
               (when (and dirname config)
-                (cons 'env (list (cons dirname (format nil "~Alocal/~A/config" *home* name))))))))
+                (cons 'env (list (cons dirname (format nil "~A~A/config" *home* name))))))))
 
 (defun new-profile (name module &optional config dirname)
   (if (assoc name *profiles* :test #'equal)
@@ -136,16 +123,11 @@ exec ros -Q -- $0 "$@"
 (defun check ()
   (log:info "Checking...")
   (load-profiles)
-  (when (not *home*)
-        (setf *home* (merge-pathnames #+os-windows "Emacy" #+linux ".emacy" (user-homedir-pathname))))
-  (log:info "Emacy home: ~A" *home*)
-  (when (not (probe-file (merge-pathnames "bin/emacy" *home*)))
-        (log:info "Emacy was not installed, cloning...")
-        (shell "rm -rf ~A; git clone http://github.com/Liszt21/Emacy ~A" *home* *home*)))
+  (log:info "Emacy home: ~A" *home*))
 
-(defun get-repos (&optional (profiles *profiles*) (home *home*))
+(defun get-repos (&optional (profiles *profiles*))
   (cons
-   (cons "https://github.com/plexus/chemacs2" (merge-pathnames "local/chemacs2" home))
+   (cons "https://github.com/plexus/chemacs2" (merge-pathnames "chemacs2" *home*))
    (loop for profile in profiles
          for name = (car profile)
          for content = (cdr profile)
@@ -163,23 +145,23 @@ exec ros -Q -- $0 "$@"
           (clone-repo (car repo) (cdr repo)))
   (use-profile)
   (clish:with-profile (ctx :section "emacy")
-    (setf ctx (list (clish:generate-alias-define "emacy" "ros ./bin/emacy" *home*)
+    (setf ctx (list (clish:generate-alias-define "ros -e '(ql:quickload :emacy) ()'")
                     (clish:generate-alias-define "spacemacs" "emacs --with-profile spacemacs")
                     (clish:generate-alias-define "doomemacs" "emacs --with-profile doomemacs"))))
-  (link (merge-pathnames "local/chemacs2" *home*)
+  (link (merge-pathnames "chemacs2" *home*)
         (merge-pathnames (user-homedir-pathname) ".emacs.d")))
 
 (defun update ()
   (log:info "Updating...")
-  (update-repo *home*)
+  ;; (update-repo *home*)
   (dolist (repo (get-repos))
           (update-repo (cdr repo))))
 
 (defun doom (&optional (command ""))
   (shell "~ADOOMDIR='~A'; ~A~A ~A"
          #+os-windows "$env:" #-os-windows "export "
-         (merge-pathnames "local/doomemacs/config")
-         (merge-pathnames "local/doomemacs/module/bin/doom" *home*)
+         (merge-pathnames "doomemacs/config")
+         (merge-pathnames "doomemacs/module/bin/doom" *home*)
          #+os-windows ".cmd" #-os-windows ""
          command))
 
@@ -189,19 +171,22 @@ exec ros -Q -- $0 "$@"
     (dolist (profile *profiles*)
       (format t "  ~A[~A]~%" (car profile) (equal (car profile) current)))))
 
+(defun info-profile (&optional name)
+  (let ((profile (member (or name (caar *profiles*))
+                         *profiles* :key #'car :test #'equal)))
+    (print profile)))
+
 (clish:defcli cli
   (nil #'update)
   (doom #'doom)
-  (list #'list-profiles)
   (update #'update)
   (install #'install)
+  ;; profile manage
   (new #'new-profile)
   (use #'use-profile)
-  (remove #'remove-profile))
-
-(defun main (&rest argv)
-  (declare (ignorable argv))
-  (check)
-  (apply #'cli argv))
+  (info #'info-profile)
+  (list #'list-profiles)
+  (remove #'remove-profile)
+  (:pre (lambda (&rest argv) (declare (ignorable argv)) (check))))
 
 ;;; vim: set ft=lisp lisp:

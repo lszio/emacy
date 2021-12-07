@@ -1,0 +1,23 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  (asdf:load-asd (eval `(or ,@(mapcar (lambda (folder)
+                                        (probe-file (concatenate 'string folder "/emacy.asd")))
+                                      (list "." ".." (uiop:getenv "Emacy") "~/Emacy" "~/.emacy")))))
+  #+quicklisp (ql:quickload '(uiop clish str log4cl emacy) :silent t))
+(log:config :nopretty :notime :nopackage :nofile)
+
+(defpackage :emacy.script
+  (:use :cl))
+(in-package :emacy.script)
+
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (print argv)
+  (apply #'emacy:cli argv))
+
+;;; vim: set ft=lisp lisp:
