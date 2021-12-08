@@ -9,11 +9,11 @@
   (let ((p (and path (probe-file path))))
     (when (and p (not (pathname-name p))) p)))
 
-(defparameter *home* (uiop:ensure-directory-pathname 
-                       (pathname 
-                         (or 
-                           (uiop:getenv "EMACY") 
-                           (concatenate 'string (uiop:getenv "HOME") 
+(defparameter *home* (uiop:ensure-directory-pathname
+                       (pathname
+                         (or
+                           (uiop:getenv "EMACY")
+                           (concatenate 'string (uiop:getenv "HOME")
                                         #+os-windows "/Emacy"
                                         #-os-windows "/.emacy")))))
 
@@ -165,7 +165,7 @@
 (defun doom (&optional (command ""))
   (shell "~ADOOMDIR='~A'; ~A~A ~A"
          #+os-windows "$env:" #-os-windows "export "
-         (merge-pathnames "doomemacs/config")
+         (merge-pathnames "doomemacs/config" *home*)
          (merge-pathnames "doomemacs/module/bin/doom" *home*)
          #+os-windows ".cmd" #-os-windows ""
          command))
