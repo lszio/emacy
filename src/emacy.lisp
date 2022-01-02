@@ -67,16 +67,16 @@
                                        (cons 'repo repo))))))
 
 (defun generate-default-profiles ()
-  '(("doomemacs"
-     (env ("DOOMDIR"))
-     (repo
-      (module . "https://github.com/hlissner/doom-emacs")
-      (config . "https://github.com/Liszt21/.doom.d")))
-    ("spacemacs"
+  '(("spacemacs"
      (env ("SPACEMACSDIR"))
      (repo
       (module . "https://github.com/syl20bnr/spacemacs")
-      (config . "https://github.com/Liszt21/.spacemacs.d")))))
+      (config . "https://github.com/Liszt21/.spacemacs.d")))
+    ("doomemacs"
+     (env ("DOOMDIR"))
+     (repo
+      (module . "https://github.com/hlissner/doom-emacs")
+      (config . "https://github.com/Liszt21/.doom.d")))))
 
 (defun save-profiles (&optional (profile-path "~/.emacs-profiles.el"))
   (with-open-file (out profile-path :direction :output :if-exists :supersede)
