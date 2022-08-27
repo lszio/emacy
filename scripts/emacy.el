@@ -3,16 +3,20 @@
 
 ;;; Code:
 (defvar *home* (or (getenv "EMACY_HOME") "~/Emacy"))
+(defvar home (or (getenv "EMACY_HOME") "~/Emacy"))
 
 (defun generate-profiles (home)
   "Geenrate profiles (HOME)."
   (let* ((envs '(("spacemacs" . "SPACEMACSDIR") ("doomemacs" . "DOOMDIR") ("lemacs" . "LEMACSDIR"))))
-    (cl-loop for module in (directory-files (concat home "/modules") nil "^[^(chemacs2|.+)].*$")
+    (cl-loop for module in (directory-files (concat home "/modules") nil "[^(chemacs2|\.)].+")
              for env-name = (cdr (assoc module envs))
              for env = (if env-name `(env (,env-name . ,(concat home "/configs/"  module))))
              for module-dir = (concat home "/modules/" module)
-             for profile = `((user-emacs-directory . ,module-dir) ,env)
+             for server = `(server-name . module)
+             for profile = `((user-emacs-directory . ,module-dir) ,server ,env)
              collect (cons module profile))))
+
+(file-name-base "/asdg/sadg")
 
 (defun save-to (file value)
   "Save VALUE to FILE."

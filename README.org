@@ -5,6 +5,12 @@
 git clone --recursive https://github.com/Liszt21/Emacy ~/Emacy
 
 emacs --script ~/Emacy/scripts/emacy.el init
+
+# config PATH
+export PATH=~/.local/bin:$PATH
+
+# set DOOMDIR for doom script
+export DOOMDIR=~/Emacy/configs/doomemacs
 #+end_src
 
 * Scripts
