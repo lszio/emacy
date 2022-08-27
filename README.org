@@ -1,1 +1,16 @@
 #+TITLE: My Emacs World
+
+* Installation
+#+begin_src shell
+git clone --recursive https://github.com/Liszt21/Emacy ~/Emacy
+
+emacs --script ~/Emacy/scripts/emacy.el init
+#+end_src
+
+* Scripts
+** emacy.el
+#+begin_example
+commands:
+    init
+    use
+#+end_example
