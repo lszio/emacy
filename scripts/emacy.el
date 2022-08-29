@@ -3,25 +3,31 @@
 
 ;;; Code:
 (defvar *home* (or (getenv "EMACY_HOME") "~/Emacy"))
-(defvar home (or (getenv "EMACY_HOME") "~/Emacy"))
+(defvar *profile-envs* '(("spacemacs" . "SPACEMACSDIR") ("doomemacs" . "DOOMDIR") ("lemacs" . "LEMACSDIR")))
 
-(defun generate-profiles (home)
-  "Geenrate profiles (HOME)."
-  (let* ((envs '(("spacemacs" . "SPACEMACSDIR") ("doomemacs" . "DOOMDIR") ("lemacs" . "LEMACSDIR"))))
-    (cl-loop for module in (directory-files (concat home "/modules") nil "[^(chemacs2|\.)].+")
-             for env-name = (cdr (assoc module envs))
-             for env = (if env-name `(env (,env-name . ,(concat home "/configs/"  module))))
-             for module-dir = (concat home "/modules/" module)
-             for server = `(server-name . module)
-             for profile = `((user-emacs-directory . ,module-dir) ,server ,env)
-             collect (cons module profile))))
+(defconst IS-MAC      (eq system-type 'darwin))
+(defconst IS-LINUX    (eq system-type 'gnu/linux))
+(defconst IS-WINDOWS  (memq system-type '(cygwin windows-nt ms-dos)))
+(defconst IS-BSD      (memq system-type '(darwin berkeley-unix gnu/kfreebsd)))
 
-(file-name-base "/asdg/sadg")
+(defun detect-profiles (home)
+  "Detect profiles (HOME)."
+  (cl-loop for profile-name in (directory-files (concat home "/profiles") nil "[^(chemacs2|\.)].+")
+           for env-name = (cdr (assoc profile-name *profile-envs*))
+           for env-data = (if env-name `(env (,env-name . ,(concat home "/configs/"  profile-name))))
+           for profile-dir = (concat home "/profiles/" profile-name)
+           for bin-dir = (concat profile-dir "/bin")
+           for bin-files = (if (file-exists-p bin-dir) (directory-files bin-dir nil "[^\.]+"))
+           for bin-data = `(bins . ,bin-files)
+           for server = `(server-name . profile-name)
+           for profile-data = `((user-emacs-directory . ,profile-dir) ,server ,env-data ,bin-data)
+           collect (cons profile-name profile-data)))
+
+(defvar *profiles* (detect-profiles *home*))
 
 (defun save-to (file value)
   "Save VALUE to FILE."
-  (with-temp-file file
-    (prin1 value (current-buffer))))
+  (with-temp-file file (prin1 value (current-buffer))))
 
 (defun read-from (file)
   "Read from FILE."
@@ -41,20 +47,18 @@
 (defun init ()
   "Initialize emacy."
   (print "init")
-  (defvar profiles (generate-profiles *home*))
-  (save-to "~/.emacs-profiles.el" profiles)
-  (pp profiles)
-  (link-executable))
+  (save-to "~/.emacs-profiles.el" (detect-profiles *home*))
+  (pp *profiles*)
+  (link-files))
 
 (defun use (&optional profile)
   "Use PROFILE."
   (defvar current (symbol-name (read-from "~/.emacs-profile")))
-  (defvar profiles (mapcar 'car (read-from "~/.emacs-profiles.el")))
+  (defvar profiles (mapcar 'car *profiles*))
   (princ (format "current profile: %s\nprofiles: " current))
-  (princ profiles)
+  (pp *profiles*)
   (princ "\n")
   (if (member profile profiles)
-      ;; (save-to "~/.emacs-profile")
       (with-temp-file "~/.emacs-profile" (princ profile (current-buffer)))
       (princ (format "profile %s not in ~/.emacs-profiles.el\n" profile))))
 
@@ -65,44 +69,71 @@
         (apply fn (cdr args))
         (princ docs))))
 
-;; (directory-files-recursively "~/Emacy/modules" "^bin$" t)
-(file-expand-wildcards "~/Emacy/modules/*/bin/*")
-
-(defun link-executable ()
+(defun link-files ()
   "Make link to all executable."
-  (cl-loop for file in (file-expand-wildcards (concat *home* "/scripts/*.el") nil)
-           do (print file)
-           for target = (concat "~/.local/bin/" (file-name-base file))
-           when (or (file-symlink-p target)
-                    (and (file-exists-p target) (not (file-directory-p target))
-                         (y-or-n-p (format "remove exist file: %s?" target))))
-           do (progn (shell-command (format "rm %s" target) standard-output)
-                     (princ (format "remove exists target: %s\n" target)))
-           when (and (file-executable-p file) (zerop (shell-command (format "ln -s %s %s" file target) nil)))
-           do (princ (format "Link %s => %s\n" file target)))
-  (cl-loop for file in (file-expand-wildcards (concat *home* "/modules/*/bin/*"))
-           for target = (concat "~/.local/bin/" (file-name-nondirectory file))
-           when (or (file-symlink-p target)
-                    (and (file-exists-p target) (not (file-directory-p target))
-                         (y-or-n-p (format "remove exist file: %s?" target))))
-           do (progn (shell-command (format "rm %s" target) standard-output)
-                     (princ (format "remove exists target: %s\n" target)))
-           when (and (file-executable-p file) (zerop (shell-command (format "ln -s %s %s" file target) nil)))
-           do (princ (format "Link %s => %s\n" file target))))
+  (print (format "Link %s => %s" "~/.emacs.d" (file-name-concat *home* "tools" "chemacs2")))
+  (make-symbolic-link (file-name-concat *home* "tools" "chemacs2") "~/.emacs.d" t)
+  (cl-loop for path in (directory-files (file-name-concat *home* "scripts") t directory-files-no-dot-files-regexp)
+           for name = (file-name-base path)
+           when (file-executable-p path)
+           do (make-symbolic-link path (format "~/.local/bin/%s" name) t))
+  (cl-loop for profile in *profiles*
+           for profile-dir = (cdr (assoc 'user-emacs-directory (cdr profile)))
+           for bins = (cdr (assoc 'bins (cdr profile)))
+           do (cl-loop for bin-name in bins
+                       for linkname = (file-name-concat "~/.local/bin/" bin-name)
+                       for target = (file-name-concat profile-dir "bin" bin-name)
+                       do (print (format "Link %s => %s" linkname target))
+                       do (make-symbolic-link target linkname t))))
+
+(defvar *hook-templates* '((powershell . ((hook-format . "# Emacy powershell hook
+function __emacy-hook(){
+    echo \"Emacy Hook\"
+%s
+}
+__emacy-hook
+unset -f __emacy-hook")
+                                          (env-format . "    env:%s=%s")))
+                           (bash . ((hook-format . "# Emacy bash hook
+function __emacy-hook(){
+    echo \"Emacy Hook\"
+    # envs
+%s
+}
+__emacy-hook
+unset -f __emacy-hook")
+                                    (env-format . "    export %s=%s")))))
+
+(defsubst string-join (strings &optional separator)
+  "Join all STRINGS using SEPARATOR."
+  (mapconcat #'identity strings separator))
+
+(defun hook (&optional type)
+  "Generate hook for shell TYPE."
+  (let* ((template (cdr (assoc (intern type) *hook-templates*)))
+         (hook-format (cdr (assoc 'hook-format template)))
+         (env-format (cdr (assoc 'env-format template)))
+         (envs (string-join (cl-loop for profile in *profiles*
+                                     for env = (cadr (assoc 'env profile))
+                                     collect (format env-format (car env) (cdr env)))
+                            "\n"))
+         (body (format hook-format envs)))
+    (princ body)))
 
 (defun help ()
   "Help."
   (pp '((init)
         (use))))
 
-
 (defun main (&rest args)
   "Main ARGS."
   (dispatch-args args '(("init" . init)
+                        ("hook" . hook)
                         ("use" . use))
                  "emacy: my emacs's script
   commands:
     init         : initialize emacs config
+    hook         : hook
     use (profile): use profile"))
 
 (apply 'main command-line-args-left)
