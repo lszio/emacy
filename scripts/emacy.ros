@@ -1,0 +1,143 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  #+quicklisp(ql:quickload '(clish inferior-shell log4cl osicat access) :silent t))
+
+(defpackage :ros.script.emacy
+  (:use :cl :inferior-shell))
+(in-package :ros.script.emacy)
+
+(defun detect-emacy-home ()
+  (uiop:ensure-directory-pathname 
+    (pathname (or (uiop:getenv "EMACY") (concatenate 'string (uiop:getenv "HOME") #+os-windows "/Emacy" #-os-windows "/Emacy")))))
+
+(defparameter *home* (detect-emacy-home))
+(defparameter *profiles* '())
+(defparameter *env-names* '(("doomemacs" . "DOOMDIR") ("spacemacs" . "SPACEMACSDIR")))
+
+(defun glob-executable (module) (directory (format nil "~Abin/*.*" module)))
+(defun valid-executable (executable) 
+  ;; TODO test if executable
+  (and (pathname-name executable) 
+       #+os-windows (member (pathname-type executable) '("cmd" "ps1" "exe") :test #'equal)
+       #-os-windows (not (member (pathname-type executable) '("cmd" "ps1" "exe") :test #'equal))))
+(defun detect-executable (module) (remove-if-not #'valid-executable (glob-executable module)))
+
+(defun folder-name (folder) (car (last (pathname-directory folder))))
+(defun glob-modules (home) (directory (parse-namestring (format nil "~Amodules/*" home))))
+(defun invalid-module (module-path) 
+  (or (pathname-name module-path)
+      (member (folder-name module-path) '("chemacs2") :test #'equal)))
+(defun detect-modules (&optional (home *home*)) (remove-if #'invalid-module (glob-modules home)))
+
+(defun wrap-env (name path &optional (env-names *env-names*))
+  (let ((env-name (access:accesses env-names name)))
+    (if env-name (cons (cons env-name path) nil)))) 
+
+(defun to-config-path (module-path) 
+  (make-pathname :directory
+                 (substitute "configs" "modules" (pathname-directory module-path)
+                             :count 1 :from-end t :test #'equal)))
+
+(defun parse-modules (&optional (modules-path (detect-modules)))
+  (loop for module-path in modules-path
+        for module-name = (folder-name module-path)
+        for bins = (mapcar #'namestring (detect-executable module-path))
+        for env = (wrap-env module-name (namestring (to-config-path module-path)))
+        collect (cons module-name (pairlis '(bins env server-name user-emacs-directory) 
+                                            (list bins env module-name (namestring module-path))))))
+
+(defun wrap-modules (modules)
+  (loop for module in modules
+        do (pprint module)))
+
+(defun lower-case-interns (string &rest interns)
+  (dolist (itn interns) (setf string (str:replace-all (string itn) (string-downcase (string itn)) string))) string)
+
+(defun save-profiles (&optional (profiles *profiles*) (profile-path "~/.emacs-profiles.el"))
+  (with-open-file (out profile-path :direction :output :if-exists :supersede)
+    (princ (lower-case-interns (prin1-to-string profiles) 'user-emacs-directory 'env 'server-name 'bins) out)))
+
+(defun load-profiles (&optional (profile-path "~/.emacs-profiles.el"))
+  (if (probe-file profile-path)
+      (with-open-file (in profile-path) (setf *profiles* (read in)))
+      (setf *profiles* (parse-modules))))
+
+(setf *profiles* (load-profiles))
+
+(defun shell (string &rest arguments)
+  (third
+    (multiple-value-list
+        (uiop:run-program
+            (format nil "~A~A~{ ~A~}" #+os-windows "powershell $OLDPWD=pwd;" #-os-windows "" string arguments)
+            :ignore-error-status t
+            :output :interactive
+            :input :interactive
+            :error-output :interactive))))
+
+(defun with-bins (&optional (profiles *profiles*))
+  (loop for profile in profiles
+        for name = (car profile)
+        for configs = (cdr profile)
+        for env-cons = (cadr (assoc 'env configs))
+        for env = (format nil "~A~A='~A';" #+os-windows "$env:" 
+                                           #-os-windows "export "
+                                           (car env-cons) (cdr env-cons)) 
+        for bins = (cdr (assoc 'bins configs))
+        if bins
+        collect (loop for bin-path in bins 
+                      for name = (intern (string-upcase (pathname-name bin-path)))
+                      for docs = (format nil "Exec ~A as ~A" name bin-path)
+                      for command = (format nil "~A~A " env bin-path)
+                      collect `(,name (lambda (&rest args) ,docs (apply #'shell (cons ,command args)))))))
+
+(defmacro generate-exec-function (name)
+  (let ((bins '()))
+    (loop for pbins in (with-bins)
+          do (loop for bin in pbins
+                   do (push bin bins)))
+    `(clish:defcli ,name (:docs "Exec file") ,@bins)))
+
+(generate-exec-function default)
+
+(defun use-profile (&optional profile)
+  (if (not profile)
+     (format nil "profiles:~%~{  ~A~%~}" (mapcar #'car *profiles*))
+     (if (member profile *profiles* :test #'equal :key #'car)
+         (shell (format nil "echo \"~A\" > ~~/.emacs-profile" profile))
+         (format t "~%Profile ~S doesn't exist~%" profile))))
+
+(defun link (source target)
+  (log:info "Linking ~A to ~A" source target)
+  (shell (format nil "~Aln -s ~A ~A -b" #+os-windows "sudo " #-os-windows "" source target)))
+
+(defun soft-link (source target &optional force)
+  (case (osicat:file-kind target)
+    (:directory (when (or force (y-or-n-p "Target ~A is directory, override as link to ~A?" target source))
+                  (link source target)))
+    (:symbolic-link (if (equal source (osicat:read-link target))
+                        (format nil "Target ~A already link to ~A" target source)
+                        (when (or force (y-or-n-p "Override target ~A from ~A to ~A?~%" target (osicat:read-link target) source))
+                          (link source target))))
+    (nil (link source target))))
+
+(defun initialize ()
+  "Initializing emacs configs"
+  (log:info "Initializing emacy with home = ~A" *home*)
+  (log:info "Save the following to ~~/.emacs-profiles.el")
+  (setf *profiles* (parse-modules))
+  (pprint *profiles*)
+  (save-profiles *profiles*)
+  (soft-link (parse-namestring (concatenate 'string (namestring *home*) "modules/chemacs2/")) #p"~/.emacs.d"))
+
+(clish:defcli main (:docs "My emacs config")
+  (:default #'default)
+  (run #'default)
+  (use #'use-profile)
+  (init #'initialize))
+
+;;; vim: set ft=lisp lisp:
