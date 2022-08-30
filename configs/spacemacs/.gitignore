@@ -1,1 +1,5 @@
-*.env
+custom.el
+/local.el
+test
+
+.spacemacs.env
