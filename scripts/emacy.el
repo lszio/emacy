@@ -56,10 +56,9 @@
   (defvar current (symbol-name (read-from "~/.emacs-profile")))
   (defvar profiles (mapcar 'car *profiles*))
   (princ (format "current profile: %s\nprofiles: " current))
-  (pp *profiles*)
-  (princ "\n")
+  (pp profiles)
   (if (member profile profiles)
-      (with-temp-file "~/.emacs-profile" (princ profile (current-buffer)))
+      (princ (format "Change to %s" (with-temp-file "~/.emacs-profile" (princ profile (current-buffer)))))
       (princ (format "profile %s not in ~/.emacs-profiles.el\n" profile))))
 
 (defun dispatch-args (args fn-alist docs)
@@ -88,7 +87,6 @@
 
 (defvar *hook-templates* '((powershell . ((hook-format . "# Emacy powershell hook
 function __emacy-hook(){
-    echo \"Emacy Hook\"
 %s
 }
 __emacy-hook
@@ -96,7 +94,6 @@ unset -f __emacy-hook")
                                           (env-format . "    env:%s=%s")))
                            (bash . ((hook-format . "# Emacy bash hook
 function __emacy-hook(){
-    echo \"Emacy Hook\"
     # envs
 %s
 }
@@ -119,11 +116,6 @@ unset -f __emacy-hook")
                             "\n"))
          (body (format hook-format envs)))
     (princ body)))
-
-(defun help ()
-  "Help."
-  (pp '((init)
-        (use))))
 
 (defun main (&rest args)
   "Main ARGS."
