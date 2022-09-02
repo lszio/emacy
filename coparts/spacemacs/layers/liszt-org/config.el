@@ -41,12 +41,25 @@
         ("QUIT" :foreground "grey"         :weight bold)
         ("[Q]"  :foreground "grey"         :weight bold)))
 
+(setq org-export-select-tags '("Publish" "Public" "export")
+      org-publish-project-alist
+      '(("content"
+         :base-directory "~/Notes/content"
+         :publishing-directory "~/Notes/publish"
+         ;; :publishing-function (org-org-publish-to-org org-md-publish-to-md)
+         :publishing-function org-org-publish-to-org
+         :select-tags ("Publish" "Public" "export" "Export" "publish" "public")
+         :exclude-tags ("Private" "Secret" "noexport")
+         :recursive t
+         :with-broken-links t
+         :with-toc nil)))
+
 (setq org-capture-templates
       `(("t" "Todo"
-         entry (file ,(concat org-directory "/Inbox.org"))
+         entry (file ,(concat org-directory "/inbox.org"))
          "* TODO %?\n  %i\n  %a")
         ("r" "Read"
-         entry (file ,(concat org-directory "/Inbox.org"))
+         entry (file ,(concat org-directory "/inbox.org"))
          "* TODO %? :Read:\n  %i\n  %a")))
 
 ;; fix deft title in roam file

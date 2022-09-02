@@ -13,7 +13,7 @@ exec ros -Q -- $0 "$@"
 
 (defun detect-emacy-home ()
   (uiop:ensure-directory-pathname 
-    (pathname (or (uiop:getenv "EMACY") (concatenate 'string (uiop:getenv "HOME") #+os-windows "/Emacy" #-os-windows "/Emacy")))))
+    (pathname (or (uiop:getenv "EMACY") (concatenate 'string (uiop:getenv "HOME") #+os-windows "/Emacy" #-os-windows "/.emacy")))))
 
 (defparameter *home* (detect-emacy-home))
 (defparameter *profiles* '())
@@ -28,7 +28,7 @@ exec ros -Q -- $0 "$@"
 (defun detect-executable (module) (remove-if-not #'valid-executable (glob-executable module)))
 
 (defun folder-name (folder) (car (last (pathname-directory folder))))
-(defun glob-modules (home) (directory (parse-namestring (format nil "~Amodules/*" home))))
+(defun glob-modules (home) (directory (parse-namestring (format nil "~Amodarts/*" home))))
 (defun invalid-module (module-path) 
   (or (pathname-name module-path)
       (member (folder-name module-path) '("chemacs2") :test #'equal)))
@@ -40,7 +40,7 @@ exec ros -Q -- $0 "$@"
 
 (defun to-config-path (module-path) 
   (make-pathname :directory
-                 (substitute "configs" "modules" (pathname-directory module-path)
+                 (substitute "coparts" "modarts" (pathname-directory module-path)
                              :count 1 :from-end t :test #'equal)))
 
 (defun parse-modules (&optional (modules-path (detect-modules)))
@@ -88,6 +88,7 @@ exec ros -Q -- $0 "$@"
                                            #-os-windows "export "
                                            (car env-cons) (cdr env-cons)) 
         for bins = (cdr (assoc 'bins configs))
+        do (print env)
         if bins
         collect (loop for bin-path in bins 
                       for name = (intern (string-upcase (pathname-name bin-path)))
@@ -132,7 +133,7 @@ exec ros -Q -- $0 "$@"
   (setf *profiles* (parse-modules))
   (pprint *profiles*)
   (save-profiles *profiles*)
-  (soft-link (parse-namestring (concatenate 'string (namestring *home*) "modules/chemacs2/")) #p"~/.emacs.d"))
+  (soft-link (parse-namestring (concatenate 'string (namestring *home*) "tools/chemacs2/")) #p"~/.emacs.d"))
 
 (clish:defcli main (:docs "My emacs config")
   (:default #'default)

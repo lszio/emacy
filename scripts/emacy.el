@@ -2,7 +2,7 @@
 (require 'cl-lib)
 
 ;;; Code:
-(defvar *home* (or (getenv "EMACY_HOME") "~/Emacy"))
+(defvar *home* (expand-file-name (or (getenv "EMACY_HOME") "~/.emacy")))
 (defvar *profile-envs* '(("spacemacs" . "SPACEMACSDIR") ("doomemacs" . "DOOMDIR") ("lemacs" . "LEMACSDIR")))
 
 (defconst IS-MAC      (eq system-type 'darwin))
@@ -96,10 +96,20 @@ unset -f __emacy-hook")
 function __emacy-hook(){
     # envs
 %s
+    # alias
 }
+%s
 __emacy-hook
 unset -f __emacy-hook")
-                                    (env-format . "    export %s=%s")))))
+                                    (env-format . "    export %s=%s")
+                                    ;; FIXME: alias does't work
+                                    (alias-format . "alias %s='emacs --with-profile %s'")))))
+
+(defun get-format-string (name type &optional default)
+  "Get format-string with(NAME TYPE DEFAULT)."
+  (or (cdr (assoc name (cdr (assoc (intern (or type "bash"))
+                                   *hook-templates*))))
+      default))
 
 (defsubst string-join (strings &optional separator)
   "Join all STRINGS using SEPARATOR."
@@ -108,13 +118,18 @@ unset -f __emacy-hook")
 (defun hook (&optional type)
   "Generate hook for shell TYPE."
   (let* ((template (cdr (assoc (intern type) *hook-templates*)))
-         (hook-format (cdr (assoc 'hook-format template)))
-         (env-format (cdr (assoc 'env-format template)))
+         (hook-format (get-format-string 'hook-format type))
+         (env-format (get-format-string 'env-format type))
+         (alias-format (get-format-string 'alias-format type))
          (envs (string-join (cl-loop for profile in *profiles*
                                      for env = (cadr (assoc 'env profile))
                                      collect (format env-format (car env) (cdr env)))
                             "\n"))
-         (body (format hook-format envs)))
+         (aliases (string-join (cl-loop for profile in *profiles*
+                                        for name = (car profile)
+                                        collect (format alias-format name name))
+                               "\n"))
+         (body (format hook-format envs aliases)))
     (princ body)))
 
 (defun main (&rest args)

@@ -1,4 +1,4 @@
-(setq rmh-elfeed-org-files (list "~/Notes/Feeds.org"))
+(setq rmh-elfeed-org-files (list "~/Notes/feeds.org"))
 
 
 ;; (setq pyim-page-tooltip 'posframe)

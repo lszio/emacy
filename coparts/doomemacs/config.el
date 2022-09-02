@@ -159,13 +159,6 @@
   (:map rime-mode-map
    ("C-," . 'rime-force-enable)))
 
-(use-package leetcode
-  :custom
-  (leetcode-prefer-language "python")
-  (leetcode-prefer-sql "sqlite")
-  (leetcode-save-solutions t)
-  (leetcode-directory (concat liszt-home "/Notes/content/leetcode")))
-
 (when IS-WINDOWS
   (setq gc-cons-threshold (* 512 1024 1024))
   (setq gc-cons-percentage 0.5)

@@ -1,9 +1,9 @@
 [submodule "tools/chemacs2"]
 	path = tools/chemacs2
 	url = https://github.com/plexus/chemacs2.git
-[submodule "profiles/doomemacs"]
-	path = profiles/doomemacs
-	url = https://github.com/doomemacs/doomemacs.git
-[submodule "profiles/spacemacs"]
-	path = profiles/spacemacs
+[submodule "modarts/doomemacs"]
+	path = modarts/doomemacs
+	url = https://github.com/doomemacs/doomemacs
+[submodule "modarts/spacemacs"]
+	path = modarts/spacemacs
 	url = https://github.com/syl20bnr/spacemacs.git
