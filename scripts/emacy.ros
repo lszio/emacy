@@ -13,7 +13,7 @@ exec ros -Q -- $0 "$@"
 
 (defun detect-emacy-home ()
   (uiop:ensure-directory-pathname 
-    (pathname (or (uiop:getenv "EMACY") (concatenate 'string (uiop:getenv "HOME") #+os-windows "/Emacy" #-os-windows "/.emacy")))))
+    (pathname (or (uiop:getenv "EMACY") (concatenate 'string (uiop:getenv "HOME") #+os-windows "/.emacy" #-os-windows "/.emacy")))))
 
 (defparameter *home* (detect-emacy-home))
 (defparameter *profiles* '())
@@ -88,7 +88,6 @@ exec ros -Q -- $0 "$@"
                                            #-os-windows "export "
                                            (car env-cons) (cdr env-cons)) 
         for bins = (cdr (assoc 'bins configs))
-        do (print env)
         if bins
         collect (loop for bin-path in bins 
                       for name = (intern (string-upcase (pathname-name bin-path)))
@@ -126,7 +125,7 @@ exec ros -Q -- $0 "$@"
                           (link source target))))
     (nil (link source target))))
 
-(defun initialize ()
+(defun install ()
   "Initializing emacs configs"
   (log:info "Initializing emacy with home = ~A" *home*)
   (log:info "Save the following to ~~/.emacs-profiles.el")
@@ -139,6 +138,6 @@ exec ros -Q -- $0 "$@"
   (:default #'default)
   (run #'default)
   (use #'use-profile)
-  (init #'initialize))
+  (install #'install))
 
 ;;; vim: set ft=lisp lisp:

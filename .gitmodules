@@ -1,9 +1,15 @@
 [submodule "tools/chemacs2"]
 	path = tools/chemacs2
 	url = https://github.com/plexus/chemacs2.git
+	branch = master
+	ignore = all
 [submodule "modarts/doomemacs"]
 	path = modarts/doomemacs
 	url = https://github.com/doomemacs/doomemacs
+	branch = master
+	ignore = all
 [submodule "modarts/spacemacs"]
 	path = modarts/spacemacs
 	url = https://github.com/syl20bnr/spacemacs.git
+	branch = develop
+	ignore = all
