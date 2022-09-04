@@ -13,7 +13,7 @@ exec ros -Q -- $0 "$@"
 
 (defun detect-emacy-home ()
   (uiop:ensure-directory-pathname 
-    (pathname (or (uiop:getenv "EMACY") (concatenate 'string (uiop:getenv "HOME") #+os-windows "/.emacy" #-os-windows "/.emacy")))))
+    (pathname (or (uiop:getenv "EMACY") (concatenate 'string (uiop:getenv "HOME") "/.emacy")))))
 
 (defparameter *home* (detect-emacy-home))
 (defparameter *profiles* '())
@@ -21,8 +21,7 @@ exec ros -Q -- $0 "$@"
 
 (defun glob-executable (module) (directory (format nil "~Abin/*.*" module)))
 (defun valid-executable (executable) 
-  ;; TODO test if executable
-  (and (pathname-name executable) 
+  (and (pathname-name executable)
        #+os-windows (member (pathname-type executable) '("cmd" "ps1" "exe") :test #'equal)
        #-os-windows (not (member (pathname-type executable) '("cmd" "ps1" "exe") :test #'equal))))
 (defun detect-executable (module) (remove-if-not #'valid-executable (glob-executable module)))
@@ -123,7 +122,7 @@ exec ros -Q -- $0 "$@"
                         (format nil "Target ~A already link to ~A" target source)
                         (when (or force (y-or-n-p "Override target ~A from ~A to ~A?~%" target (osicat:read-link target) source))
                           (link source target))))
-    (nil (link source target))))
+    (otherwise (link source target))))
 
 (defun install ()
   "Initializing emacs configs"
@@ -132,7 +131,9 @@ exec ros -Q -- $0 "$@"
   (setf *profiles* (parse-modules))
   (pprint *profiles*)
   (save-profiles *profiles*)
-  (soft-link (parse-namestring (concatenate 'string (namestring *home*) "tools/chemacs2/")) #p"~/.emacs.d"))
+  (soft-link (parse-namestring (concatenate 'string (namestring *home*) "tools/chemacs2/")) #p"~/.emacs.d")
+  (use-profile (caar *profiles*)))
+
 
 (clish:defcli main (:docs "My emacs config")
   (:default #'default)
