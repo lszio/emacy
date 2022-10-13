@@ -49,14 +49,11 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
 
-;; (package! eaf
-;;   :recipe (:host github
-;;            :repo "manateelazycat/eaf"
-;;            :files ("*")))
 ;; (package! anki
 ;;   :recipe (:host github
 ;;            :repo "chenyanming/anki"
 ;;            :files ("*")))
+;;
 (package! leetcode)
 (package! wakatime-mode)
 (package! rime)
@@ -64,3 +61,10 @@
 
 (unpin! org-roam)
 (package! org-roam-ui)
+
+(package! eaf
+  :recipe
+  (:host github
+   :repo "manateelazycat/emacs-application-framework"
+   :files ("*")
+   :build (:not compile)))
