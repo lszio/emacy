@@ -1,0 +1,8 @@
+[submodule "library/doomemacs"]
+	path = library/doomemacs
+	url = https://github.com/doomemacs/doomemacs
+    branch = master
+[submodule "library/spacemacs"]
+	path = library/spacemacs
+	url = https://github.com/syl20bnr/spacemacs
+    branch = develop
