@@ -135,6 +135,31 @@
           (sbcl ("ros" "-L" "sbcl-bin" "run"))
           (ccl ("ros" "-L" "ccl-bin" "run")))))
 
+;; (setq typescript-indent-level 2
+;;       typescript-auto-indent-flag nil)
+;;
+(after! elfeed
+  (message "elfeed loaded"))
+  ;; (setq elfeed-search-filter "@1-month-ago +unread"))
+(setq elfeed-db-directory "~/Sync/Database/Feeds")
+(make-directory elfeed-db-directory t)
+
+;; FIXME format with multi lsp server
+;; (setq-hook! 'typescript-mode-hook +format-with-lsp nil)
+;; (setq-hook! 'typescript-tsx-mode-hook +format-with-lsp nil)
+;; (after! lsp-mode
+;;   (defun my/eslint-format ()
+;;     (interactive
+;;      (if-let ((eslint (-first (lambda (wks)
+;;                                 (eq 'eslint (lsp--client-server-id
+;;                                              (lsp--workspace-client wks))))
+;;                               (lsp-workspaces))))
+;;          (with-lsp-workspace eslint
+;;            (lsp-format-buffer))
+;;        (lsp-format-buffer))))
+;;   (setq-hook! 'typescript-mode-hook +format-with 'my/eslint-format)
+;;   (setq-hook! 'typescript-tsx-mode-hook +format-with 'my/eslint-format))
+
 (use-package rime
   :defer t
   :custom
@@ -176,6 +201,8 @@
 
 (use-package! eaf
   :config
+  (setq eaf-config-location "~/Sync/Database/EAF")
+  ;; (setq eaf-python-command "/usr/bin/python")
   (require 'eaf-browser)
   (require 'eaf-pdf-viewer)
   (require 'eaf-music-player)
