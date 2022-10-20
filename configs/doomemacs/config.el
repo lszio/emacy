@@ -39,8 +39,9 @@
 (display-time-mode)
 (toggle-frame-maximized)
 
-(setq minimap-minimum-width 10
-      minimap-width-fraction 0.03)
+(after! minimap
+   (setq minimap-minimum-width 10
+         minimap-width-fraction 0.03))
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!

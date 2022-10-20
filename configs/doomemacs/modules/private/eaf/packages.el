@@ -27,6 +27,7 @@
       (let ((default-directory app-dir))
         (message "%s" (shell-command-to-string "npm rebuild"))))))
 
+;; TODO fix keybindings
 (package! eaf
   :recipe (:host github :repo "emacs-eaf/emacs-application-framework"
            :files ("*")
