@@ -16,15 +16,19 @@
 
 (defconst IS-WSL     (and IS-LINUX (string-match-p "microsoft" operating-system-release)) "Are we on wsl?")
 
-(doom! :input
+(doom! :private
+       eaf
+       misc
+       lsp-bridge
+
+       :input
        ;;bidi              ; (tfel ot) thgir etirw uoy gnipleh
        ;;chinese
        ;;japanese
        ;;layout            ; auie,ctsrnm is the superior home row
 
        :completion
-       (company
-        +childframe)           ; the ultimate code completion backend
+       ;; (company +childframe)           ; the ultimate code completion backend
        ;;helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
        (ivy +fuzzy +icons)               ; a search engine for love and life
@@ -97,7 +101,7 @@
        (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
        (lookup +dictionary)              ; navigate your code and its documentation
-       (lsp +peek)
+       ;; (lsp +peek)
        magit             ; a git porcelain for Emacs
        make              ; run make tasks from Emacs
        ;;pass              ; password manager for nerds
