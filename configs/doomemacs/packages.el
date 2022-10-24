@@ -54,22 +54,8 @@
 ;;            :repo "chenyanming/anki"
 ;;            :files ("*")))
 ;;
-(package! leetcode)
 (package! wakatime-mode)
 (package! rime)
 ;; (package! sis)
 
-(unpin! org-roam)
-(package! org-roam-ui)
-
-;; (package! eaf
-;;   :recipe
-;;   (:host github
-;;    :repo "manateelazycat/emacs-application-framework"
-;;    :files ("*")
-;;    :build (:not compile)))
-
-;; (package! lsp-bridge
-;;   :recipe (:host github :repo "manateelazycat/lsp-bridge" :branch "master"
-;;            :files ("*")))
-;;            ;; :files ("acm" "core" "langserver" "multiserver" "test" "*.py" "*.el")))
+(package! leetcode :recipe (:host github :repo "liyan-ah/leetcode.el" :files ("*")))

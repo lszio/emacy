@@ -17,6 +17,7 @@
 (defconst IS-WSL     (and IS-LINUX (string-match-p "microsoft" operating-system-release)) "Are we on wsl?")
 
 (doom! :private
+       org
        eaf
        misc
        lsp-bridge
@@ -66,7 +67,7 @@
        format
        ;; (format +onsave)  ; automated prettiness
        ;;god               ; run Emacs commands without modifier keys
-       ;;lispy             ; vim for lisp, for people who don't like vim
+       lispy             ; vim for lisp, for people who don't like vim
        multiple-cursors  ; editing in many places at once
        ;;objed             ; text object editing for the innocent
        (parinfer +rust)          ; turn lisp into python, sort of
@@ -89,7 +90,7 @@
 
        :checkers
        syntax              ; tasing you for every semicolon you forget
-       (spell +flyspell) ; tasing you for misspelling mispelling
+       ;; (spell +flyspell) ; tasing you for misspelling mispelling
        ;;grammar           ; tasing grammar mistake every you make
 
        :tools
