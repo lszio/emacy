@@ -130,38 +130,6 @@
 (after! eaf
   (setq eaf-config-location "~/Sync/Database/EAF"))
 
-;; (use-package! eaf
-;;   :config
-;;   (setq eaf-config-location "~/Sync/Database/EAF")
-;;   ;; (setq eaf-python-command "/usr/bin/python")
-;;   (require 'eaf-browser)
-;;   (require 'eaf-pdf-viewer)
-;;   (require 'eaf-music-player)
-;;   (require 'eaf-video-player)
-;;   (require 'eaf-image-viewer)
-;;   (require 'eaf-rss-reader)
-;;   (require 'eaf-terminal)
-;;   (require 'eaf-markdown-previewer)
-;;   (require 'eaf-org-previewer)
-;;   (require 'eaf-camera)
-;;   (require 'eaf-git)
-;;   (require 'eaf-file-manager)
-;;   (require 'eaf-mindmap)
-;;   (require 'eaf-netease-cloud-music)
-;;   (require 'eaf-system-monitor)
-;;   (require 'eaf-file-browser)
-;;   (require 'eaf-file-sender)
-;;   (require 'eaf-airshare)
-;;   (require 'eaf-jupyter))
-
-;; (use-package! lsp-bridge
-;;   :init
-;;   (require 'yasnippet)
-;;   (require 'lsp-bridge)
-;;   :config
-;;   (setq lsp-bridge-enable-log t)
-;;   (global-lsp-bridge-mode))
-
 (defun proxy-socks-show ()
   "Show SOCKS proxy."
   (interactive)
