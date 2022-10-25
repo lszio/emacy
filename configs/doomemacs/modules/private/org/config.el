@@ -4,6 +4,7 @@
 ;; directories & files
 (setq org-directory  "~/Notes"
       org-archive-location (concat org-directory "/archive/%s::")
+      org-contacts-files (list (concat org-directory "/archive/contacts.org"))
       org-agenda-files (list org-directory)
       deft-directory org-directory
       org-roam-directory org-directory
@@ -11,11 +12,8 @@
       org-roam-file-exclude-regexp ".*/bak/.*"
       org-brain-visualize-default-choices 'all
       rmh-elfeed-org-files (list (concat org-directory "/feeds.org")))
-      ;; org-roam-tag-sources '(prop last-directory)
-      ;; org-brain-include-file-entries t
-      ;; org-brain-file-entries-use-title t
-      
 
+(setq org-agenda-archives-mode t)
 (setq org-export-select-tags '("Publish" "Public" "export")
       org-publish-project-alist
       '(("content"
@@ -31,7 +29,8 @@
 
 ;; ui
 (after! org
-  ;; (setq org-log-done 'time)
+  (setq org-log-done 'time)
+  (setq org-contacts-icon-use-gravatar nil)
   (setq org-superstar-headline-bullets-list '("☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷"))
   (setq org-todo-keywords
         '((sequence "NEXT(n)" "TODO(t)" "PEND(p)" "WILL(w@/!)" "|" "DONE(d)" "QUIT(q@)")
@@ -52,8 +51,12 @@
 
 (after! org-capture
   (setq org-capture-templates
-        `(("t" "Todo" entry (file ,(concat org-directory "/Inbox.org")) "* TODO %?\n  %i\n  %a")
-          ("r" "Read" entry (file ,(concat org-directory "/Inbox.org")) "* TODO %? :Read:\n  %i\n  %a"))))
+        `(("t" "Todo" entry (file ,(concat org-directory "/inbox.org")) "* TODO %?\n  %i\n  %a")
+          ("r" "Read" entry (file ,(concat org-directory "/inbox.org")) "* TODO %? :Read:\n  %i\n  %a"))))
+
+(after! org-appear
+  (setq org-appear-trigger 'always
+        org-appear-autolinks t))
 
 (use-package! org-transclusion
   :after org
@@ -61,3 +64,30 @@
   (map! :map global-map "<f12>" #'org-transclusion-add
         :leader :prefix "n"
         :desc "Org Transclusion Mode" "t" #'org-transclusion-mode))
+
+(use-package! org-sticky-header
+  :after org)
+
+(use-package! valign
+  :after org
+  :config
+  (add-hook 'org-mode-hook #'valign-mode))
+
+(use-package! org-super-agenda
+  :after org
+  :config
+  (setq org-super-agenda-header-map (make-sparse-keymap))
+  ;;(setq org-super-agenda-header-map evil-org-agenda-mode-map)
+  (setq org-super-agenda-groups
+        '((:name "Today" :time-grid t :todo "TODAY")
+          (:name "Important" :priority "A")
+          (:todo "NEXT")
+          (:todo ("PEND" "WILL"))))
+  (org-super-agenda-mode))
+
+;; (let ((org-super-agenda-groups
+;;        '((:auto-group t))))
+;;   (org-agenda-list))
+
+;; (let ((org-super-agenda-groups '((:todo "NEXT") (:todo ("PEND" "WILL")))))
+;;   (org-todo-list))
