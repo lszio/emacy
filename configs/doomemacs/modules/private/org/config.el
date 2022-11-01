@@ -14,17 +14,7 @@
       rmh-elfeed-org-files (list (concat org-directory "/feeds.org")))
 
 (setq deft-recursive t
-      deft-recursive-ignore-dir-regexp (concat "\\(?:" "\\." "\\|\\.\\." "\\)$"))
-
-(rx (group (or (and (: ".")))) eol)
-
-(setf text-regex (concat "\\(bak*\\)\\|\\(biak\\)"))
-
-(setf text-regex  (rx (or (and "logseq" not-newline "bak") (and "b" "ik"))))
-
-(rx (group-n "asdf"))
-
-(string-match text-regex "asdfg/logseq/bak")
+      deft-recursive-ignore-dir-regexp (rx (or "." ".." "logseq") eol))
 
 (setq org-agenda-archives-mode t)
 (setq org-export-select-tags '("Publish" "Public" "export")
