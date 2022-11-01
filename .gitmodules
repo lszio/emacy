@@ -6,3 +6,6 @@
 	path = library/spacemacs
 	url = https://github.com/syl20bnr/spacemacs
     branch = develop
+[submodule "library/centaur"]
+	path = library/centaur
+	url = https://github.com/seagle0128/.emacs.d.git
