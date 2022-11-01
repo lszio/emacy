@@ -13,6 +13,19 @@
       org-brain-visualize-default-choices 'all
       rmh-elfeed-org-files (list (concat org-directory "/feeds.org")))
 
+(setq deft-recursive t
+      deft-recursive-ignore-dir-regexp (concat "\\(?:" "\\." "\\|\\.\\." "\\)$"))
+
+(rx (group (or (and (: ".")))) eol)
+
+(setf text-regex (concat "\\(bak*\\)\\|\\(biak\\)"))
+
+(setf text-regex  (rx (or (and "logseq" not-newline "bak") (and "b" "ik"))))
+
+(rx (group-n "asdf"))
+
+(string-match text-regex "asdfg/logseq/bak")
+
 (setq org-agenda-archives-mode t)
 (setq org-export-select-tags '("Publish" "Public" "export")
       org-publish-project-alist
@@ -30,6 +43,7 @@
 ;; ui
 (after! org
   (setq org-log-done 'time)
+  ;; (setq org-priority-lowest ?E)
   (setq org-contacts-icon-use-gravatar nil)
   (setq org-superstar-headline-bullets-list '("☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷"))
   (setq org-todo-keywords
@@ -79,12 +93,41 @@
   (setq org-super-agenda-header-map (make-sparse-keymap))
   ;;(setq org-super-agenda-header-map evil-org-agenda-mode-map)
   (setq org-super-agenda-groups
-        '((:name "Today" :time-grid t :todo "TODAY")
+        '((:name "Current" :time-grid t :todo "TODAY")
           (:name "Important" :priority "A")
-          (:todo "NEXT")
+          (:todo ("NEXT" "TODO"))
           (:todo ("PEND" "WILL"))))
   (org-super-agenda-mode))
 
+;; fix deft title in roam file
+(defun my/deft-parse-title (file contents)
+    "Parse the given FILE and CONTENTS and determine the title.
+If `deft-use-filename-as-title' is nil, the title is taken to
+be the first non-empty line of the FILE.  Else the base name of the FILE is
+used as title."
+    (let ((begin (string-match "^#\\+[tT][iI][tT][lL][eE]: .*$" contents)))
+      (if begin
+            (string-trim (substring contents begin (match-end 0)) "#\\+[tT][iI][tT][lL][eE]: *" "[\n\t ]+")
+          (deft-base-filename file))))
+
+(advice-add 'deft-parse-title :override #'my/deft-parse-title)
+
+(setq deft-strip-summary-regexp
+    (concat "\\("
+            "[\n\t]" ;; blank
+            "\\|^#\\+[[:alpha:]_]+:.*$" ;; org-mode metadata
+            "\\|^:PROPERTIES:\n\\(.+\n\\)+:END:\n"
+            "\\)"))
+
+(if (display-graphic-p)
+    (dolist (charset '(kana han cjk-misc bopomofo))
+      (set-fontset-font (frame-parameter nil 'font)
+                        charset (font-spec :family "Sarasa Gothic SC" :size 18))))
+
+;; (if (display-graphic-p)
+;;     (dolist (charset '(kana han cjk-misc bopomofo))
+;;       (set-fontset-font (frame-parameter nil 'font)
+;;                         charset (font-spec :family "Hiragino Sans GB" :size 18))))
 ;; (let ((org-super-agenda-groups
 ;;        '((:auto-group t))))
 ;;   (org-agenda-list))
