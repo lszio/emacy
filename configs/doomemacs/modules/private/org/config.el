@@ -24,7 +24,7 @@
          :publishing-directory "~/Notes/publish"
          ;; :publishing-function (org-org-publish-to-org org-md-publish-to-md)
          :publishing-function org-org-publish-to-org
-         :select-tags ("Publish" "Public" "export" "Export" "publish" "public")
+         :select-tags ("Publish" "Public" "Export" "export" "publish" "public")
          :exclude-tags ("Private" "Secret" "noexport")
          :recursive t
          :with-broken-links t
@@ -56,7 +56,16 @@
 (after! org-capture
   (setq org-capture-templates
         `(("t" "Todo" entry (file ,(concat org-directory "/inbox.org")) "* TODO %?\n  %i\n  %a")
-          ("r" "Read" entry (file ,(concat org-directory "/inbox.org")) "* TODO %? :Read:\n  %i\n  %a"))))
+          ("r" "Read" entry (file ,(concat org-directory "/inbox.org")) "* TODO %? :Read:\n  %i\n  %a")
+          ("c" "Contact" entry (file ,(concat org-directory "/archive/contacts.org")) "* %(org-contacts-template-name)
+:PROPERTIES:
+:PHONE: %^{PHONE|UNKNOWN}
+:EMAIL: %(org-contacts-template-email)
+:ADDRESS: %^{ADDRESS|UNKNOWN}
+:BIRTHDAY: %^u
+:NATIVE_PLACE: %^{NATIVE_PLACE|UNKNOWN}
+:END:
+"))))
 
 (after! org-appear
   (setq org-appear-trigger 'always
