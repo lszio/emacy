@@ -9,3 +9,6 @@
 [submodule "library/centaur"]
 	path = library/centaur
 	url = https://github.com/seagle0128/.emacs.d.git
+[submodule "library/purcell"]
+	path = library/purcell
+	url = https://github.com/purcell/emacs.d

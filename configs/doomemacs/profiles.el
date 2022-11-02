@@ -6,6 +6,8 @@
   ("SPACEMACSDIR" . "~/Emacy/configs/spacemacs"))
  (centaur
   (user-emacs-directory . "~/Emacy/library/centaur"))
+ (purcell
+  (user-emacs-directory . "~/Emacy/library/purcell"))
  (vanilla
   (user-emacs-directory . "~/Emacy/library/vanilla"))
  (doomemacs-origin
