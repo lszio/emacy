@@ -49,18 +49,13 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
 
-;; (package! eaf
-;;   :recipe (:host github
-;;            :repo "manateelazycat/eaf"
-;;            :files ("*")))
 ;; (package! anki
 ;;   :recipe (:host github
 ;;            :repo "chenyanming/anki"
 ;;            :files ("*")))
-(package! leetcode)
+;;
 (package! wakatime-mode)
 (package! rime)
 ;; (package! sis)
 
-(unpin! org-roam)
-(package! org-roam-ui)
+(package! leetcode :recipe (:host github :repo "liyan-ah/leetcode.el" :files ("*")))

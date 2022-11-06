@@ -1,0 +1,1 @@
+(message "From Vanilla Emacs")
