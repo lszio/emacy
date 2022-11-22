@@ -55,7 +55,5 @@
 ;;            :files ("*")))
 ;;
 (package! wakatime-mode)
-(package! rime)
-;; (package! sis)
 
 (package! leetcode :recipe (:host github :repo "liyan-ah/leetcode.el" :files ("*")))

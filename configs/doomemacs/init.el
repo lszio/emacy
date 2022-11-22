@@ -216,4 +216,5 @@
        org
        eaf
        misc
+       chinese
        lsp-bridge)
