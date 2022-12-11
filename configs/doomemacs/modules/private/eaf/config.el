@@ -1,5 +1,18 @@
 (use-package! eaf)
-
+;; (use-package! eaf-evil
+;;   :config
+;;   (define-key key-translation-map (kbd "SPC")
+;;       (lambda (prompt)
+;;         (if (derived-mode-p 'eaf-mode)
+;;             (pcase eaf--buffer-app-name
+;;               ("browser" (if  eaf-buffer-input-focus
+;;                              (kbd "SPC")
+;;                            (kbd eaf-evil-leader-key)))
+;;               ("pdf-viewer" (kbd eaf-evil-leader-key))
+;;               ("image-viewer" (kbd eaf-evil-leader-key))
+;;               (_  (kbd "SPC")))
+;;           (kbd "SPC")))))
+(use-package! eaf-all-the-icons)
 ;; apps
 (use-package! eaf-browser)
 (use-package! eaf-jupyter)
@@ -16,8 +29,11 @@
 (use-package! eaf-netease-cloud-music)
 (use-package! eaf-video-player)
 (use-package! eaf-image-viewer)
-;; (use-package! eaf-demo)
-;; (use-package! eaf-vue-demo)
 (use-package! eaf-pdf-viewer)
 (use-package! eaf-markdown-previewer)
 (use-package! eaf-camera)
+;; (use-package! eaf-demo)
+;; (use-package! eaf-vue-demo)
+
+(use-package! eaf-evil)
+(setq eaf-evil-leader-key "SPC")
