@@ -57,3 +57,8 @@
 (package! wakatime-mode)
 
 (package! leetcode :recipe (:host github :repo "liyan-ah/leetcode.el" :files ("*")))
+
+;; (package! mu4e :recipe (:host github :repo "djcb/mu" :files ("mu4e/*")
+;;                         :pre-build '()))
+
+(unpin! straight)

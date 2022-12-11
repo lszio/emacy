@@ -33,6 +33,9 @@
 
 (setq doom-theme 'doom-one)
 
+(let ((default-directory "~/.guix-profile/share/emacs/site-lisp"))
+  (normal-top-level-add-subdirs-to-load-path))
+
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type 'relative)
@@ -104,6 +107,26 @@
 
 (after! eaf
   (setq eaf-config-location "~/Sync/Database/EAF"))
+
+(after! mu4e
+  (setq mu4e-root-maildir "~/Mails"
+
+        mu4e-attachment-dir "~/Downloads"))
+  ;; (setq mu4e-maildir "~/Emails")
+  ;; (setq mu4e-get-mail-command "offlineimap -u quiet"
+  ;;       mu4e-update-interval 60
+  ;;       mu4e-view-show-images t))
+
+(set-email-account! "qq"
+  '((mu4e-sent-folder       . "/qq/Sent Mail")
+    (mu4e-drafts-folder     . "/qq/Drafts")
+    (mu4e-trash-folder      . "/qq/Trash")
+    (mu4e-refile-folder     . "/qq/Inbox")
+    (smtpmail-smtp-user     . "liszt21@qq.com")
+    (user-mail-address      . "liszt21@qq.com")    ;; only needed for mu < 1.4
+    (mu4e-compose-signature . "---\nYours truly\nThe Baz"))
+  t)
+(setq +mu4e-backend 'offlineimap)
 
 (defun proxy-socks-show ()
   "Show SOCKS proxy."
