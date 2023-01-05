@@ -1,5 +1,5 @@
 .vscode
-
+__pycache__
 *ipynb_checkpoints
 
 .local
@@ -8,4 +8,4 @@ local
 tmp
 temp
 
-modart/spacemacs/pariner-rust
+library/spacemacs/pariner-rust
