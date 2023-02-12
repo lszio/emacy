@@ -33,8 +33,10 @@
 
 (setq doom-theme 'doom-one)
 
-(let ((default-directory "~/.guix-profile/share/emacs/site-lisp"))
-  (normal-top-level-add-subdirs-to-load-path))
+(let ((guix-site-lisp-directory "~/.guix-profile/share/emacs/site-lisp"))
+  (when (file-directory-p guix-site-lisp-directory)
+    (let ((default-directory guix-site-lisp-directory))
+     (normal-top-level-add-subdirs-to-load-path))))
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
