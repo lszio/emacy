@@ -18,9 +18,8 @@
            ;; (dump-custom-langserver (concat straight-base-dir "straight/" straight-build-dir "/lsp-bridge"))
            (dump-custom-langserver (concat straight-base-dir "straight/" "repos" "/lsp-bridge"))))
 
-;; (package! posframe)
-;; (package! yasnippet)
+(package! posframe)
+(package! yasnippet)
 (package! lsp-mode :disable t :ignore t)
 (package! company :disable t :ignore t)
-
-(package! hy-mode)
+(package! corfu :disable t :ignore t)
