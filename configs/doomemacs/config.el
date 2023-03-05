@@ -78,42 +78,17 @@
 (setq elfeed-db-directory "~/Sync/Database/Feeds")
 (make-directory elfeed-db-directory t)
 
-;; FIXME format with multi lsp server
-;; (setq-hook! 'typescript-mode-hook +format-with-lsp nil)
-;; (setq-hook! 'typescript-tsx-mode-hook +format-with-lsp nil)
-;; (after! lsp-mode
-;;   (defun my/eslint-format ()
-;;     (interactive
-;;      (if-let ((eslint (-first (lambda (wks)
-;;                                 (eq 'eslint (lsp--client-server-id
-;;                                              (lsp--workspace-client wks))))
-;;                               (lsp-workspaces))))
-;;          (with-lsp-workspace eslint
-;;            (lsp-format-buffer))
-;;        (lsp-format-buffer))))
-;;   (setq-hook! 'typescript-mode-hook +format-with 'my/eslint-format)
-;;   (setq-hook! 'typescript-tsx-mode-hook +format-with 'my/eslint-format))
-
 (when IS-WINDOWS
   (setq gc-cons-threshold (* 512 1024 1024))
   (setq gc-cons-percentage 0.5)
   (run-with-idle-timer 9 t #'garbage-collect))
   ;; (setq garbage-collection-messages t))
 
-(use-package! org-roam-ui
-  :after org-roam
-  :config
-  (setq org-roam-ui-sync-theme t
-        org-roam-ui-follow t
-        org-roam-ui-update-on-save t
-        org-roam-ui-open-on-start t))
-
 (after! eaf
   (setq eaf-config-location "~/Sync/Database/EAF"))
 
 (after! mu4e
   (setq mu4e-root-maildir "~/Mails"
-
         mu4e-attachment-dir "~/Downloads"))
   ;; (setq mu4e-maildir "~/Emails")
   ;; (setq mu4e-get-mail-command "offlineimap -u quiet"
@@ -146,8 +121,8 @@
   (require 'socks)
   (setq url-gateway-method 'socks
         socks-noproxy '("localhost")
-        socks-server '("Default server" "127.0.0.1" 1080 5))
-  (setenv "all_proxy" "http://127.0.0.1:1080")
+        socks-server '("Default server" "127.0.0.1" 7890 5))
+  (setenv "all_proxy" "http://127.0.0.1:7890")
   (proxy-socks-show))
 
 (defun proxy-socks-disable ()
