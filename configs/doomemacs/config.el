@@ -23,9 +23,10 @@
 ;; font string. You generally only need these two:
 ;; (setq doom-font (font-spec :family "monospace" :size 18 :weight 'semi-light)
 ;;     doom-variable-pitch-font (font-spec :family "sans" :size 20))
-(setq doom-font (font-spec :family "Fira Code" :size 18 :weight 'semi-light)
-      doom-variable-pitch-font (font-spec :family "Sarasa Gothic SC" :size 18)
-      doom-unicode-font (font-spec :family "Sarasa Gothic SC" :size 18))
+(setq doom-font (font-spec :family "Fira Code" :size 16))
+;; (setq doom-font (font-spec :family "Source Code Pro" :size 18 :weight 'semi-light)
+;;       doom-variable-pitch-font (font-spec :family "Sarasa Gothic SC" :size 18)
+;;       doom-unicode-font (font-spec :family "Sarasa Gothic SC" :size 18))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -96,8 +97,8 @@
 (when IS-WINDOWS
   (setq gc-cons-threshold (* 512 1024 1024))
   (setq gc-cons-percentage 0.5)
-  (run-with-idle-timer 5 t #'garbage-collect) 
-  (setq garbage-collection-messages t))
+  (run-with-idle-timer 9 t #'garbage-collect))
+  ;; (setq garbage-collection-messages t))
 
 (use-package! org-roam-ui
   :after org-roam
