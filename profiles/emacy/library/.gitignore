@@ -1,5 +1,6 @@
 auto-save-list
 *~
 /*.el
+/lisp/*.el
 
 elpaca
