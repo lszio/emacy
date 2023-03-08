@@ -8,5 +8,4 @@ local
 tmp
 temp
 
-library/repos
-library/spacemacs/pariner-rust
+/repos
