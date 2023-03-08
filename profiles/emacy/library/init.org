@@ -128,6 +128,8 @@ https://github.com/progfolio/elpaca
     (require 'emacy-ui)                    ; 加载UI交互的模块化配置文件
     (require 'emacy-org)
     )
+
+    (elpaca-process-queues)
 #+end_src
 * emacy-ui.el
 :PROPERTIES:
@@ -428,7 +430,7 @@ https://github.com/progfolio/elpaca
 #+begin_src emacs-lisp
   (use-package doom-modeline
     :ensure t
-    :hook (after-init . doom-modeline-mode)
+    :hook (elpaca-after-init . doom-modeline-mode)
     :custom
     (doom-modeline-irc nil)
     (doom-modeline-mu4e nil)
@@ -443,11 +445,11 @@ https://github.com/progfolio/elpaca
 
   (use-package minions
     :ensure t
-    :hook (after-init . minions-mode))
+    :hook (elpaca-after-init . minions-mode))
 
   (use-package keycast
     :ensure t
-    :hook (after-init . keycast-mode)
+    :hook (elpaca-after-init . keycast-mode)
     ;; :custom-face
     ;; (keycast-key ((t (:background "#0030b4" :weight bold))))
     ;; (keycast-command ((t (:foreground "#0030b4" :weight bold))))
@@ -485,7 +487,6 @@ https://github.com/progfolio/elpaca
   (provide 'emacy-ui)
 #+end_src
 
-
 * emacy-org.el
 :PROPERTIES:
 :HEADER-ARGS: :tangle lisp/emacy-org.el :mkdirp yes
@@ -514,7 +515,7 @@ https://github.com/progfolio/elpaca
 #+begin_src emacs-lisp
   (use-package autorevert
     :ensure nil
-    :hook (after-init . global-auto-revert-mode)
+    :hook (elpaca-after-init . global-auto-revert-mode)
     :bind ("s-u" . revert-buffer)
     :custom
     (auto-revert-interval 10)
@@ -527,7 +528,7 @@ https://github.com/progfolio/elpaca
   ;; Directly modify when selecting text
   (use-package delsel
     :ensure nil
-    :hook (after-init . delete-selection-mode))
+    :hook (elpaca-after-init . delete-selection-mode))
 #+end_src
 
 * Footers
