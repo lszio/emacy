@@ -42,9 +42,7 @@ https://remacs.cc/
   ;; 在这个阶段不编译
   (setq comp-deferred-compilation nil)
 
-  (provide 'early-init)
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;; early-init.el ends here
+
 #+END_SRC
 
 * init.el
@@ -53,56 +51,81 @@ https://remacs.cc/
 :END:
 ** Header
 #+begin_src emacs-lisp
-;;; init.el --- The main init entry for Emacs -*- lexical-binding: t -*-
-;;; Commentary:
+  ;;; init.el --- The main init entry for Emacs -*- lexical-binding: t -*-
+  ;;; Commentary:
 
-;;; Code:
+  ;;; Code:
 #+end_src
 
 ** Variables
 #+begin_src emacs-lisp
   (defvar emacy-directory "~/Emacy")
 #+end_src
+
 ** 包管理配置
 *** elpaca
+https://github.com/progfolio/elpaca
 #+begin_src emacs-lisp
-(defvar elpaca-installer-version 0.2)
-(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
-(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-(defvar elpaca-repos-directory (expand-file-name "repos/" emacy-directory))
-(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil
-                              :files (:defaults (:exclude "extensions"))
-                              :build (:not elpaca--activate-package)))
-(when-let ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-           (build (expand-file-name "elpaca/" elpaca-builds-directory))
-           (order (cdr elpaca-order))
-           ((add-to-list 'load-path (if (file-exists-p build) build repo)))
-           ((not (file-exists-p repo))))
-  (condition-case-unless-debug err
-      (if-let ((buffer (pop-to-buffer-same-window "*elpaca-installer*"))
-               ((zerop (call-process "git" nil buffer t "clone"
-                                     (plist-get order :repo) repo)))
-               (default-directory repo)
-               ((zerop (call-process "git" nil buffer t "checkout"
-                                     (or (plist-get order :ref) "--"))))
-               (emacs (concat invocation-directory invocation-name))
-               ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                     "--eval" "(byte-recompile-directory \".\" 0 'force)"))))
-          (progn (require 'elpaca)
-                 (elpaca-generate-autoloads "elpaca" repo)
-                 (kill-buffer buffer))
-        (error "%s" (with-current-buffer buffer (buffer-string))))
-    ((error) (warn "%s" err) (delete-directory repo 'recursive))))
-(require 'elpaca-autoloads)
-(add-hook 'after-init-hook #'elpaca-process-queues)
-(elpaca `(,@elpaca-order))
+  (defvar elpaca-installer-version 0.2)
+  (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+  (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+  (defvar elpaca-repos-directory (expand-file-name "repos/" emacy-directory))
+  (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+				:ref nil
+				:files (:defaults (:exclude "extensions"))
+				:build (:not elpaca--activate-package)))
+  (when-let ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+	     (build (expand-file-name "elpaca/" elpaca-builds-directory))
+	     (order (cdr elpaca-order))
+	     ((add-to-list 'load-path (if (file-exists-p build) build repo)))
+	     ((not (file-exists-p repo))))
+    (condition-case-unless-debug err
+	(if-let ((buffer (pop-to-buffer-same-window "*elpaca-installer*"))
+		 ((zerop (call-process "git" nil buffer t "clone"
+				       (plist-get order :repo) repo)))
+		 (default-directory repo)
+		 ((zerop (call-process "git" nil buffer t "checkout"
+				       (or (plist-get order :ref) "--"))))
+		 (emacs (concat invocation-directory invocation-name))
+		 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+				       "--eval" "(byte-recompile-directory \".\" 0 'force)"))))
+	    (progn (require 'elpaca)
+		   (elpaca-generate-autoloads "elpaca" repo)
+		   (kill-buffer buffer))
+	  (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (require 'elpaca-autoloads)
+  (add-hook 'after-init-hook #'elpaca-process-queues)
+  (elpaca `(,@elpaca-order))
+
+  (elpaca use-package)
+
+  ;; Install use-package support
+  (elpaca elpaca-use-package
+    ;; Enable :elpaca use-package keyword.
+    (elpaca-use-package-mode)
+    ;; Assume :elpaca t unless otherwise specified.
+    (setq elpaca-use-package-by-default t))
+
+  ;; Block until current queue processed.
+  (elpaca-wait)
 #+end_src
 
-** Footer
-#+begin_src emacs-lisp
-  
-(provide 'init)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; init.el ends here
+**** elpaca disable package.el
+#+begin_src emacs-lisp :tangle early-init.el
+  (setq package-enable-at-startup nil)
+#+end_src
+* Footers
+** early-init.el
+#+begin_src emacs-lisp :tangle early-init.el
+  (provide 'early-init)
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;; early-init.el ends here
+#+end_src
+
+** init.el
+#+begin_src emacs-lisp :tangle init.el
+  (provide 'init)
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;; init.el ends here
 #+end_src
