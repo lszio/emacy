@@ -1,16 +1,16 @@
 [submodule "profiles/doomemacs/library"]
 	path = profiles/doomemacs/library
 	url = https://github.com/doomemacs/doomemacs
-  branch = master
+	branch = master
 [submodule "profiles/spacemacs/library"]
 	path = profiles/spacemacs/library
 	url = https://github.com/syl20bnr/spacemacs
-  branch = develop
+	branch = develop
 [submodule "profiles/centaur/library"]
 	path = profiles/centaur/library
 	url = https://github.com/seagle0128/.emacs.d.git
-  branch = master
+	branch = master
 [submodule "profiles/purcell/library"]
 	path = profiles/purcell/library
 	url = https://github.com/purcell/emacs.d
-  branch = master
+	branch = master
