@@ -115,6 +115,21 @@ https://github.com/progfolio/elpaca
 #+begin_src emacs-lisp :tangle early-init.el
   (setq package-enable-at-startup nil)
 #+end_src
+**** elpaca custom menus
+#+begin_src emacs-lisp
+  (defun elpaca-menu-emacy (request_)
+    "Emacy custom menu"
+    '((mind-wave :source "AI tools" :recipe (mind-wave :host github :repo "manateelazycat/mind-wave" :files (:defaults "*.py")))))
+
+  (push  'elpaca-menu-emacy elpaca-menu-functions)
+
+  ;;(pop elpaca-menu-functions)
+
+  ;;(elpaca-recipe 'mind-wave)
+  ;;(elpaca mind-wave)
+  ;;(elpaca-process-queues)
+  ;;(use-package mind-wave)
+#+end_src
 
 ** require lisps
 #+begin_src emacs-lisp
@@ -127,9 +142,11 @@ https://github.com/progfolio/elpaca
   (with-temp-message ""
     (require 'emacy-ui)                    ; 加载UI交互的模块化配置文件
     (require 'emacy-org)
+    (require 'emacy-edit)
+    (require 'emacy-misc)
     )
 
-    (elpaca-process-queues)
+  (elpaca-process-queues)
 #+end_src
 * emacy-ui.el
 :PROPERTIES:
@@ -279,12 +296,12 @@ https://github.com/progfolio/elpaca
     (setq ef-themes-to-toggle '(ef-summer ef-winter))
     ;; set org headings and function syntax
     (setq ef-themes-headings
-	  '((0 . (bold 1))
-	    (1 . (bold 1))
-	    (2 . (rainbow bold 1))
-	    (3 . (rainbow bold 1))
-	    (4 . (rainbow bold 1))
-	    (t . (rainbow bold 1))))
+      '((0 . (bold 1))
+        (1 . (bold 1))
+        (2 . (rainbow bold 1))
+        (3 . (rainbow bold 1))
+        (4 . (rainbow bold 1))
+        (t . (rainbow bold 1))))
     (setq ef-themes-region '(intense no-extend neutral))
     ;; Disable all other themes to avoid awkward blending:
     (mapc #'disable-theme custom-enabled-themes)
@@ -298,7 +315,7 @@ https://github.com/progfolio/elpaca
 
     ;; 随机挑选一款主题，如果是命令行打开Emacs，则随机挑选一款黑色主题
     (if (display-graphic-p)
-	(ef-themes-load-random)
+    (ef-themes-load-random)
       (ef-themes-load-random 'dark))
 
     :config
@@ -307,13 +324,14 @@ https://github.com/progfolio/elpaca
       "Load theme, taking current system APPEARANCE into consideration."
       (mapc #'disable-theme custom-enabled-themes)
       (pcase appearance
-	('light (if (display-graphic-p) (ef-themes-load-random 'light) (ef-themes-load-random 'dark)))
-	('dark (ef-themes-load-random 'dark))))
+    ('light (if (display-graphic-p) (ef-themes-load-random 'light) (ef-themes-load-random 'dark)))
+    ('dark (ef-themes-load-random 'dark))))
 
     (if (eq system-type 'darwin)
-	;; only for emacs-plus
-	(add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
-      (ef-themes-select 'ef-summer)
+    ;; only for emacs-plus
+    (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
+      ;;(ef-themes-select 'ef-summer)
+      (ef-themes-load-random)
       )
     )
 #+end_src
@@ -441,6 +459,7 @@ https://github.com/progfolio/elpaca
     (doom-modeline-unicode-fallback t)
     (doom-modeline-enable-word-count nil))
 
+  
   ;; [[https://github.com/tarsius/minions][minions]] 插件能让模式栏变得清爽，将次要模式隐藏起来。
 
   (use-package minions
@@ -461,19 +480,19 @@ https://github.com/progfolio/elpaca
       :global t
       (if keycast-mode
       (progn
-        (add-hook 'pre-command-hook 'keycast--update t)
-        (add-to-list 'global-mode-string '("" keycast-mode-line "  ")))
+	(add-hook 'pre-command-hook 'keycast--update t)
+	(add-to-list 'global-mode-string '("" keycast-mode-line "  ")))
     (remove-hook 'pre-command-hook 'keycast--update)
     (setq global-mode-string (delete '("" keycast-mode-line "  ") global-mode-string))
     ))
 
     (dolist (input '(self-insert-command
-             org-self-insert-command))
+	     org-self-insert-command))
       (add-to-list 'keycast-substitute-alist `(,input "." "Typing…")))
 
     (dolist (event '(mouse-event-p
-             mouse-movement-p
-             mwheel-scroll))
+	     mouse-movement-p
+	     mwheel-scroll))
       (add-to-list 'keycast-substitute-alist `(,event nil)))
 
     (setq keycast-log-format "%-20K%C\n")
@@ -513,24 +532,49 @@ https://github.com/progfolio/elpaca
 :END:
 ** base
 #+begin_src emacs-lisp
-  (use-package autorevert
-    :ensure nil
-    :hook (elpaca-after-init . global-auto-revert-mode)
-    :bind ("s-u" . revert-buffer)
-    :custom
-    (auto-revert-interval 10)
-    (auto-revert-avoid-polling t)
-    (auto-revert-verbose nil)
-    (auto-revert-remote-files t)
-    (auto-revert-check-vc-info t)
-    (global-auto-revert-non-file-buffers t))
+  ;;(use-package autorevert
+  ;;  :ensure nil
+  ;;  :hook (elpaca-after-init . global-auto-revert-mode)
+  ;;  :bind ("s-u" . revert-buffer)
+  ;;  :custom
+  ;;  (auto-revert-interval 10)
+  ;;  (auto-revert-avoid-polling t)
+  ;;  (auto-revert-verbose nil)
+  ;;  (auto-revert-remote-files t)
+  ;;  (auto-revert-check-vc-info t)
+  ;;  (global-auto-revert-non-file-buffers t))
 
   ;; Directly modify when selecting text
-  (use-package delsel
-    :ensure nil
-    :hook (elpaca-after-init . delete-selection-mode))
+  ;;(use-package delsel
+  ;;  :ensure nil
+  ;;  :hook (elpaca-after-init . delete-selection-mode))
+
+  (use-package evil :demand t)
 #+end_src
 
+** footer
+#+begin_src emacs-lisp
+  (provide 'emacy-edit)
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;; init.el ends here  
+#+end_src
+
+
+* emacy-misc.el
+:PROPERTIES:
+:HEADER-ARGS: :tangle lisp/emacy-misc.el :mkdirp yes
+:END:
+** mind-wave
+#+begin_src emacs-lisp
+  ;;(use-package '(elpaca :repo "https://https://github.com/manateelazycat/mind-wave))
+  (use-package mind-wave)
+#+end_src
+** footer
+#+begin_src emacs-lisp
+  (provide 'emacy-misc)
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;; init.el ends here  
+#+end_src
 * Footers
 ** early-init.el
 #+begin_src emacs-lisp :tangle early-init.el
