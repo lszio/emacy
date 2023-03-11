@@ -41,10 +41,21 @@ https://remacs.cc/
 
   ;; 在这个阶段不编译
   (setq comp-deferred-compilation nil)
-
-
 #+END_SRC
-
+** frame
+#+begin_src emacs-lisp
+  ;;(add-hook 'window-setup-hook #'toggle-frame-maximized t)
+  
+  (setq-default inhibit-redisplay t
+                inhibit-message t)
+  (defun reset-inhibit-vars ()
+    (setq-default inhibit-redisplay nil
+                  inhibit-message nil)
+    (redraw-frame))
+  (add-hook 'window-setup-hook #'reset-inhibit-vars)
+  (define-advice startup--load-user-init-file (:after (&rest _) reset-inhibit-vars)
+    (and init-file-had-error (reset-inhibit-vars)))
+#+end_src
 * init.el
 :PROPERTIES:
 :HEADER-ARGS: :tangle init.el
@@ -71,64 +82,62 @@ https://github.com/progfolio/elpaca
   (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
   (defvar elpaca-repos-directory (expand-file-name "repos/" emacy-directory))
   (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-				:ref nil
-				:files (:defaults (:exclude "extensions"))
-				:build (:not elpaca--activate-package)))
+                :ref nil
+                :files (:defaults (:exclude "extensions"))
+                :build (:not elpaca--activate-package)))
   (when-let ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-	     (build (expand-file-name "elpaca/" elpaca-builds-directory))
-	     (order (cdr elpaca-order))
-	     ((add-to-list 'load-path (if (file-exists-p build) build repo)))
-	     ((not (file-exists-p repo))))
+         (build (expand-file-name "elpaca/" elpaca-builds-directory))
+         (order (cdr elpaca-order))
+         ((add-to-list 'load-path (if (file-exists-p build) build repo)))
+         ((not (file-exists-p repo))))
     (condition-case-unless-debug err
-	(if-let ((buffer (pop-to-buffer-same-window "*elpaca-installer*"))
-		 ((zerop (call-process "git" nil buffer t "clone"
-				       (plist-get order :repo) repo)))
-		 (default-directory repo)
-		 ((zerop (call-process "git" nil buffer t "checkout"
-				       (or (plist-get order :ref) "--"))))
-		 (emacs (concat invocation-directory invocation-name))
-		 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-				       "--eval" "(byte-recompile-directory \".\" 0 'force)"))))
-	    (progn (require 'elpaca)
-		   (elpaca-generate-autoloads "elpaca" repo)
-		   (kill-buffer buffer))
-	  (error "%s" (with-current-buffer buffer (buffer-string))))
+    (if-let ((buffer (pop-to-buffer-same-window "*elpaca-installer*"))
+         ((zerop (call-process "git" nil buffer t "clone"
+                       (plist-get order :repo) repo)))
+         (default-directory repo)
+         ((zerop (call-process "git" nil buffer t "checkout"
+                       (or (plist-get order :ref) "--"))))
+         (emacs (concat invocation-directory invocation-name))
+         ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                       "--eval" "(byte-recompile-directory \".\" 0 'force)"))))
+        (progn (require 'elpaca)
+           (elpaca-generate-autoloads "elpaca" repo)
+           (kill-buffer buffer))
+      (error "%s" (with-current-buffer buffer (buffer-string))))
       ((error) (warn "%s" err) (delete-directory repo 'recursive))))
   (require 'elpaca-autoloads)
   (add-hook 'after-init-hook #'elpaca-process-queues)
   (elpaca `(,@elpaca-order))
-
-  (elpaca use-package)
+#+end_src
+**** elpaca enable use-package
+#+begin_src emacs-lisp
+  ;; (elpaca use-package)
 
   ;; Install use-package support
   (elpaca elpaca-use-package
     ;; Enable :elpaca use-package keyword.
     (elpaca-use-package-mode)
     ;; Assume :elpaca t unless otherwise specified.
-    (setq elpaca-use-package-by-default t))
-
+    (setq elpaca-use-package-by-default t)
+    )
+  
   ;; Block until current queue processed.
   (elpaca-wait)
-#+end_src
 
+#+end_src
 **** elpaca disable package.el
 #+begin_src emacs-lisp :tangle early-init.el
   (setq package-enable-at-startup nil)
 #+end_src
 **** elpaca custom menus
 #+begin_src emacs-lisp
-  (defun elpaca-menu-emacy (request_)
-    "Emacy custom menu"
-    '((mind-wave :source "AI tools" :recipe (mind-wave :host github :repo "manateelazycat/mind-wave" :files (:defaults "*.py")))))
+    (defun elpaca-menu-emacy (_)
+      "Emacy custom menu"
+      '((mind-wave :source "AI tools" :recipe (mind-wave :host github :repo "manateelazycat/mind-wave" :files (:defaults "*.py")))
+        (lsp-bridge :source "Lsp Bridge" :recipe (mind-wave :host github :repo "manateelazycat/lsp-bridge" :files ("*")))))
 
-  (push  'elpaca-menu-emacy elpaca-menu-functions)
-
-  ;;(pop elpaca-menu-functions)
-
-  ;;(elpaca-recipe 'mind-wave)
-  ;;(elpaca mind-wave)
-  ;;(elpaca-process-queues)
-  ;;(use-package mind-wave)
+    ;; (push 'elpaca-menu-emacy elpaca-menu-functions)
+    (add-to-list 'elpaca-menu-functions 'elpaca-menu-emacy)
 #+end_src
 
 ** require lisps
@@ -144,6 +153,7 @@ https://github.com/progfolio/elpaca
     (require 'emacy-org)
     (require 'emacy-edit)
     (require 'emacy-misc)
+    (require 'emacy-ide)
     )
 
   (elpaca-process-queues)
@@ -156,10 +166,10 @@ https://github.com/progfolio/elpaca
 #+begin_src emacs-lisp
   ;; 禁用一些GUI特性
   (setq use-dialog-box nil)               ; 鼠标操作不使用对话框
-  (setq inhibit-default-init t)           ; 不加载 `default' 库
-  (setq inhibit-startup-screen t)         ; 不加载启动画面
-  (setq inhibit-startup-message t)        ; 不加载启动消息
-  (setq inhibit-startup-buffer-menu t)    ; 不显示缓冲区列表
+  ;;(setq inhibit-default-init t)           ; 不加载 `default' 库
+  ;;(setq inhibit-startup-screen t)         ; 不加载启动画面
+  ;;(setq inhibit-startup-message t)        ; 不加载启动消息
+  ;;(setq inhibit-startup-buffer-menu t)    ; 不显示缓冲区列表
 
   ;; 草稿缓冲区默认文字设置
   (setq initial-scratch-message (concat ";; Happy hacking, "
@@ -265,7 +275,7 @@ https://github.com/progfolio/elpaca
   (xterm-mouse-mode 1)
 
   ;; 退出Emacs时进行确认
-  (setq confirm-kill-emacs 'y-or-n-p)
+  ;;(setq confirm-kill-emacs 'y-or-n-p)
 
   ;; 在模式栏上显示当前光标的列号
   (column-number-mode t)
@@ -432,16 +442,16 @@ https://github.com/progfolio/elpaca
   ;; 设置窗口大小，仅仅在图形界面需要设置
   (when (display-graphic-p)
     (let ((top    0)                                     ; 顶不留空
-	  (left   (/ (x-display-pixel-width) 10))        ; 左边空10%
-	  (height (round (* 0.8                          ; 窗体高度为0.8倍的显示高度
-			    (/ (x-display-pixel-height)
-			       (frame-char-height))))))
+      (left   (/ (x-display-pixel-width) 10))        ; 左边空10%
+      (height (round (* 0.8                          ; 窗体高度为0.8倍的显示高度
+                (/ (x-display-pixel-height)
+                   (frame-char-height))))))
       (let ((width  (round (* 2.5 height))))             ; 窗体宽度为2.5倍高度
-	(setq default-frame-alist nil)
-	(add-to-list 'default-frame-alist (cons 'top top))
-	(add-to-list 'default-frame-alist (cons 'left left))
-	(add-to-list 'default-frame-alist (cons 'height height))
-	(add-to-list 'default-frame-alist (cons 'width width)))))
+    (setq default-frame-alist nil)
+    (add-to-list 'default-frame-alist (cons 'top top))
+    (add-to-list 'default-frame-alist (cons 'left left))
+    (add-to-list 'default-frame-alist (cons 'height height))
+    (add-to-list 'default-frame-alist (cons 'width width)))))
 #+end_src
 
 ** Modeline
@@ -525,7 +535,6 @@ https://github.com/progfolio/elpaca
   (provide 'emacy-org)
 #+end_src
 
-
 * emacy-edit.el
 :PROPERTIES:
 :HEADER-ARGS: :tangle lisp/emacy-edit.el :mkdirp yes
@@ -549,7 +558,10 @@ https://github.com/progfolio/elpaca
   ;;  :ensure nil
   ;;  :hook (elpaca-after-init . delete-selection-mode))
 
-  (use-package evil :demand t)
+  (use-package evil
+    :demand t
+    :hook (elpaca-after-init . evil-mode)
+    )
 #+end_src
 
 ** footer
@@ -559,6 +571,17 @@ https://github.com/progfolio/elpaca
   ;;; init.el ends here  
 #+end_src
 
+* emacy-ide.el
+:PROPERTIES:
+:HEADER-ARGS: :tangle lisp/emacy-ide.el :mkdirp yes
+:END:
+** base
+** footer
+#+begin_src emacs-lisp
+  (provide 'emacy-ide)
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;; init.el ends here  
+#+end_src
 
 * emacy-misc.el
 :PROPERTIES:
