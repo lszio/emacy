@@ -73,12 +73,14 @@ https://remacs.cc/
   (defvar emacy-directory "~/Emacy")
 #+end_src
 
-** 包管理配置
+** package manager
 *** elpaca
 https://github.com/progfolio/elpaca
 #+begin_src emacs-lisp
   (defvar elpaca-installer-version 0.2)
-  (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+  ;;(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+  (defvar user-local-directory (expand-file-name ".local" "~"))
+  (defvar elpaca-directory (expand-file-name "elpaca" user-local-directory))
   (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
   (defvar elpaca-repos-directory (expand-file-name "repos/" emacy-directory))
   (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
@@ -109,6 +111,7 @@ https://github.com/progfolio/elpaca
   (add-hook 'after-init-hook #'elpaca-process-queues)
   (elpaca `(,@elpaca-order))
 #+end_src
+
 **** elpaca enable use-package
 #+begin_src emacs-lisp
   ;; (elpaca use-package)
@@ -149,18 +152,18 @@ https://github.com/progfolio/elpaca
   ;; 加载各模块化配置
   ;; 不要在`*message*'缓冲区显示加载模块化配置的信息
   (with-temp-message ""
-    (require 'emacy-ui)                    ; 加载UI交互的模块化配置文件
-    (require 'emacy-org)
-    (require 'emacy-edit)
-    (require 'emacy-misc)
-    (require 'emacy-ide)
+    (require 'init-ui)                    ; 加载UI交互的模块化配置文件
+    (require 'init-org)
+    (require 'init-edit)
+    (require 'init-misc)
+    (require 'init-ide)
     )
 
   (elpaca-process-queues)
 #+end_src
-* emacy-ui.el
+* init-ui.el
 :PROPERTIES:
-:HEADER-ARGS: :tangle lisp/emacy-ui.el :mkdirp yes
+:HEADER-ARGS: :tangle lisp/init-ui.el :mkdirp yes
 :END:
 ** Misc
 #+begin_src emacs-lisp
@@ -513,12 +516,12 @@ https://github.com/progfolio/elpaca
 #+end_src
 ** Footer
 #+begin_src emacs-lisp
-  (provide 'emacy-ui)
+  (provide 'init-ui)
 #+end_src
 
-* emacy-org.el
+* init-org.el
 :PROPERTIES:
-:HEADER-ARGS: :tangle lisp/emacy-org.el :mkdirp yes
+:HEADER-ARGS: :tangle lisp/init-org.el :mkdirp yes
 :END:
 ** Misc
 #+begin_src emacs-lisp
@@ -532,12 +535,12 @@ https://github.com/progfolio/elpaca
 
 ** footer
 #+begin_src emacs-lisp
-  (provide 'emacy-org)
+  (provide 'init-org)
 #+end_src
 
-* emacy-edit.el
+* init-edit.el
 :PROPERTIES:
-:HEADER-ARGS: :tangle lisp/emacy-edit.el :mkdirp yes
+:HEADER-ARGS: :tangle lisp/init-edit.el :mkdirp yes
 :END:
 ** base
 #+begin_src emacs-lisp
@@ -566,26 +569,26 @@ https://github.com/progfolio/elpaca
 
 ** footer
 #+begin_src emacs-lisp
-  (provide 'emacy-edit)
+  (provide 'init-edit)
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;; init.el ends here  
 #+end_src
 
-* emacy-ide.el
+* init-ide.el
 :PROPERTIES:
-:HEADER-ARGS: :tangle lisp/emacy-ide.el :mkdirp yes
+:HEADER-ARGS: :tangle lisp/init-ide.el :mkdirp yes
 :END:
 ** base
 ** footer
 #+begin_src emacs-lisp
-  (provide 'emacy-ide)
+  (provide 'init-ide)
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;; init.el ends here  
 #+end_src
 
-* emacy-misc.el
+* init-misc.el
 :PROPERTIES:
-:HEADER-ARGS: :tangle lisp/emacy-misc.el :mkdirp yes
+:HEADER-ARGS: :tangle lisp/init-misc.el :mkdirp yes
 :END:
 ** mind-wave
 #+begin_src emacs-lisp
@@ -594,7 +597,7 @@ https://github.com/progfolio/elpaca
 #+end_src
 ** footer
 #+begin_src emacs-lisp
-  (provide 'emacy-misc)
+  (provide 'init-misc)
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;; init.el ends here  
 #+end_src
