@@ -592,8 +592,10 @@ https://github.com/progfolio/elpaca
 :END:
 ** mind-wave
 #+begin_src emacs-lisp
-  ;;(use-package '(elpaca :repo "https://https://github.com/manateelazycat/mind-wave))
-  (use-package mind-wave)
+    ;;(use-package '(elpaca :repo "https://https://github.com/manateelazycat/mind-wave))
+    (use-package mind-wave
+      :elpaca (mind-wave :repo "https://github.com/manateelazycat/mind-wave" :files (:defaults "*.py"))
+  )
 #+end_src
 ** footer
 #+begin_src emacs-lisp
