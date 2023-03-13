@@ -2,6 +2,13 @@
 #+AUTHOR: Lishuzhi
 #+STARTUP: content
 
+* headers
+** common
+The following line turns on lexical binding for performance reasons.
+#+name: lexical-binding
+#+begin_src emacs-lisp
+  ;; -*- lexical-binding: t; -*-
+#+end_src
 * early-init.el
 :PROPERTIES:
 :HEADER-ARGS: :tangle early-init.el
@@ -82,7 +89,7 @@ https://github.com/progfolio/elpaca
   (defvar user-local-directory (expand-file-name ".local" "~"))
   (defvar elpaca-directory (expand-file-name "elpaca" user-local-directory))
   (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-  (defvar elpaca-repos-directory (expand-file-name "repos/" emacy-directory))
+  (defvar elpaca-repos-directory (expand-file-name "libraries/" emacy-directory))
   (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
                 :ref nil
                 :files (:defaults (:exclude "extensions"))
@@ -562,9 +569,18 @@ https://github.com/progfolio/elpaca
   ;;  :hook (elpaca-after-init . delete-selection-mode))
 
   (use-package evil
-    :demand t
-    :hook (elpaca-after-init . evil-mode)
-    )
+    :ensure t
+    :init
+    (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
+    (setq evil-want-keybinding nil)
+    :config
+    (evil-mode 1))
+
+  (use-package evil-collection
+    :after evil
+    :ensure t
+    :config
+    (evil-collection-init))
 #+end_src
 
 ** footer
