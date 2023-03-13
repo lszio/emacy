@@ -1,0 +1,6 @@
+#+TITLE: Emacy
+
+* Installation
+#+begin_src shell
+  emacs --batch -l org <org-file> -f org-babel-tangle
+#+end_src
