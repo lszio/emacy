@@ -8,4 +8,5 @@ local
 tmp
 temp
 
-/repos
+eln-cache
+/libraries
