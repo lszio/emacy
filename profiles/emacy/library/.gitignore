@@ -3,4 +3,11 @@ auto-save-list
 /*.el
 /lisp/*.el
 
+history
+
+elpa
 elpaca
+
+mind-wave
+tree-sitter
+eshell
