@@ -189,12 +189,34 @@ https://remacs.cc/
   ;; 不要在`*message*'缓冲区显示加载模块化配置的信息
   (with-temp-message ""
     (require 'init-ui)                    ; 加载UI交互的模块化配置文件
+    (require 'init-keybinds)
     (require 'init-org)
     (require 'init-edit)
     (require 'init-misc)
     (require 'init-ide)
     (require 'init-completion)
     )
+#+end_src
+
+* init-keybinds
+:PROPERTIES:
+:HEADER-ARGS: :tangle lisp/init-keybinds.el :mkdirp yes
+:END:
+#+begin_src emacs-lisp
+  (use-package general
+    :config
+    (general-override-mode)
+    (general-auto-unbind-keys)
+    (general-evil-setup)
+    (general-define-key
+     :keymaps 'minibuffer-mode-map
+     "C-j" 'vertico-next
+     "C-k" 'vertico-last))
+#+end_src
+
+** Footer
+#+begin_src emacs-lisp
+  (provide 'init-keybinds)
 #+end_src
 
 * init-ui.el
@@ -364,9 +386,10 @@ https://remacs.cc/
     ;; (ef-themes-select 'ef-summer)
 
     ;; 随机挑选一款主题，如果是命令行打开Emacs，则随机挑选一款黑色主题
-    (if (display-graphic-p)
-    (ef-themes-load-random)
-      (ef-themes-load-random 'dark))
+    ;;(if (display-graphic-p)
+    ;;  (ef-themes-load-random)
+    ;;  (ef-themes-load-random 'dark))
+    (ef-themes-load-random 'dark)
 
     :config
     ;; auto change theme, aligning with system themes.
@@ -374,16 +397,18 @@ https://remacs.cc/
       "Load theme, taking current system APPEARANCE into consideration."
       (mapc #'disable-theme custom-enabled-themes)
       (pcase appearance
-    ('light (if (display-graphic-p) (ef-themes-load-random 'light) (ef-themes-load-random 'dark)))
-    ('dark (ef-themes-load-random 'dark))))
+        ('light (if (display-graphic-p) (ef-themes-load-random 'light) (ef-themes-load-random 'dark)))
+        ('dark (ef-themes-load-random 'dark))))
 
     (if (eq system-type 'darwin)
-    ;; only for emacs-plus
-    (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
-      ;;(ef-themes-select 'ef-summer)
-      (ef-themes-load-random)
-      )
-    )
+        ;; only for emacs-plus
+        (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
+        ;;(ef-themes-select 'ef-summer)
+        (ef-themes-load-random)))
+
+    ;;(use-package spacemacs-theme :ensure t)
+    ;;(use-package atom-one-dark-theme :ensure t)
+
 #+end_src
 
 ** Fonts
@@ -1008,8 +1033,7 @@ https://remacs.cc/
   (defun consult-line-symbol-at-point ()
     "Consult line the synbol where the point is"
     (interactive)
-    (consult-line (thing-at-point 'symbol)))
-  )
+    (consult-line (thing-at-point 'symbol))))
 #+end_src
 
 ** TODO corfu
