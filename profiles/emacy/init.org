@@ -202,6 +202,16 @@ https://remacs.cc/
 :PROPERTIES:
 :HEADER-ARGS: :tangle lisp/init-keybinds.el :mkdirp yes
 :END:
+
+** Header
+#+begin_src emacs-lisp
+  ;;; init-keybinds.el --- The main init entry for Emacs -*- lexical-binding: t -*-
+  ;;; Commentary:
+
+  ;;; Code:
+#+end_src
+
+** general
 #+begin_src emacs-lisp
   (use-package general
     :config
@@ -223,6 +233,14 @@ https://remacs.cc/
 :PROPERTIES:
 :HEADER-ARGS: :tangle lisp/init-ui.el :mkdirp yes
 :END:
+
+** Header
+#+begin_src emacs-lisp
+  ;;; init-ui.el --- The main init entry for Emacs -*- lexical-binding: t -*-
+  ;;; Commentary:
+
+  ;;; Code:
+#+end_src
 ** Misc
 #+begin_src emacs-lisp
   ;; 禁用一些GUI特性
@@ -609,6 +627,13 @@ https://remacs.cc/
 :PROPERTIES:
 :HEADER-ARGS: :tangle lisp/init-org.el :mkdirp yes
 :END:
+** Header
+#+begin_src emacs-lisp
+  ;;; init-org.el --- The main init entry for Emacs -*- lexical-binding: t -*-
+  ;;; Commentary:
+
+  ;;; Code:
+#+end_src
 ** Misc
 #+begin_src emacs-lisp
   (use-package org-auto-tangle
@@ -738,6 +763,13 @@ https://remacs.cc/
 :PROPERTIES:
 :HEADER-ARGS: :tangle lisp/init-edit.el :mkdirp yes
 :END:
+** Header
+#+begin_src emacs-lisp
+  ;;; init-edit.el --- The main init entry for Emacs -*- lexical-binding: t -*-
+  ;;; Commentary:
+
+  ;;; Code:
+#+end_src
 ** base
 #+begin_src emacs-lisp
   ;;(use-package autorevert
@@ -789,17 +821,31 @@ https://remacs.cc/
 :PROPERTIES:
 :HEADER-ARGS: :tangle lisp/init-ide.el :mkdirp yes
 :END:
+** Header
+#+begin_src emacs-lisp
+  ;;; init-ide.el --- The main init entry for Emacs -*- lexical-binding: t -*-
+  ;;; Commentary:
+
+  ;;; Code:
+#+end_src
 ** base
+#+begin_src emacs-lisp
+  (use-package rainbow-delimiters
+    :hook (prog-mode rainbow-delimiters-mode))
+
+  ;;(use-package citre
+  ;;  :defer t)
+#+end_src
 ** lsp-bridge
 #+begin_src emacs-lisp
   (use-package posframe)
   (use-package yasnippet
-    :init
+    :config
     (yas-global-mode 1))
 
   (use-package lsp-bridge
     :elpaca (lsp-bridge :host github :repo "manateelazycat/lsp-bridge" :files ("*"))
-    :init
+    :config
     (global-lsp-bridge-mode))
 #+end_src
 ** treesit
@@ -862,6 +908,13 @@ https://remacs.cc/
 :PROPERTIES:
 :HEADER-ARGS: :tangle lisp/init-misc.el :mkdirp yes
 :END:
+** Header
+#+begin_src emacs-lisp
+  ;;; init-misc.el --- The main init entry for Emacs -*- lexical-binding: t -*-
+  ;;; Commentary:
+
+  ;;; Code:
+#+end_src
 ** mind-wave
 #+begin_src emacs-lisp
     ;;(use-package '(elpaca :repo "https://https://github.com/manateelazycat/mind-wave))
@@ -885,6 +938,13 @@ https://remacs.cc/
 :PROPERTIES:
 :HEADER-ARGS: :tangle lisp/init-completion.el :mkdirp yes
 :END:
+** Header
+#+begin_src emacs-lisp
+  ;;; init-completion.el --- The main init entry for Emacs -*- lexical-binding: t -*-
+  ;;; Commentary:
+
+  ;;; Code:
+#+end_src
 ** vertico
 #+begin_src emacs-lisp
   ;; Enable vertico
@@ -1044,6 +1104,41 @@ https://remacs.cc/
     (consult-line (thing-at-point 'symbol))))
 #+end_src
 
+
+** embark
+#+begin_src emacs-lisp
+  (use-package embark
+    :ensure t
+
+    :bind
+    (("C-." . embark-act)         ;; pick some comfortable binding
+     ("C-;" . embark-dwim)        ;; good alternative: M-.
+     ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+
+    :init
+
+    ;; Optionally replace the key help with a completing-read interface
+    (setq prefix-help-command #'embark-prefix-help-command)
+
+    ;; Show the Embark target at point via Eldoc.  You may adjust the Eldoc
+    ;; strategy, if you want to see the documentation from multiple providers.
+    (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+    ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+
+    :config
+
+    ;; Hide the mode line of the Embark live/completions buffers
+    (add-to-list 'display-buffer-alist
+                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                   nil
+                   (window-parameters (mode-line-format . none)))))
+
+  ;; Consult users will also want the embark-consult package.
+  (use-package embark-consult
+    :ensure t ; only need to install it, embark loads it after consult if found
+    :hook
+    (embark-collect-mode . consult-preview-at-point-mode))
+#+end_src
 ** TODO corfu
 #+begin_src emacs-lisp
   (use-package corfu
