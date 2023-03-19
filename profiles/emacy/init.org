@@ -66,11 +66,11 @@ https://remacs.cc/
 
 ** Constants
 #+begin_src emacs-lisp
-  (defconst windows? "are we on windows" (memq system-type '(cygwin windows-nt ms-dos)))
-  (defconst macos? "are we on macos" (eq system-type 'darwin))
-  (defconst linux? "are we on linux" (memq system-type '(gnu gnu/linux gnu/kfreebds berkeley-unix)))
-  (defconst bsd? "are we on bsd" (memq system-type '(darwin berkeley-unix gnu/kfreebsd)))
-  (defconst wsl? "are we on wsl" (and linux? (string-match-p "microsoft" operating-system-release)))
+  (defconst windows? (memq system-type '(cygwin windows-nt ms-dos)) "are we on windows")
+  (defconst macos? (eq system-type 'darwin) "are we on macos")
+  (defconst linux? (memq system-type '(gnu gnu/linux gnu/kfreebds berkeley-unix)) "are we on linux")
+  (defconst bsd? (memq system-type '(darwin berkeley-unix gnu/kfreebsd)) "are we on bsd" )
+  (defconst wsl? (and linux? (string-match-p "microsoft" operating-system-release)) "are we on wsl")
 #+end_src
 
 * init.el
@@ -118,65 +118,55 @@ https://remacs.cc/
                                 :ref nil
                                 :files (:defaults (:exclude "extensions"))
                                 :build (:not elpaca--activate-package)))
-  (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-         (build (expand-file-name "elpaca/" elpaca-builds-directory))
-         (order (cdr elpaca-order))
-         (default-directory repo))
-    (add-to-list 'load-path (if (file-exists-p build) build repo))
-    (unless (file-exists-p repo)
-      (make-directory repo t)
-      (condition-case-unless-debug err
-          (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                   ((zerop (call-process "git" nil buffer t "clone"
-                                         (plist-get order :repo) repo)))
-                   ((zerop (call-process "git" nil buffer t "checkout"
-                                         (or (plist-get order :ref) "--"))))
-                   (emacs (concat invocation-directory invocation-name))
-                   ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                         "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-                   ((require 'elpaca))
-                   ((elpaca-generate-autoloads "elpaca" repo)))
-              (kill-buffer buffer)
-            (error "%s" (with-current-buffer buffer (buffer-string))))
-        ((error) (warn "%s" err) (delete-directory repo 'recursive))))
-    (unless (require 'elpaca-autoloads nil t)
-      (require 'elpaca)
-      (elpaca-generate-autoloads "elpaca" repo)
-      (load "./elpaca-autoloads")))
-  (add-hook 'after-init-hook #'elpaca-process-queues)
-  (elpaca `(,@elpaca-order))
-#+end_src
 
-**** elpaca enable use-package
-#+begin_src emacs-lisp
-  ;; (elpaca use-package)
+  (defun install-elpaca ()
+      (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+          (build (expand-file-name "elpaca/" elpaca-builds-directory))
+          (order (cdr elpaca-order))
+          (default-directory repo))
+      (add-to-list 'load-path (if (file-exists-p build) build repo))
+      (unless (file-exists-p repo)
+          (make-directory repo t)
+          (condition-case-unless-debug err
+              (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                      ((zerop (call-process "git" nil buffer t "clone"
+                                          (plist-get order :repo) repo)))
+                      ((zerop (call-process "git" nil buffer t "checkout"
+                                          (or (plist-get order :ref) "--"))))
+                      (emacs (concat invocation-directory invocation-name))
+                      ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                          "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                      ((require 'elpaca))
+                      ((elpaca-generate-autoloads "elpaca" repo)))
+                  (kill-buffer buffer)
+              (error "%s" (with-current-buffer buffer (buffer-string))))
+          ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+      (unless (require 'elpaca-autoloads nil t)
+          (require 'elpaca)
+          (elpaca-generate-autoloads "elpaca" repo)
+          (load "./elpaca-autoloads")))
+      (add-hook 'after-init-hook #'elpaca-process-queues)
+      (elpaca `(,@elpaca-order))
+        ;; (elpaca use-package)
 
-  ;; Install use-package support
-  (elpaca elpaca-use-package
-    ;; Enable :elpaca use-package keyword.
-    (elpaca-use-package-mode)
-    ;; Assume :elpaca t unless otherwise specified.
-    (setq elpaca-use-package-by-default t)
+    ;; Install use-package support
+    (elpaca elpaca-use-package
+        ;; Enable :elpaca use-package keyword.
+        (elpaca-use-package-mode)
+        ;; Assume :elpaca t unless otherwise specified.
+        (setq elpaca-use-package-by-default t)
+        )
+
+    ;; Block until current queue processed.
+    (elpaca-wait)
+
     )
-  
-  ;; Block until current queue processed.
-  (elpaca-wait)
+  (when (not windows?) (install-elpaca))
 #+end_src
 
 **** elpaca disable package.el
 #+begin_src emacs-lisp :tangle early-init.el
   (setq package-enable-at-startup nil)
-#+end_src
-
-**** elpaca custom menus
-#+begin_src emacs-lisp
-    (defun elpaca-menu-emacy (_)
-      "Emacy custom menu"
-      '((mind-wave :source "AI tools" :recipe (mind-wave :host github :repo "manateelazycat/mind-wave" :files (:defaults "*.py")))
-        (lsp-bridge :source "Lsp Bridge" :recipe (mind-wave :host github :repo "manateelazycat/lsp-bridge" :files ("*")))))
-
-    ;; (push 'elpaca-menu-emacy elpaca-menu-functions)
-    (add-to-list 'elpaca-menu-functions 'elpaca-menu-emacy)
 #+end_src
 
 ** require lisps
@@ -185,11 +175,18 @@ https://remacs.cc/
   (let ((dir (locate-user-emacs-file "lisp")))
     (add-to-list 'load-path (file-name-as-directory dir)))
 
+  (defun add-subdirs-to-load-path (dir)
+  "Recursive add directories to `load-path'."
+  (let ((default-directory (file-name-as-directory dir)))
+    (add-to-list 'load-path dir)
+    (normal-top-level-add-subdirs-to-load-path)))
+  (when windows? (add-subdirs-to-load-path elpaca-repos-directory))
+
   ;; 加载各模块化配置
   ;; 不要在`*message*'缓冲区显示加载模块化配置的信息
   (with-temp-message ""
-    (require 'init-ui)                    ; 加载UI交互的模块化配置文件
     (require 'init-keybinds)
+    (require 'init-ui)                    ; 加载UI交互的模块化配置文件
     (require 'init-org)
     (require 'init-edit)
     (require 'init-misc)
