@@ -1,83 +1,23 @@
+:PROPERTIES:
+:ID: emacy-config
+:HEADER-ARGS: :tangle init.el
+:END:
 #+TITLE: init.el
 #+AUTHOR: Lishuzhi
 #+STARTUP: content
 
 * headers
-** common
-The following line turns on lexical binding for performance reasons.
-#+name: lexical-binding
-#+begin_src emacs-lisp
-  ;; -*- lexical-binding: t; -*-
-#+end_src
-* early-init.el
+** early-init.el
 :PROPERTIES:
 :HEADER-ARGS: :tangle early-init.el
 :END:
-
-https://remacs.cc/
-
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   ;;; early-init.el --- Emacs pre-initialization config -*- lexical-binding: t -*-
   ;;; Commentary:
 
   ;;; Code:
-
-  ;; 设置垃圾回收参数
-  (setq gc-cons-threshold most-positive-fixnum)
-  (setq gc-cons-percentage 0.6)
-
-  ;; 启动早期不加载`package.el'包管理器
-  (setq package-enable-at-startup nil)
-  ;; 不从包缓存中加载
-  (setq package-quickstart nil)
-
-  ;; 禁止展示菜单栏、工具栏和纵向滚动条
-  (push '(menu-bar-lines . 0) default-frame-alist)
-  (push '(tool-bar-lines . 0) default-frame-alist)
-  (push '(vertical-scroll-bars) default-frame-alist)
-
-  ;; 禁止自动缩放窗口先
-  (setq frame-inhibit-implied-resize t)
-
-  ;; 禁止菜单栏、工具栏、滚动条模式，禁止启动屏幕和文件对话框
-  (menu-bar-mode -1)
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1)
-  (setq inhibit-splash-screen t)
-  (setq use-file-dialog nil)
-
-  ;; 在这个阶段不编译
-  (setq comp-deferred-compilation nil)
-#+END_SRC
-** frame
-#+begin_src emacs-lisp
-  ;;(add-hook 'window-setup-hook #'toggle-frame-maximized t)
-  
-  (setq-default inhibit-redisplay t
-                inhibit-message t)
-  (defun reset-inhibit-vars ()
-    (setq-default inhibit-redisplay nil
-                  inhibit-message nil)
-    (redraw-frame))
-  (add-hook 'window-setup-hook #'reset-inhibit-vars)
-  (define-advice startup--load-user-init-file (:after (&rest _) reset-inhibit-vars)
-    (and init-file-had-error (reset-inhibit-vars)))
 #+end_src
-
-** Constants
-#+begin_src emacs-lisp
-  (defconst windows? (memq system-type '(cygwin windows-nt ms-dos)) "are we on windows")
-  (defconst macos? (eq system-type 'darwin) "are we on macos")
-  (defconst linux? (memq system-type '(gnu gnu/linux gnu/kfreebds berkeley-unix)) "are we on linux")
-  (defconst bsd? (memq system-type '(darwin berkeley-unix gnu/kfreebsd)) "are we on bsd" )
-  (defconst wsl? (and linux? (string-match-p "microsoft" operating-system-release)) "are we on wsl")
-#+end_src
-
-* init.el
-:PROPERTIES:
-:HEADER-ARGS: :tangle init.el
-:END:
-** Header
+** init.el
 #+begin_src emacs-lisp
   ;;; init.el --- The main init entry for Emacs -*- lexical-binding: t -*-
   ;;; Commentary:
@@ -85,6 +25,65 @@ https://remacs.cc/
   ;;; Code:
 #+end_src
 
+* early-init.el
+:PROPERTIES:
+:HEADER-ARGS: :tangle early-init.el
+:END:
+https://remacs.cc/
+** Base
+#+BEGIN_SRC emacs-lisp
+;; 设置垃圾回收参数
+(setq gc-cons-threshold most-positive-fixnum)
+(setq gc-cons-percentage 0.6)
+
+;; 启动早期不加载`package.el'包管理器
+(setq package-enable-at-startup nil)
+;; 不从包缓存中加载
+(setq package-quickstart nil)
+
+;; 禁止展示菜单栏、工具栏和纵向滚动条
+(push '(menu-bar-lines . 0) default-frame-alist)
+(push '(tool-bar-lines . 0) default-frame-alist)
+(push '(vertical-scroll-bars) default-frame-alist)
+
+;; 禁止自动缩放窗口先
+(setq frame-inhibit-implied-resize t)
+
+;; 禁止菜单栏、工具栏、滚动条模式，禁止启动屏幕和文件对话框
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(setq inhibit-splash-screen t)
+(setq use-file-dialog nil)
+
+;; 在这个阶段不编译
+(setq comp-deferred-compilation nil)
+#+END_SRC
+** Frame
+#+begin_src emacs-lisp
+;;(add-hook 'window-setup-hook #'toggle-frame-maximized t)
+
+(setq-default inhibit-redisplay t
+              inhibit-message t)
+(defun reset-inhibit-vars ()
+  (setq-default inhibit-redisplay nil
+                inhibit-message nil)
+  (redraw-frame))
+(add-hook 'window-setup-hook #'reset-inhibit-vars)
+(define-advice startup--load-user-init-file (:after (&rest _) reset-inhibit-vars)
+  (and init-file-had-error (reset-inhibit-vars)))
+#+end_src
+
+** Constants
+#+begin_src emacs-lisp
+(defconst windows? (memq system-type '(cygwin windows-nt ms-dos)) "are we on windows")
+(defconst macos? (eq system-type 'darwin) "are we on macos")
+(defconst linux? (memq system-type '(gnu gnu/linux gnu/kfreebds berkeley-unix)) "are we on linux")
+(defconst bsd? (memq system-type '(darwin berkeley-unix gnu/kfreebsd)) "are we on bsd")
+(defconst wsl? (and linux? (string-match-p "microsoft" operating-system-release)) "are we on wsl")
+#+end_src
+
+* init.el
 ** Variables
 #+begin_src emacs-lisp
   (defvar emacy-directory "~/Emacy")
@@ -185,7 +184,7 @@ https://remacs.cc/
 (elpaca-wait)
 #+end_src
 
-**** elpaca disable package.el
+**** disable package.el
 #+begin_src emacs-lisp :tangle early-init.el
   (setq package-enable-at-startup nil)
 #+end_src
@@ -202,33 +201,9 @@ https://remacs.cc/
     (add-to-list 'load-path dir)
     (normal-top-level-add-subdirs-to-load-path)))
   (when windows? (add-subdirs-to-load-path elpaca-repos-directory))
-
-  ;; 加载各模块化配置
-  ;; 不要在`*message*'缓冲区显示加载模块化配置的信息
-  (with-temp-message ""
-    (require 'init-keybinds)
-    (require 'init-ui)                    ; 加载UI交互的模块化配置文件
-    (require 'init-org)
-    (require 'init-edit)
-    (require 'init-misc)
-    (require 'init-ide)
-    (require 'init-completion)
-    )
 #+end_src
 
-* init-keybinds
-:PROPERTIES:
-:HEADER-ARGS: :tangle lisp/init-keybinds.el :mkdirp yes
-:END:
-
-** Header
-#+begin_src emacs-lisp
-  ;;; init-keybinds.el --- The main init entry for Emacs -*- lexical-binding: t -*-
-  ;;; Commentary:
-
-  ;;; Code:
-#+end_src
-
+* keybindings
 ** general
 #+begin_src emacs-lisp
   (use-package general
@@ -242,23 +217,7 @@ https://remacs.cc/
      "C-k" 'vertico-last))
 #+end_src
 
-** Footer
-#+begin_src emacs-lisp
-  (provide 'init-keybinds)
-#+end_src
-
-* init-ui.el
-:PROPERTIES:
-:HEADER-ARGS: :tangle lisp/init-ui.el :mkdirp yes
-:END:
-
-** Header
-#+begin_src emacs-lisp
-  ;;; init-ui.el --- The main init entry for Emacs -*- lexical-binding: t -*-
-  ;;; Commentary:
-
-  ;;; Code:
-#+end_src
+* ui.el
 ** Misc
 #+begin_src emacs-lisp
   ;; 禁用一些GUI特性
@@ -636,22 +595,7 @@ https://remacs.cc/
     (setq keycast-log-newest-first t)
     )
 #+end_src
-** Footer
-#+begin_src emacs-lisp
-  (provide 'init-ui)
-#+end_src
-
-* init-org.el
-:PROPERTIES:
-:HEADER-ARGS: :tangle lisp/init-org.el :mkdirp yes
-:END:
-** Header
-#+begin_src emacs-lisp
-  ;;; init-org.el --- The main init entry for Emacs -*- lexical-binding: t -*-
-  ;;; Commentary:
-
-  ;;; Code:
-#+end_src
+* org.el
 ** Misc
 #+begin_src emacs-lisp
   (use-package org-auto-tangle
@@ -772,22 +716,7 @@ https://remacs.cc/
   ) 
 #+end_src
 
-** footer
-#+begin_src emacs-lisp
-  (provide 'init-org)
-#+end_src
-
-* init-edit.el
-:PROPERTIES:
-:HEADER-ARGS: :tangle lisp/init-edit.el :mkdirp yes
-:END:
-** Header
-#+begin_src emacs-lisp
-  ;;; init-edit.el --- The main init entry for Emacs -*- lexical-binding: t -*-
-  ;;; Commentary:
-
-  ;;; Code:
-#+end_src
+* edit.el
 ** base
 #+begin_src emacs-lisp
   ;;(use-package autorevert
@@ -828,24 +757,7 @@ https://remacs.cc/
   (global-auto-revert-mode)
 #+end_src
 
-** footer
-#+begin_src emacs-lisp
-  (provide 'init-edit)
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;; init.el ends here  
-#+end_src
-
-* init-ide.el
-:PROPERTIES:
-:HEADER-ARGS: :tangle lisp/init-ide.el :mkdirp yes
-:END:
-** Header
-#+begin_src emacs-lisp
-  ;;; init-ide.el --- The main init entry for Emacs -*- lexical-binding: t -*-
-  ;;; Commentary:
-
-  ;;; Code:
-#+end_src
+* ide.el
 ** base
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters
@@ -915,24 +827,7 @@ https://remacs.cc/
 
   (add-hook 'emacs-lisp-mode-hook #'(lambda () (treesit-parser-create 'elisp)))
 #+end_src
-** footer
-#+begin_src emacs-lisp
-  (provide 'init-ide)
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;; init.el ends here  
-#+end_src
-
-* init-misc.el
-:PROPERTIES:
-:HEADER-ARGS: :tangle lisp/init-misc.el :mkdirp yes
-:END:
-** Header
-#+begin_src emacs-lisp
-  ;;; init-misc.el --- The main init entry for Emacs -*- lexical-binding: t -*-
-  ;;; Commentary:
-
-  ;;; Code:
-#+end_src
+* misc.el
 ** mind-wave
 #+begin_src emacs-lisp
     ;;(use-package '(elpaca :repo "https://https://github.com/manateelazycat/mind-wave))
@@ -946,23 +841,7 @@ https://remacs.cc/
     :elpaca (whisper :host github :repo "natrys/whisper.el"))
 
 #+end_src
-** footer
-#+begin_src emacs-lisp
-  (provide 'init-misc)
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;; init.el ends here  
-#+end_src
-* init-completion
-:PROPERTIES:
-:HEADER-ARGS: :tangle lisp/init-completion.el :mkdirp yes
-:END:
-** Header
-#+begin_src emacs-lisp
-  ;;; init-completion.el --- The main init entry for Emacs -*- lexical-binding: t -*-
-  ;;; Commentary:
-
-  ;;; Code:
-#+end_src
+* completion
 ** vertico
 #+begin_src emacs-lisp
   ;; Enable vertico
@@ -1122,7 +1001,6 @@ https://remacs.cc/
     (consult-line (thing-at-point 'symbol))))
 #+end_src
 
-
 ** embark
 #+begin_src emacs-lisp
   (use-package embark
@@ -1157,6 +1035,7 @@ https://remacs.cc/
     :hook
     (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
+
 ** TODO corfu
 #+begin_src emacs-lisp
   (use-package corfu
@@ -1197,13 +1076,8 @@ https://remacs.cc/
   (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify)
   )
 #+end_src
-** footer
-#+begin_src emacs-lisp
-  (provide 'init-completion)
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;; init.el ends here  
-#+end_src
-* Footers
+
+* footers
 ** early-init.el
 #+begin_src emacs-lisp :tangle early-init.el
   (provide 'early-init)
