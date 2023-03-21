@@ -6,6 +6,8 @@
 #+AUTHOR: Lishuzhi
 #+STARTUP: content
 
+https://remacs.cc/
+
 * headers
 ** early-init.el
 #+header: :tangle early-init.el
@@ -27,7 +29,6 @@
 :PROPERTIES:
 :HEADER-ARGS: :tangle early-init.el
 :END:
-https://remacs.cc/
 ** Base
 #+BEGIN_SRC emacs-lisp
 ;; 设置垃圾回收参数
@@ -57,22 +58,8 @@ https://remacs.cc/
 ;; 在这个阶段不编译
 (setq comp-deferred-compilation nil)
 #+END_SRC
-** Frame
-#+begin_src emacs-lisp
-;;(add-hook 'window-setup-hook #'toggle-frame-maximized t)
-
-(setq-default inhibit-redisplay t
-              inhibit-message t)
-(defun reset-inhibit-vars ()
-  (setq-default inhibit-redisplay nil
-                inhibit-message nil)
-  (redraw-frame))
-(add-hook 'window-setup-hook #'reset-inhibit-vars)
-(define-advice startup--load-user-init-file (:after (&rest _) reset-inhibit-vars)
-  (and init-file-had-error (reset-inhibit-vars)))
-#+end_src
-
 ** Constants
+baisc constants for operating system
 #+begin_src emacs-lisp
 (defconst windows? (memq system-type '(cygwin windows-nt ms-dos)) "are we on windows")
 (defconst macos? (eq system-type 'darwin) "are we on macos")
@@ -85,21 +72,25 @@ https://remacs.cc/
 ** Variables
 #+begin_src emacs-lisp
   (defvar emacy-directory "~/Emacy")
-  (defvar user-local-directory (expand-file-name ".local" "~"))
+  (defvar user-local-directory "~/.local")
 #+end_src
 
 ** profiling
 #+begin_src emacs-lisp
+(defun enable-profiler ()
   (add-hook 'elpaca-after-init-hook
-          (lambda ()
-            (message "Emacs loaded in %s with %d garbage collections."
-                     (format "%.2f seconds"
-                             (float-time
-                              (time-subtract (current-time) before-init-time)))
-                     gcs-done)))
+    (lambda ()
+      (message "Emacs loaded in %s with %d garbage collections."
+               (format "%.2f seconds"
+                       (float-time (time-subtract (current-time) before-init-time)))
+               gcs-done)))
 
- (profiler-start 'cpu+mem)
-(add-hook 'elpaca-after-init-hook (lambda () (profiler-stop) (profiler-report))) 
+  (profiler-start 'cpu+mem)
+  (add-hook 'elpaca-after-init-hook (lambda () (profiler-stop) (profiler-report))))
+
+(when (member "--with-profiler" command-line-args)
+  (enable-profiler)
+  (remove "--with-profiler" command-line-args))
 #+end_src
 
 ** package manager
