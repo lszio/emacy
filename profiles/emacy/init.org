@@ -101,79 +101,80 @@ baisc constants for operating system
 [[https://github.com/progfolio/elpaca][elpaca]]
 *** install
 #+begin_src emacs-lisp
-(defvar elpaca-installer-version 0.3)
-;; (defvar elpaca-directory (expand-file-name "elpaca/" user-local-directory))
-(defvar elpaca-directory (expand-file-name "elpaca/" (if wsl? user-local-directory user-emacs-directory)))
-(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-(defvar elpaca-repos-directory (expand-file-name "libraries/" emacy-directory))
-(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil
-                              :files (:defaults (:exclude "extensions"))
-                              :build (:not elpaca--activate-package)))
+  (defvar elpaca-installer-version 0.3)
+  ;;(defvar elpaca-directory (expand-file-name "elpaca/" user-local-directory))
+  ;;(defvar elpaca-directory (expand-file-name "elpaca" (if wsl? user-local-directory user-emacs-directory)))
+  (defvar elpaca-builds-directory (expand-file-name "var/elpaca/build" (if wsl? user-local-directory user-emacs-directory)))
+  (defvar elpaca-cache-directory (expand-file-name "var/elpaca/menus" user-emacs-directory))
+  (defvar elpaca-repos-directory (expand-file-name "libraries" emacy-directory))
+  (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                                :ref nil
+                                :files (:defaults (:exclude "extensions"))
+                                :build (:not elpaca--activate-package)))
 
-(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-       (build (expand-file-name "elpaca/" elpaca-builds-directory))
-       (order (cdr elpaca-order))
-       (default-directory repo))
-  (add-to-list 'load-path (if (file-exists-p build) build repo))
-  (unless (file-exists-p repo)
-    (make-directory repo t)
-    (condition-case-unless-debug err
-      (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-               ((zerop (call-process "git" nil buffer t "clone"
-                                     (plist-get order :repo) repo)))
-               ((zerop (call-process "git" nil buffer t "checkout"
-                                     (or (plist-get order :ref) "--"))))
-               (emacs (concat invocation-directory invocation-name))
-               ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                     "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-               ((require 'elpaca))
-               ((elpaca-generate-autoloads "elpaca" repo)))
-        (kill-buffer buffer)
-        (error "%s" (with-current-buffer buffer (buffer-string))))
-      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
-  (unless (require 'elpaca-autoloads nil t)
-      (require 'elpaca)
-      (elpaca-generate-autoloads "elpaca" repo)
-      (load "./elpaca-autoloads"))
-  (add-hook 'after-init-hook #'elpaca-process-queues))
+  (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+         (build (expand-file-name "elpaca/" elpaca-builds-directory))
+         (order (cdr elpaca-order))
+         (default-directory repo))
+    (add-to-list 'load-path (if (file-exists-p build) build repo))
+    (unless (file-exists-p repo)
+      (make-directory repo t)
+      (condition-case-unless-debug err
+        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                 ((zerop (call-process "git" nil buffer t "clone"
+                                       (plist-get order :repo) repo)))
+                 ((zerop (call-process "git" nil buffer t "checkout"
+                                       (or (plist-get order :ref) "--"))))
+                 (emacs (concat invocation-directory invocation-name))
+                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                 ((require 'elpaca))
+                 ((elpaca-generate-autoloads "elpaca" repo)))
+          (kill-buffer buffer)
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+        ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+    (unless (require 'elpaca-autoloads nil t)
+        (require 'elpaca)
+        (elpaca-generate-autoloads "elpaca" repo)
+        (load "./elpaca-autoloads"))
+    (add-hook 'after-init-hook #'elpaca-process-queues))
 
-(defun emacy/elpaca--link-build-files (e)
-  "Link E's :files into its builds subdirectory."
-  (elpaca--signal e "Linking build files" 'linking)
-  (let* ((build-dir (elpaca<-build-dir e))
-         (files (elpaca--files e)))
-    (when (file-exists-p build-dir) (delete-directory build-dir 'recusrive))
-    (make-directory build-dir 'parents)
-    (dolist (spec files)
-      (when-let ((file   (car spec))
-                 ((file-exists-p file))
-                 (link   (cdr spec)))
-        (make-directory (file-name-directory link) 'parents)
-        ;; (ignore-errors (make-symbolic-link file link 'overwrite))
-        (condition-case err
-           (make-symbolic-link file link 'overwrite)
-           (file-already-exists nil)))))
-        ;;(make-symbolic-link file link 'overwrite)
-        ;;(copy-file file link :ok-if-already-exists 'overwrite)
+  (defun emacy/elpaca--link-build-files (e)
+    "Link E's :files into its builds subdirectory."
+    (elpaca--signal e "Linking build files" 'linking)
+    (let* ((build-dir (elpaca<-build-dir e))
+           (files (elpaca--files e)))
+      (when (file-exists-p build-dir) (delete-directory build-dir 'recusrive))
+      (make-directory build-dir 'parents)
+      (dolist (spec files)
+        (when-let ((file   (car spec))
+                   ((file-exists-p file))
+                   (link   (cdr spec)))
+          (make-directory (file-name-directory link) 'parents)
+          ;; (ignore-errors (make-symbolic-link file link 'overwrite))
+          (condition-case err
+             (make-symbolic-link file link 'overwrite)
+             (file-already-exists nil)))))
+          ;;(make-symbolic-link file link 'overwrite)
+          ;;(copy-file file link :ok-if-already-exists 'overwrite)
 
-  (elpaca--continue-build e "Build files linked"))
+    (elpaca--continue-build e "Build files linked"))
 
-(when windows?
-  (advice-add 'elpaca--link-build-files :override 'emacy/elpaca--link-build-files))
+  (when windows?
+    (advice-add 'elpaca--link-build-files :override 'emacy/elpaca--link-build-files))
 
-(elpaca `(,@elpaca-order))
-  ;; (elpaca use-package)
+  (elpaca `(,@elpaca-order))
+    ;; (elpaca use-package)
 
-  ;; Install use-package support
-(elpaca elpaca-use-package
-  ;; Enable :elpaca use-package keyword.
-  (elpaca-use-package-mode)
-  ;; Assume :elpaca t unless otherwise specified.
-  (setq elpaca-use-package-by-default t))
+    ;; Install use-package support
+  (elpaca elpaca-use-package
+    ;; Enable :elpaca use-package keyword.
+    (elpaca-use-package-mode)
+    ;; Assume :elpaca t unless otherwise specified.
+    (setq elpaca-use-package-by-default t))
 
-  ;; Block until current queue processed.
-(elpaca-wait)
+    ;; Block until current queue processed.
+  (elpaca-wait)
 #+end_src
 
 *** disable package.el
@@ -195,18 +196,34 @@ baisc constants for operating system
   (when windows? (add-subdirs-to-load-path elpaca-repos-directory))
 #+end_src
 
+** no-littering
+#+begin_src emacs-lisp
+  (use-package no-littering
+               :config
+               (setq suctom-file (no-littering-expand-etc-file-name "custom.el")))
+#+end_src
+
+*** eln-cache
+#+header :tangle early-init.el
+#+begin_src emacs-lisp
+    (when (fboundp 'startup-redirect-eln-cache)
+      (startup-redirect-eln-cache
+       (convert-standard-filename
+          (expand-file-name  "var/eln-cache/" user-emacs-directory))))
+#+end_src
+
 * keybindings
 ** general
 #+begin_src emacs-lisp
   (use-package general
+    :demand t
     :config
     (general-override-mode)
     (general-auto-unbind-keys)
     (general-evil-setup)
     (general-define-key
-     :keymaps 'minibuffer-mode-map
-     "C-j" 'vertico-next
-     "C-k" 'vertico-last))
+     :keymaps 'minibuffer-mode-map))
+  (elpaca-wait)
 #+end_src
 
 * ui
@@ -651,8 +668,7 @@ baisc constants for operating system
     :init
     (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
     (setq evil-want-keybinding nil)
-    :config
-    (evil-mode 1))
+    :config (evil-mode 1))
 
   (use-package evil-collection
     :after (evil)
@@ -671,17 +687,18 @@ baisc constants for operating system
   ;;(use-package citre
   ;;  :defer t)
 #+end_src
+** projectile
+#+begin_src emacs-lisp
+  (use-package projectile)
+#+end_src
 ** lsp-bridge
 #+begin_src emacs-lisp
   (use-package posframe)
-  (use-package yasnippet
-    :config
-    (yas-global-mode 1))
+  (use-package yasnippet :config (yas-global-mode 1))
 
   (use-package lsp-bridge
     :elpaca (lsp-bridge :host github :repo "manateelazycat/lsp-bridge" :files ("*" (:exclude ".git")))
-    :config
-    (global-lsp-bridge-mode))
+    :config (global-lsp-bridge-mode))
 #+end_src
 ** treesit
 #+begin_src emacs-lisp
@@ -730,6 +747,12 @@ baisc constants for operating system
           (typescript-mode . typescript-ts-mode)))
 
   (add-hook 'emacs-lisp-mode-hook #'(lambda () (treesit-parser-create 'elisp)))
+  ;;(setq treesit-extra-load-path (expand-file-name "var/treesit" user-emacs-directory))
+  (use-package treesit-auto
+    :demand t
+    :config
+    (setq treesit-auto-install 'prompt)
+    (global-treesit-auto-mode))
 #+end_src
 * misc
 ** mind-wave
@@ -746,7 +769,11 @@ baisc constants for operating system
   ;; Enable vertico
   (use-package vertico
     :init
-    (vertico-mode))
+    (vertico-mode)
+    :general
+    (:keymaps 'minibuffer-mode-map
+              "C-j" 'vertico-next
+              "C-k" 'vertico-last))
 
   ;; Persist history over Emacs restarts. Vertico sorts by history position.
   (savehist-mode)
