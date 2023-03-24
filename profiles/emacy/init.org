@@ -3,7 +3,7 @@
 :HEADER-ARGS: :tangle init.el
 :END:
 #+TITLE: init.el
-#+AUTHOR: Lishuzhi
+#+AUTHOR: lishuzhi
 #+STARTUP: content
 
 https://remacs.cc/
@@ -104,7 +104,7 @@ baisc constants for operating system
   (defvar elpaca-installer-version 0.3)
   ;;(defvar elpaca-directory (expand-file-name "elpaca/" user-local-directory))
   ;;(defvar elpaca-directory (expand-file-name "elpaca" (if wsl? user-local-directory user-emacs-directory)))
-  (defvar elpaca-builds-directory (expand-file-name "var/elpaca/build" (if wsl? user-local-directory user-emacs-directory)))
+  (defvar elpaca-builds-directory (expand-file-name "var/elpaca/builds" (if wsl? user-local-directory user-emacs-directory)))
   (defvar elpaca-cache-directory (expand-file-name "var/elpaca/menus" user-emacs-directory))
   (defvar elpaca-repos-directory (expand-file-name "libraries" emacy-directory))
   (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
@@ -204,7 +204,7 @@ baisc constants for operating system
 #+end_src
 
 *** eln-cache
-#+header :tangle early-init.el
+#+header: :tangle no
 #+begin_src emacs-lisp
     (when (fboundp 'startup-redirect-eln-cache)
       (startup-redirect-eln-cache
@@ -748,10 +748,9 @@ baisc constants for operating system
 
   (add-hook 'emacs-lisp-mode-hook #'(lambda () (treesit-parser-create 'elisp)))
   ;;(setq treesit-extra-load-path (expand-file-name "var/treesit" user-emacs-directory))
+
   (use-package treesit-auto
-    :demand t
     :config
-    (setq treesit-auto-install 'prompt)
     (global-treesit-auto-mode))
 #+end_src
 * misc
