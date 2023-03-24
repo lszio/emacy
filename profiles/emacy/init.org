@@ -103,8 +103,8 @@ baisc constants for operating system
 #+begin_src emacs-lisp
   (defvar elpaca-installer-version 0.3)
   ;;(defvar elpaca-directory (expand-file-name "elpaca/" user-local-directory))
-  ;;(defvar elpaca-directory (expand-file-name "elpaca" (if wsl? user-local-directory user-emacs-directory)))
-  (defvar elpaca-builds-directory (expand-file-name "var/elpaca/builds" (if wsl? user-local-directory user-emacs-directory)))
+  (defvar elpaca-directory (expand-file-name "var/elpaca" (if wsl? user-local-directory user-emacs-directory)))
+  (defvar elpaca-builds-directory (expand-file-name "builds" elpaca-directory))
   (defvar elpaca-cache-directory (expand-file-name "var/elpaca/menus" user-emacs-directory))
   (defvar elpaca-repos-directory (expand-file-name "libraries" emacy-directory))
   (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
@@ -203,7 +203,7 @@ baisc constants for operating system
                (setq suctom-file (no-littering-expand-etc-file-name "custom.el")))
 #+end_src
 
-*** eln-cache
+*** TODO eln-cache
 #+header: :tangle no
 #+begin_src emacs-lisp
     (when (fboundp 'startup-redirect-eln-cache)
@@ -682,7 +682,7 @@ baisc constants for operating system
 ** base
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters
-    :hook (prog-mode rainbow-delimiters-mode))
+    :hook (prog-mode . rainbow-delimiters-mode))
 
   ;;(use-package citre
   ;;  :defer t)
@@ -747,11 +747,68 @@ baisc constants for operating system
           (typescript-mode . typescript-ts-mode)))
 
   (add-hook 'emacs-lisp-mode-hook #'(lambda () (treesit-parser-create 'elisp)))
-  ;;(setq treesit-extra-load-path (expand-file-name "var/treesit" user-emacs-directory))
+  (setq treesit-extra-load-path (list (expand-file-name "var/treesit" user-emacs-directory)))
 
   (use-package treesit-auto
     :config
     (global-treesit-auto-mode))
+#+end_src
+** langs
+*** web-dev
+#+begin_src emacs-lisp
+  (use-package css-mode
+    :elpaca nil
+    :init (setq css-indent-offset 2))
+
+  ;; SCSS
+  (use-package scss-mode
+    :init
+    ;; Disable complilation on save
+    (setq scss-compile-at-save nil))
+
+  ;; LESS
+  (unless (fboundp 'less-css-mode)
+    (use-package less-css-mode))
+
+  ;; JSON
+  (unless (fboundp 'js-json-mode)
+    (use-package json-mode))
+
+  (use-package js2-mode
+    :mode (("\\.js\\'" . js2-mode)
+           ("\\.jsx\\'" . js2-jsx-mode))
+    :interpreter (("node" . js2-mode)
+                  ("node" . js2-jsx-mode))
+    :hook ((js2-mode . js2-imenu-extras-mode)
+           (js2-mode . js2-highlight-unused-variables-mode)))
+
+  (use-package prettier
+    :diminish
+    :hook ((js-mode js2-mode css-mode sgml-mode web-mode) . prettier-mode)
+    :init (setq prettier-pre-warm 'none))
+
+  (use-package typescript-mode
+    :mode ("\\.ts[x]\\'" . typescript-mode))
+
+  ;; Major mode for editing web templates
+  (use-package web-mode
+    :mode "\\.\\(phtml\\|php\\|[gj]sp\\|as[cp]x\\|erb\\|djhtml\\|html?\\|hbs\\|ejs\\|jade\\|swig\\|tm?pl\\|vue\\)$"
+    :config
+    (setq web-mode-markup-indent-offset 2)
+    (setq web-mode-css-indent-offset 2)
+    (setq web-mode-code-indent-offset 2))
+
+  ;; Adds node_modules/.bin directory to `exec_path'
+  (use-package add-node-modules-path
+    :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
+
+  ;; REST
+  (use-package restclient
+    :mode ("\\.http\\'" . restclient-mode)
+    :config
+    (use-package restclient-test
+      :diminish
+      :hook (restclient-mode . restclient-test-mode)))
 #+end_src
 * misc
 ** mind-wave
