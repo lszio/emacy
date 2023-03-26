@@ -1,6 +1,6 @@
 :PROPERTIES:
 :ID: emacy-config
-:HEADER-ARGS: :tangle init.el
+:HEADER-ARGS: :tangle init.el :noweb yes
 :END:
 #+TITLE: init.el
 #+AUTHOR: lishuzhi
@@ -214,18 +214,199 @@ baisc constants for operating system
 
 * keybindings
 ** general
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :lexical t
   (use-package general
     :demand t
     :config
     (general-override-mode)
     (general-auto-unbind-keys)
     (general-evil-setup)
-    (general-define-key
-     :keymaps 'minibuffer-mode-map))
+    <<general-configs>>)
   (elpaca-wait)
 #+end_src
+*** configs
+:PROPERTIES:
+:HEADER-ARGS: :noweb-ref general-configs
+:END:
+#+begin_src emacs-lisp :lexical t
+  (general-define-key
+   :keymaps 'override
+   :states '(insert normal hybrid motion visual operator emacs)
+   :prefix-map '+prefix-map
+   :prefix "SPC"
+   :global-prefix "S-SPC")
 
+  (general-create-definer global-definer
+    :wk-full-keys nil
+    :keymaps '+prefix-map)
+
+  (defmacro generate-general-global-definer (name infix-key &rest body)
+    "Create a definer named +general-global-NAME wrapping global-definer.
+    Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY."
+    (declare (indent 2))
+    (let* ((n (concat "+general-global-" name))
+           (prefix (intern (concat n "-map"))))
+      `(progn
+         (general-create-definer ,(intern n)
+           :wrapping global-definer
+           :prefix-map (quote ,prefix)
+           :infix ,infix-key
+           :wk-full-keys nil
+           "" '(:ignore t :which-key ,name))
+         (,(intern n) ,@body))))
+#+end_src
+**** applications
+#+begin_src emacs-lisp
+  (generate-general-global-definer "application" "a"
+    "p" '(:ignore t "elpaca")
+    "pb" 'elpaca-browse
+    "pr"  '((lambda () (interactive)
+              (let ((current-prefix-arg (not current-prefix-arg)))
+                (call-interactively #'elpaca-rebuild)))
+            :which-key "rebuild")
+    "pm" 'elpaca-manager
+    "pl" 'elpaca-log
+    "pi" 'elpaca-info
+    "pI" '((lambda () (interactive) (info "Elpaca"))
+           :which-key "elpaca-info")
+    "ps" 'elpaca-status
+    "pt" 'elpaca-try
+    "pv" 'elpaca-visit)
+#+end_src
+**** buffers
+#+begin_src emacs-lisp
+  (generate-general-global-definer "buffer" "b"
+    "d"  'kill-current-buffer
+    "o" '((lambda () (interactive) (switch-to-buffer nil))
+          :which-key "other-buffer")
+    "p"  'previous-buffer
+    "i"  'ibuffer
+    "r"  'rename-buffer
+    "R"  'revert-buffer
+    "M" '((lambda () (interactive) (switch-to-buffer "*Messages*"))
+          :which-key "messages-buffer")
+    "n"  'next-buffer
+    "s" '((lambda () (interactive) (switch-to-buffer "*scratch*"))
+          :which-key "scratch-buffer")
+    "TAB" '((lambda () (interactive) (switch-to-buffer nil))
+            :which-key "other-buffer"))
+#+end_src
+**** windows
+#+begin_src emacs-lisp
+   (generate-general-global-definer "window" "w"
+     "?" 'split-window-vertically
+     "=" 'balance-windows
+     "/" 'split-window-horizontally
+     "O" 'delete-other-windows
+     "X" '((lambda () (interactive) (call-interactively #'other-window) (kill-buffer-and-window))
+           :which-key "kill-other-buffer-and-window")
+     "d" 'delete-window
+     "h" 'windmove-left
+     "j" 'windmove-down
+     "k" 'windmove-up
+     "l" 'windmove-right
+     "o" 'other-window
+     "t" '((lambda () (interactive)
+             "toggle window dedication"
+             (set-window-dedicated-p (selected-window) (not (window-dedicated-p))))
+           :which-key "toggle window dedication")
+     "."  '(:ingore :which-key "resize")
+     ".h" '((lambda () (interactive)
+              (call-interactively (if (window-prev-sibling) #'enlarge-window-horizontally
+                                    #'shrink-window-horizontally)))
+            :which-key "divider left")
+     ".l" '((lambda () (interactive)
+              (call-interactively (if (window-next-sibling) #'enlarge-window-horizontally
+                                    #'shrink-window-horizontally)))
+            :which-key "divider right")
+     ".j" '((lambda () (interactive)
+              (call-interactively (if (window-next-sibling) #'enlarge-window #'shrink-window)))
+            :which-key "divider up")
+     ".k" '((lambda () (interactive)
+              (call-interactively (if (window-prev-sibling) #'enlarge-window #'shrink-window)))
+            :which-key "divider down")
+     "x" 'kill-buffer-and-window)
+#+end_src
+**** project
+#+begin_src emacs-lisp
+  (generate-general-global-definer "project" "p"
+    "b" '(:ignore t :which-key "buffer"))
+#+end_src
+**** others
+#+begin_src emacs-lisp
+  (generate-general-global-definer "link" "l")
+
+  (generate-general-global-definer "quit" "q"
+    "q" 'save-buffers-kill-emacs
+    "r" 'restart-emacs
+    "Q" 'kill-emacs)
+
+  (generate-general-global-definer "tab" "t")
+
+  (generate-general-global-definer "toggle" "T"
+    "d" '(:ignore t :which-key "debug")
+    "de" 'toggle-debug-on-error
+    "dq" 'toggle-debug-on-quit
+    "s" '(:ignore t :which-key "spelling"))
+
+  (generate-general-global-definer "help" "h"
+    "d"   '(:ignore t :which-key "describe")
+    "df"  'describe-function
+    "dF"  'describe-face
+    "dk"  'describe-key
+    "dt"  '((lambda () (interactive) (describe-text-properties (point)))
+            :which-key "describe-text-properties")
+    "dv"  'describe-variable
+    "h"   (general-simulate-key "C-h" :which-key "help"))
+
+  (generate-general-global-definer "git/version-control" "g")
+
+  (generate-general-global-definer "frame" "F"
+    "D" 'delete-other-frames
+    "F" 'select-frame-by-name
+    "O" 'other-frame-prefix
+    "c" '(:ingore t :which-key "color")
+    "cb" 'set-background-color
+    "cc" 'set-cursor-color
+    "cf" 'set-foreground-color
+    "f" 'set-frame-font
+    "m" 'make-frame-on-monitor
+    "n" 'next-window-any-frame
+    "o" 'other-frame
+    "p" 'previous-window-any-frame
+    "r" 'set-frame-name)
+#+end_src
+**** files
+#+begin_src emacs-lisp
+  (generate-general-global-definer "file" "f"
+    "d"   '((lambda (&optional arg)
+              (interactive "P")
+              (let ((buffer (when arg (current-buffer))))
+                (diff-buffer-with-file buffer))) :which-key "diff-with-file")
+    "e"   '(:ignore t :which-key "edit")
+    "ed"  '((lambda () (interactive) (find-file-existing literate-file) (widen))
+            :which-key "dotfile")
+    "eR"  '((lambda () (interactive) (load-file user-init-file))
+            :which-key "reload-init.el")
+    "et"  '((lambda ()
+              (interactive)
+              (save-restriction
+                (widen)
+                (check-parens)
+                (org-babel-tangle-file literate-file))
+              (load-file "~/.emacs.d/init.el"))
+            :which-key "tangle/reload-init.el")
+    "l"   '((lambda (&optional arg)
+              (interactive "P")
+              (call-interactively (if arg #'find-library-other-window #'find-library)))
+            :which-key "+find-library")
+    "p"   'find-function-at-point
+    "P"   'find-function
+    "R"   'rename-file-and-buffer
+    "s"   'save-buffer
+    "v"   'find-variable-at-point
+    "V"   'find-variable)
+#+end_src
 * ui
 ** Misc
 #+begin_src emacs-lisp
@@ -689,7 +870,26 @@ baisc constants for operating system
 #+end_src
 ** projectile
 #+begin_src emacs-lisp
-  (use-package projectile)
+  (use-package projectile
+    :general
+    (+general-global-project
+      "!" 'projectile-run-shell-command-in-root
+      "%" 'projectile-replace-regexp
+      "&" 'projectile-run-async-shell-command-in-root
+      "A" 'projectile-toggle-between-implementation-and-test
+      "bn" 'projectile-next-project-buffer
+      "bp" 'projectile-previous-project-buffer
+      "c" 'projectile-compile-project
+      "D" 'projectile-dired
+      "e" 'projectile-edit-dir-locals
+      "g" 'projectile-find-tag
+      "G" 'projectile-regenerate-tags
+      "I" 'projectile-invalidate-cache
+      "k" 'projectile-kill-buffers
+      "R" 'projectile-replace
+      "s" 'projectile-save-project-buffers
+      "T" 'projectile-test-project
+      "v" 'projectile-vc))
 #+end_src
 ** lsp-bridge
 #+begin_src emacs-lisp
