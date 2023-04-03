@@ -1,16 +1,24 @@
-:PROPERTIES:
-:ID: emacy-config
-:HEADER-ARGS: :tangle init.el :noweb yes
-:END:
+;-*- eval: (load-file "./lisp/init-dev.el");   -*-
 #+TITLE: init.el
 #+AUTHOR: lishuzhi
 #+STARTUP: content
+#+PROPERTY: id emacy-config
+#+PROPERTY: header-args :tangle init.el :noweb yes :session init
 
 https://remacs.cc/
 
-* headers
+* TODO Tasks
+** TODO line numbers width change
+xxx => xxxx lead to width change
+** TODO which key description override by menu name
+eg. description for "SPC a p <xx>" was override by "SPC p" as "project"
+** TODO config packages
+*** TODO keyfreq
+[[http://blog.binchen.org/posts/how-to-be-extremely-efficient-in-emacs.html]]
+** TODO init debug config
+* Header
 ** early-init.el
-#+header: :tangle early-init.el
+#+header: :tangle early-init.el :session early
 #+begin_src emacs-lisp
   ;;; early-init.el --- Emacs pre-initialization config -*- lexical-binding: t -*-
   ;;; Commentary:
@@ -25,12 +33,10 @@ https://remacs.cc/
   ;;; Code:
 #+end_src
 
-* early-init.el
-:PROPERTIES:
-:HEADER-ARGS: :tangle early-init.el
-:END:
-** Base
-#+BEGIN_SRC emacs-lisp
+* Basic
+** defaults
+#+header: :tangle early-init.el :session early
+#+begin_src emacs-lisp
   ;; 设置垃圾回收参数
   (setq gc-cons-threshold most-positive-fixnum)
   (setq gc-cons-percentage 0.6)
@@ -61,9 +67,9 @@ https://remacs.cc/
   (global-display-line-numbers-mode)
   (display-time-mode)
   (toggle-frame-maximized)
-#+END_SRC
-** Constants
-baisc constants for operating system
+#+end_src
+** constants
+#+header: :tangle early-init.el
 #+begin_src emacs-lisp
 (defconst windows? (memq system-type '(cygwin windows-nt ms-dos)) "are we on windows")
 (defconst macos? (eq system-type 'darwin) "are we on macos")
@@ -72,34 +78,29 @@ baisc constants for operating system
 (defconst wsl? (and linux? (string-match-p "microsoft" operating-system-release)) "are we on wsl")
 #+end_src
 
-* init.el
-** Variables
+** variables
 #+begin_src emacs-lisp
   (defvar emacy-directory "~/Emacy")
   (defvar user-local-directory "~/.local")
 #+end_src
 
-** profiling
+** load-path
 #+begin_src emacs-lisp
-(defun enable-profiler ()
-  (add-hook 'elpaca-after-init-hook
-    (lambda ()
-      (message "Emacs loaded in %s with %d garbage collections."
-               (format "%.2f seconds"
-                       (float-time (time-subtract (current-time) before-init-time)))
-               gcs-done)))
+  ;; 将lisp目录放到加载路径的前面以加快启动速度
+  (let ((dir (locate-user-emacs-file "lisp")))
+    (add-to-list 'load-path (file-name-as-directory dir)))
 
-  (profiler-start 'cpu+mem)
-  (add-hook 'elpaca-after-init-hook (lambda () (profiler-stop) (profiler-report))))
-
-(when (member "--with-profiler" command-line-args)
-  (enable-profiler)
-  (remove "--with-profiler" command-line-args))
+  (defun add-subdirs-to-load-path (dir)
+  "Recursive add directories to `load-path'."
+  (let ((default-directory (file-name-as-directory dir)))
+    (add-to-list 'load-path dir)
+    (normal-top-level-add-subdirs-to-load-path)))
+  ;;(when windows? (add-subdirs-to-load-path elpaca-repos-directory))
 #+end_src
-
-** elpaca
+** package manager
+*** elpaca
 [[https://github.com/progfolio/elpaca][elpaca]]
-*** install
+**** install elpaca 
 #+begin_src emacs-lisp
   (defvar elpaca-installer-version 0.3)
   ;;(defvar elpaca-directory (expand-file-name "elpaca/" user-local-directory))
@@ -164,7 +165,6 @@ baisc constants for operating system
     (advice-add 'elpaca--link-build-files :override 'emacy/elpaca--link-build-files))
 
   (elpaca `(,@elpaca-order))
-    ;; (elpaca use-package)
 
     ;; Install use-package support
   (elpaca elpaca-use-package
@@ -176,219 +176,158 @@ baisc constants for operating system
     ;; Block until current queue processed.
   (elpaca-wait)
 #+end_src
-
-*** disable package.el
+***** disable package.el
 #+begin_src emacs-lisp :tangle early-init.el
   (setq package-enable-at-startup nil)
 #+end_src
-
-** require lisps
+** keybindings
+*** evil
 #+begin_src emacs-lisp
-  ;; 将lisp目录放到加载路径的前面以加快启动速度
-  (let ((dir (locate-user-emacs-file "lisp")))
-    (add-to-list 'load-path (file-name-as-directory dir)))
+  (global-auto-revert-mode)
 
-  (defun add-subdirs-to-load-path (dir)
-  "Recursive add directories to `load-path'."
-  (let ((default-directory (file-name-as-directory dir)))
-    (add-to-list 'load-path dir)
-    (normal-top-level-add-subdirs-to-load-path)))
-  (when windows? (add-subdirs-to-load-path elpaca-repos-directory))
+  (use-package evil
+    :demand t
+    :preface (setq evil-want-keybinding nil)
+    :custom
+    (evil-want-integration t) ;; This is optional since it's already set to t by default.
+    (evil-want-C-i-jump t)
+    (evil-shift-width 2 "same behavior for vim")
+    (evil-complete-all-buffers nil)
+    :config
+    (defun +evil-kill-minibuffer ()
+    (interactive)
+    (when (windowp (active-minibuffer-window))
+        (evil-ex-search-exit)))
+
+    (add-hook 'mouse-leave-buffer-hook #'+evil-kill-minibuffer)
+    (evil-mode))
+
+  (use-package evil-collection
+    :after (evil)
+    :config (evil-collection-init)
+    :custom
+    (evil-collection-elpaca-want-g-filters nil)
+    (evil-collection-setup-minibuffer t "Add evil bindings to minibuffer")
+    (evil-collection-company-use-tng t))
 #+end_src
 
-** no-littering
-#+begin_src emacs-lisp
-  (use-package no-littering
-               :config
-               (setq suctom-file (no-littering-expand-etc-file-name "custom.el")))
-#+end_src
-
-*** TODO eln-cache
-#+header: :tangle no
-#+begin_src emacs-lisp
-    (when (fboundp 'startup-redirect-eln-cache)
-      (startup-redirect-eln-cache
-       (convert-standard-filename
-          (expand-file-name  "var/eln-cache/" user-emacs-directory))))
-#+end_src
-
-* keybindings
-** general
+*** general
 #+begin_src emacs-lisp :lexical t
   (use-package general
     :demand t
     :config
     (general-override-mode)
     (general-auto-unbind-keys)
-    (general-evil-setup)
+    ;;(general-evil-setup)
     <<general-configs>>)
   (elpaca-wait)
 #+end_src
-*** configs
+**** menus
 :PROPERTIES:
 :HEADER-ARGS: :noweb-ref general-configs
 :END:
 #+begin_src emacs-lisp :lexical t
   (general-define-key
    :keymaps 'override
-   :states '(insert normal hybrid motion visual operator emacs)
-   :prefix-map '+prefix-map
+   :states '(insert normal visual emacs motion operator)
+   :prefix-map 'emacy-map
    :prefix "SPC"
    :global-prefix "S-SPC")
 
-  (general-create-definer global-definer
+  (general-create-definer emacy-definer
     :wk-full-keys nil
-    :keymaps '+prefix-map)
+    :keymaps 'emacy-map)
 
-  (defmacro generate-general-global-definer (name infix-key &rest body)
-    "Create a definer named +general-global-NAME wrapping global-definer.
-    Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY."
-    (declare (indent 2))
-    (let* ((n (concat "+general-global-" name))
-           (prefix (intern (concat n "-map"))))
-      `(progn
-         (general-create-definer ,(intern n)
-           :wrapping global-definer
-           :prefix-map (quote ,prefix)
-           :infix ,infix-key
-           :wk-full-keys nil
-           "" '(:ignore t :which-key ,name))
-         (,(intern n) ,@body))))
-#+end_src
-**** applications
-#+begin_src emacs-lisp
-  (generate-general-global-definer "application" "a"
-    "p" '(:ignore t "elpaca")
-    "pb" 'elpaca-browse
-    "pr"  '((lambda () (interactive)
-              (let ((current-prefix-arg (not current-prefix-arg)))
-                (call-interactively #'elpaca-rebuild)))
-            :which-key "rebuild")
-    "pm" 'elpaca-manager
-    "pl" 'elpaca-log
-    "pi" 'elpaca-info
-    "pI" '((lambda () (interactive) (info "Elpaca"))
-           :which-key "elpaca-info")
-    "ps" 'elpaca-status
-    "pt" 'elpaca-try
-    "pv" 'elpaca-visit)
-#+end_src
-**** buffers
-#+begin_src emacs-lisp
-  (generate-general-global-definer "buffer" "b"
-    "d"  'kill-current-buffer
-    "o" '((lambda () (interactive) (switch-to-buffer nil))
+  (emacy-definer
+    "!"  'shell-command
+    ":"  'eval-expression
+    "."  'repeat
+    "z"  '((lambda (local) (interactive "p")
+              (unless repeat-mode (repeat-mode))
+              (let ((local current-prefix-arg)
+                    (current-prefix-arg nil))
+                (call-interactively (if local #'text-scale-adjust #'global-text-scale-adjust))))
+            :wk "zoom")
+
+    "a" '(:ignore t :wk "application")
+    "b" '(:ignore t :wk "buffer")
+    "e" '(:ignore t :wk "eval")
+    "w" '(:ignore t :wk "window")
+    "p" '(:ignore t :wk "project")
+    "f" '(:ignore t :wk "file")
+    "F" '(:ignore t :wk "frame")
+    "T" '(:ignore t :wk "toggle")
+    "g" '(:ignore t :wk "git")
+    "q" '(:ignore t :wk "quit")
+
+    "ap" '(:ignore t :wk "elpaca")
+    "apb" 'elpaca-browse
+    "apr" '((lambda () (interactive) (let ((current-prefix-arg (not current-prefix-arg))) (call-interactively #'elpaca-rebuild))) :which-key "rebuild")
+    "apm" 'elpaca-manager
+    "apl" 'elpaca-log
+    "api" 'elpaca-info
+    "apI" '((lambda () (interactive) (info "Elpaca")) :which-key "elpaca-info")
+    "aps" 'elpaca-status
+    "apt" 'elpaca-try
+    "apv" 'elpaca-visit
+
+    "bd"  'kill-current-buffer
+    "bo" '((lambda () (interactive) (switch-to-buffer nil))
           :which-key "other-buffer")
-    "p"  'previous-buffer
-    "i"  'ibuffer
-    "r"  'rename-buffer
-    "R"  'revert-buffer
-    "M" '((lambda () (interactive) (switch-to-buffer "*Messages*"))
-          :which-key "messages-buffer")
-    "n"  'next-buffer
-    "s" '((lambda () (interactive) (switch-to-buffer "*scratch*"))
-          :which-key "scratch-buffer")
-    "TAB" '((lambda () (interactive) (switch-to-buffer nil))
-            :which-key "other-buffer"))
-#+end_src
-**** windows
-#+begin_src emacs-lisp
-   (generate-general-global-definer "window" "w"
-     "?" 'split-window-vertically
-     "=" 'balance-windows
-     "/" 'split-window-horizontally
-     "O" 'delete-other-windows
-     "X" '((lambda () (interactive) (call-interactively #'other-window) (kill-buffer-and-window))
-           :which-key "kill-other-buffer-and-window")
-     "d" 'delete-window
-     "h" 'windmove-left
-     "j" 'windmove-down
-     "k" 'windmove-up
-     "l" 'windmove-right
-     "o" 'other-window
-     "t" '((lambda () (interactive)
-             "toggle window dedication"
-             (set-window-dedicated-p (selected-window) (not (window-dedicated-p))))
-           :which-key "toggle window dedication")
-     "."  '(:ingore :which-key "resize")
-     ".h" '((lambda () (interactive)
-              (call-interactively (if (window-prev-sibling) #'enlarge-window-horizontally
-                                    #'shrink-window-horizontally)))
-            :which-key "divider left")
-     ".l" '((lambda () (interactive)
-              (call-interactively (if (window-next-sibling) #'enlarge-window-horizontally
-                                    #'shrink-window-horizontally)))
-            :which-key "divider right")
-     ".j" '((lambda () (interactive)
-              (call-interactively (if (window-next-sibling) #'enlarge-window #'shrink-window)))
-            :which-key "divider up")
-     ".k" '((lambda () (interactive)
-              (call-interactively (if (window-prev-sibling) #'enlarge-window #'shrink-window)))
-            :which-key "divider down")
-     "x" 'kill-buffer-and-window)
-#+end_src
-**** project
-#+begin_src emacs-lisp
-  (generate-general-global-definer "project" "p"
-    "b" '(:ignore t :which-key "buffer"))
-#+end_src
-**** others
-#+begin_src emacs-lisp
-  (generate-general-global-definer "link" "l")
+    "bp"  'previous-buffer
+    "bi"  'ibuffer
+    "br"  'rename-buffer
+    "bR"  'revert-buffer
+    "bM" '((lambda () (interactive) (switch-to-buffer "*Messages*")) :which-key "messages-buffer")
+    "bn"  'next-buffer
+    "bs" '((lambda () (interactive) (switch-to-buffer "*scratch*")) :which-key "scratch-buffer")
+    "b TAB" '((lambda () (interactive) (switch-to-buffer nil)) :which-key "other-buffer")
 
-  (generate-general-global-definer "quit" "q"
-    "q" 'save-buffers-kill-emacs
-    "r" 'restart-emacs
-    "Q" 'kill-emacs)
+    "w=" 'balance-windows
+    "w/" 'split-window-horizontally
+    "w?" 'split-window-vertically
+    "wO" 'delete-other-windows
+    "wX" '((lambda () (interactive) (call-interactively #'other-window) (kill-buffer-and-window)) :which-key "kill-other-buffer-and-window")
+    "wx" 'kill-buffer-and-window
+    "wd" 'delete-window
+    "wh" 'windmove-left
+    "wj" 'windmove-down
+    "wk" 'windmove-up
+    "wl" 'windmove-right
+    "wo" 'other-window
+    "wt" '((lambda () (interactive)
+            (set-window-dedicated-p (selected-window) (not (window-dedicated-p))))
+          :which-key "toggle window dedication")
+    "w."  '(:ingore :which-key "resize")
+    "w.h" '((lambda () (interactive)
+             (call-interactively (if (window-prev-sibling) #'enlarge-window-horizontally
+                                   #'shrink-window-horizontally)))
+           :which-key "divider left")
+    "w.l" '((lambda () (interactive)
+             (call-interactively (if (window-next-sibling) #'enlarge-window-horizontally
+                                   #'shrink-window-horizontally)))
+           :which-key "divider right")
+    "w.j" '((lambda () (interactive)
+             (call-interactively (if (window-next-sibling) #'enlarge-window #'shrink-window)))
+           :which-key "divider up")
+    "w.k" '((lambda () (interactive)
+             (call-interactively (if (window-prev-sibling) #'enlarge-window #'shrink-window)))
+           :which-key "divider down")
 
-  (generate-general-global-definer "tab" "t")
+    "eb" 'eval-buffer
+    "ed" 'eval-defun
+    "ee" 'eval-expression
+    "ep" 'pp-eval-last-sexp
+    "es" 'eval-last-sexp
 
-  (generate-general-global-definer "toggle" "T"
-    "d" '(:ignore t :which-key "debug")
-    "de" 'toggle-debug-on-error
-    "dq" 'toggle-debug-on-quit
-    "s" '(:ignore t :which-key "spelling"))
-
-  (generate-general-global-definer "help" "h"
-    "d"   '(:ignore t :which-key "describe")
-    "df"  'describe-function
-    "dF"  'describe-face
-    "dk"  'describe-key
-    "dt"  '((lambda () (interactive) (describe-text-properties (point)))
-            :which-key "describe-text-properties")
-    "dv"  'describe-variable
-    "h"   (general-simulate-key "C-h" :which-key "help"))
-
-  (generate-general-global-definer "git/version-control" "g")
-
-  (generate-general-global-definer "frame" "F"
-    "D" 'delete-other-frames
-    "F" 'select-frame-by-name
-    "O" 'other-frame-prefix
-    "c" '(:ingore t :which-key "color")
-    "cb" 'set-background-color
-    "cc" 'set-cursor-color
-    "cf" 'set-foreground-color
-    "f" 'set-frame-font
-    "m" 'make-frame-on-monitor
-    "n" 'next-window-any-frame
-    "o" 'other-frame
-    "p" 'previous-window-any-frame
-    "r" 'set-frame-name)
-#+end_src
-**** files
-#+begin_src emacs-lisp
-  (generate-general-global-definer "file" "f"
-    "d"   '((lambda (&optional arg)
+    "fd"   '((lambda (&optional arg)
               (interactive "P")
               (let ((buffer (when arg (current-buffer))))
                 (diff-buffer-with-file buffer))) :which-key "diff-with-file")
-    "e"   '(:ignore t :which-key "edit")
-    "ed"  '((lambda () (interactive) (find-file-existing literate-file) (widen))
-            :which-key "dotfile")
-    "eR"  '((lambda () (interactive) (load-file user-init-file))
-            :which-key "reload-init.el")
-    "et"  '((lambda ()
+    "fe"   '(:ignore t :which-key "edit")
+    "fed"  '((lambda () (interactive) (find-file-existing literate-file) (widen)) :which-key "dotfile")
+    "feR"  '((lambda () (interactive) (load-file user-init-file)) :which-key "reload-init.el")
+    "fet"  '((lambda ()
               (interactive)
               (save-restriction
                 (widen)
@@ -396,18 +335,306 @@ baisc constants for operating system
                 (org-babel-tangle-file literate-file))
               (load-file "~/.emacs.d/init.el"))
             :which-key "tangle/reload-init.el")
-    "l"   '((lambda (&optional arg)
-              (interactive "P")
-              (call-interactively (if arg #'find-library-other-window #'find-library)))
+    "fl"   '((lambda (&optional arg) (interactive "P") (call-interactively (if arg #'find-library-other-window #'find-library)))
             :which-key "+find-library")
-    "p"   'find-function-at-point
-    "P"   'find-function
-    "R"   'rename-file-and-buffer
-    "s"   'save-buffer
-    "v"   'find-variable-at-point
-    "V"   'find-variable)
+    "fp"   'find-function-at-point
+    "fP"   'find-function
+    "fR"   'rename-file-and-buffer
+    "fs"   'save-buffer
+    "fv"   'find-variable-at-point
+    "fV"   'find-variable
+
+    "FD" 'delete-other-frames
+    "FF" 'select-frame-by-name
+    "FO" 'other-frame-prefix
+    "Fc" '(:ingore t :which-key "color")
+    "Fcb" 'set-background-color
+    "Fcc" 'set-cursor-color
+    "Fcf" 'set-foreground-color
+    "Ff" 'set-frame-font
+    "Fm" 'make-frame-on-monitor
+    "Fn" 'next-window-any-frame
+    "Fo" 'other-frame
+    "Fp" 'previous-window-any-frame
+    "Fr" 'set-frame-name
+
+    "Td" '(:ignore t :which-key "debug")
+    "Tde" 'toggle-debug-on-error
+    "Tdq" 'toggle-debug-on-quit
+    )
 #+end_src
-* ui
+*** which-key
+#+begin_src emacs-lisp
+  (use-package which-key
+    :demand t
+    :init
+    (setq which-key-enable-extended-define-key t)
+    :config
+    (which-key-mode)
+    :custom
+    (which-key-side-window-location 'bottom)
+    (which-key-sort-order 'which-key-key-order-alpha)
+    (which-key-side-window-max-width 0.33)
+    (which-key-idle-delay 0.12)
+    :diminish which-key-mode)
+#+end_src
+
+** profile
+#+begin_src emacs-lisp
+(defun enable-profiler ()
+  (add-hook 'elpaca-after-init-hook
+    (lambda ()
+      (message "Emacs loaded in %s with %d garbage collections."
+               (format "%.2f seconds"
+                       (float-time (time-subtract (current-time) before-init-time)))
+               gcs-done)))
+
+  (profiler-start 'cpu+mem)
+  (add-hook 'elpaca-after-init-hook (lambda () (profiler-stop) (profiler-report))))
+
+(when (member "--with-profiler" command-line-args)
+  (enable-profiler)
+  (remove "--with-profiler" command-line-args))
+#+end_src
+** config tree
+#+begin_src emacs-lisp
+  (use-package no-littering
+               :config
+               (setq suctom-file (no-littering-expand-etc-file-name "custom.el")))
+#+end_src
+*** TODO eln-cache
+#+header: :tangle no
+#+begin_src emacs-lisp
+  (when (fboundp 'startup-redirect-eln-cache)
+    (startup-redirect-eln-cache
+     (convert-standard-filename
+        (expand-file-name  "var/eln-cache/" user-emacs-directory))))
+#+end_src
+** completion
+:PROPERTIES:
+:HEADER-ARGS: :tangle no
+:END:
+*** vertico
+#+begin_src emacs-lisp
+  ;; Enable vertico
+  (use-package vertico
+    :init
+    (vertico-mode)
+    :general
+    (:keymaps 'minibuffer-mode-map
+              "C-j" 'vertico-next
+              "C-k" 'vertico-last))
+
+  ;; Persist history over Emacs restarts. Vertico sorts by history position.
+  (savehist-mode)
+
+  ;; A few more useful configurations...
+  (use-package emacs
+    :elpaca nil
+    :init
+    ;; Add prompt indicator to `completing-read-multiple'.
+    ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
+    (defun crm-indicator (args)
+      (cons (format "[CRM%s] %s"
+                    (replace-regexp-in-string
+                     "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
+                     crm-separator)
+                    (car args))
+            (cdr args)))
+    (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
+
+    ;; Do not allow the cursor in the minibuffer prompt
+    (setq display-line-numbers-type 'relative)
+    (setq minibuffer-prompt-properties
+          '(read-only t cursor-intangible t face minibuffer-prompt))
+    (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+
+    ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
+    ;; Vertico commands are hidden in normal buffers.
+    ;; (setq read-extended-command-predicate
+    ;;       #'command-completion-default-include-p)
+
+    ;; Enable recursive minibuffers
+    (setq enable-recursive-minibuffers t))
+#+end_src
+*** orderless
+#+begin_src emacs-lisp
+  ;; support Pinyin first character match for orderless, avy etc.
+  (use-package pinyinlib :ensure t)
+
+  (use-package orderless
+    :ensure t
+    :init
+    (setq completion-styles '(orderless partial-completion basic))
+    (setq orderless-component-separator "[ &]") ; & is for company because space will break completion
+    (setq completion-category-defaults nil)
+    (setq completion-category-overrides nil)
+    :config
+    ;; make completion support pinyin, refer to
+    ;; https://emacs-china.org/t/vertico/17913/2
+    (defun completion--regex-pinyin (str) (orderless-regexp (pinyinlib-build-regexp-string str)))
+    (add-to-list 'orderless-matching-styles 'completion--regex-pinyin))
+#+end_src
+
+*** marginalia
+#+begin_src emacs-lisp
+  ;; minibuffer helpful annotations
+  (use-package marginalia
+    :ensure t
+    :hook (elpaca-after-init . marginalia-mode)
+    :custom
+    (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
+#+end_src
+
+*** consult
+#+begin_src emacs-lisp
+  (use-package consult
+  :ensure t
+  :after org
+  :bind (([remap goto-line]                     . consult-goto-line)
+         ([remap isearch-forward]               . consult-line-symbol-at-point) ; my-consult-ripgrep-or-line
+         ([remap switch-to-buffer]              . consult-buffer)
+         ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
+         ([remap switch-to-buffer-other-frame]  . consult-buffer-other-frame)
+         ([remap yank-pop]                      . consult-yank-pop)
+         ([remap apropos]                       . consult-apropos)
+         ([remap bookmark-jump]                 . consult-bookmark)
+         ([remap goto-line]                     . consult-goto-line)
+         ([remap imenu]                         . consult-imenu)
+         ([remap multi-occur]                   . consult-multi-occur)
+         ([remap recentf-open-files]            . consult-recent-file)
+         ("C-x j"                               . consult-mark)
+         ("C-c g"                               . consult-ripgrep)
+         ("C-c f"                               . consult-find)
+         ("\e\ef"                               . consult-locate) ; need to enable locate first
+         ("C-c n h"                             . my/consult-find-org-headings)
+         :map org-mode-map
+         ("C-c C-j"                             . consult-org-heading)
+         :map minibuffer-local-map
+         ("C-r"                                 . consult-history)
+         :map isearch-mode-map
+         ("C-;"                                 . consult-line)
+         :map prog-mode-map
+         ("C-c C-j"                             . consult-outline)
+         )
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+  :init
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  (setq register-preview-delay 0
+        register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  ;; MacOS locate doesn't support `--ignore-case --existing' args.
+  (setq consult-locate-args (pcase system-type
+                              ('gnu/linux "locate --ignore-case --existing --regex")
+                              ('darwin "mdfind -name")))
+  :config
+  (consult-customize
+   consult-theme
+   :preview-key '(:debounce 0.2 any)
+   consult-ripgrep consult-git-grep consult-grep
+   consult-bookmark consult-recent-file consult-xref
+   consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
+   :preview-key (kbd "M-."))
+
+  ;; Optionally configure the narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  (setq consult-narrow-key "<") ;; (kbd "C-+")
+
+  (autoload 'projectile-project-root "projectile")
+  (setq consult-project-root-function #'projectile-project-root)
+
+  ;; Use `consult-ripgrep' instead of `consult-line' in large buffers
+  (defun consult-line-symbol-at-point ()
+    "Consult line the synbol where the point is"
+    (interactive)
+    (consult-line (thing-at-point 'symbol))))
+#+end_src
+
+*** embark
+#+begin_src emacs-lisp
+  (use-package embark
+    :demand t
+    :ensure t
+    :bind
+    (("C-." . embark-act)         ;; pick some comfortable binding
+     ("C-;" . embark-dwim)        ;; good alternative: M-.
+     ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+
+    :init
+    ;; Optionally replace the key help with a completing-read interface
+    (setq prefix-help-command #'embark-prefix-help-command)
+
+    ;; Show the Embark target at point via Eldoc.  You may adjust the Eldoc
+    ;; strategy, if you want to see the documentation from multiple providers.
+    (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+    ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+
+    :config
+    ;; Hide the mode line of the Embark live/completions buffers
+    (add-to-list 'display-buffer-alist
+                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                   nil
+                   (window-parameters (mode-line-format . none)))))
+
+  ;; Consult users will also want the embark-consult package.
+  (use-package embark-consult
+    :ensure t ; only need to install it, embark loads it after consult if found
+    :hook
+    (embark-collect-mode . consult-preview-at-point-mode))
+#+end_src
+
+*** TODO corfu
+#+begin_src emacs-lisp
+  (use-package corfu
+    :elpaca (corfu :host github :repo "minad/corfu" :files (:defaults "extensions/*"))
+    :defer 5
+    :custom
+    (corfu-cycle t)
+    :config
+    (global-corfu-mode)
+    (with-eval-after-load 'evil
+      (setq evil-complete-next-func (lambda (_) (completion-at-point)))))
+#+end_src
+*** TODO cape
+#+begin_src emacs-lisp
+  (use-package cape
+  :ensure t
+  :init
+  ;; Add `completion-at-point-functions', used by `completion-at-point'.
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-keyword)  ; programming language keyword
+  (add-to-list 'completion-at-point-functions #'cape-ispell)
+  (add-to-list 'completion-at-point-functions #'cape-dict)
+  (add-to-list 'completion-at-point-functions #'cape-symbol)   ; elisp symbol
+  (add-to-list 'completion-at-point-functions #'cape-line)
+
+  :config
+  (setq cape-dict-file (expand-file-name "etc/hunspell_dict.txt" user-emacs-directory))
+
+  ;; for Eshell:
+  ;; ===========
+  ;; Silence the pcomplete capf, no errors or messages!
+  (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-silent)
+
+  ;; and behaves as a pure `completion-at-point-function'.
+  ;; Ensure that pcomplete does not write to the buffer
+  ;; and behaves as a pure `completion-at-point-function'.
+  (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify)
+  )
+#+end_src
+
+* UI
 ** Misc
 #+begin_src emacs-lisp
   ;; 禁用一些GUI特性
@@ -416,15 +643,6 @@ baisc constants for operating system
   ;;(setq inhibit-startup-screen t)         ; 不加载启动画面
   ;;(setq inhibit-startup-message t)        ; 不加载启动消息
   ;;(setq inhibit-startup-buffer-menu t)    ; 不显示缓冲区列表
-
-  ;; 草稿缓冲区默认文字设置
-  (setq initial-scratch-message (concat ";; Happy hacking, "
-					(capitalize user-login-name) " - Emacs ♥ you!\n\n"))
-
-  ;; 设置缓冲区的文字方向为从左到右
-  (setq bidi-paragraph-direction 'left-to-right)
-  ;; 禁止使用双向括号算法
-  ;; (setq bidi-inhibit-bpa t)
 
   ;; 设置自动折行宽度为80个字符，默认值为70
   (setq-default fill-column 80)
@@ -439,9 +657,6 @@ baisc constants for operating system
 
   ;; 禁止响铃
   (setq ring-bell-function 'ignore)
-
-  ;; 禁止闪烁光标
-  (blink-cursor-mode -1)
 
   ;; 在光标处而非鼠标所在位置粘贴
   (setq mouse-yank-at-point t)
@@ -539,44 +754,43 @@ baisc constants for operating system
   (set-buffer-file-coding-system 'utf-8)
   (prefer-coding-system 'utf-8)
   (modify-coding-system-alist 'process "*" 'utf-8)
-  (when (display-graphic-p)
-    (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+  (when (display-graphic-p) (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 #+end_src
 
 ** Theme
 #+begin_src emacs-lisp
-(use-package ef-themes
-  :ensure t
-  :bind ("C-c t" . ef-themes-toggle)
-  :init
-  ;; set two specific themes and switch between them
-  (setq ef-themes-to-toggle '(ef-summer ef-winter))
-  ;; set org headings and function syntax
-  (setq ef-themes-headings ; read the manual's entry or the doc string
-      '((0 . (variable-pitch light 1.5))
-        (1 . (variable-pitch light 1.4))
-        (2 . (variable-pitch regular 1.3))
-        (3 . (variable-pitch regular 1.2))
-        (4 . (variable-pitch regular 1.1))
-        (5 . (variable-pitch 1.0)) ; absence of weight means `bold'
-        (6 . (variable-pitch 1.0))
-        (7 . (variable-pitch 1.0))
-        (t . (variable-pitch 1.0))))
-  (setq ef-themes-region '(intense no-extend neutral))
-  ;; Disable all other themes to avoid awkward blending:
-  (mapc #'disable-theme custom-enabled-themes)
-  (ef-themes-load-random 'dark)
-
-  :config
-  ;; auto change theme, aligning with system themes.
-  (defun my/apply-theme (appearance)
-    "Load theme, taking current system APPEARANCE into consideration."
+  (use-package ef-themes
+    :ensure t
+    :bind ("C-c t" . ef-themes-toggle)
+    :init
+    ;; set two specific themes and switch between them
+    (setq ef-themes-to-toggle '(ef-summer ef-winter))
+    ;; set org headings and function syntax
+    (setq ef-themes-headings ; read the manual's entry or the doc string
+        '((0 . (variable-pitch light 1.2))
+          (1 . (variable-pitch light 1.1))
+          (2 . (variable-pitch regular 1.0))
+          (3 . (variable-pitch regular 1.0))
+          (4 . (variable-pitch regular 1.0))
+          (5 . (variable-pitch 1.0)) ; absence of weight means `bold'
+          (6 . (variable-pitch 1.0))
+          (7 . (variable-pitch 1.0))
+          (t . (variable-pitch 1.0))))
+    (setq ef-themes-region '(intense no-extend neutral))
+    ;; Disable all other themes to avoid awkward blending:
     (mapc #'disable-theme custom-enabled-themes)
-    (pcase appearance
-      ('light (if (display-graphic-p) (ef-themes-load-random 'light) (ef-themes-load-random 'dark)))
-      ('dark (ef-themes-load-random 'dark))))
+    (ef-themes-load-random 'dark)
 
-  (when macos? (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)))
+    :config
+    ;; auto change theme, aligning with system themes.
+    (defun my/apply-theme (appearance)
+      "Load theme, taking current system APPEARANCE into consideration."
+      (mapc #'disable-theme custom-enabled-themes)
+      (pcase appearance
+        ('light (if (display-graphic-p) (ef-themes-load-random 'light) (ef-themes-load-random 'dark)))
+        ('dark (ef-themes-load-random 'dark))))
+
+    (when macos? (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)))
 #+end_src
 
 ** Fonts
@@ -658,22 +872,6 @@ baisc constants for operating system
                     ("Apple Color Emoji"   . 0.91))))
 #+end_src
 
-** which-key
-#+begin_src emacs-lisp
-  (use-package which-key
-    :demand t
-    :init
-    (setq which-key-enable-extended-define-key t)
-    :config
-    (which-key-mode)
-    :custom
-    (which-key-side-window-location 'bottom)
-    (which-key-sort-order 'which-key-key-order-alpha)
-    (which-key-side-window-max-width 0.33)
-    (which-key-idle-delay 0.05)
-  :diminish which-key-mode)
-#+end_src
-
 ** Modeline
 #+begin_src emacs-lisp
   (use-package doom-modeline
@@ -723,14 +921,13 @@ baisc constants for operating system
     (setq keycast-log-frame-alist '((minibuffer . nil)))
     (setq keycast-log-newest-first t))
 #+end_src
-* org
+* Org
 ** Misc
 #+begin_src emacs-lisp
   (use-package org-auto-tangle
     :ensure t
     :hook (org-mode . org-auto-tangle-mode)
-    :config
-    (setq org-auto-tangle-default t))
+    :config (setq org-auto-tangle-default t))
 #+end_src
 ** org-config
 #+begin_src emacs-lisp
@@ -839,27 +1036,10 @@ baisc constants for operating system
    (setq org-appear-inside-latex t)) 
 #+end_src
 
-* edit
-** base
-#+begin_src emacs-lisp
-  (global-auto-revert-mode)
-
-  (use-package evil
-    :ensure t
-    :init
-    (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
-    (setq evil-want-keybinding nil)
-    :config (evil-mode 1))
-
-  (use-package evil-collection
-    :after (evil)
-    :config (evil-collection-init)
-    :custom
-    (evil-collection-elpaca-want-g-filters nil)
-    (evil-collection-setup-minibuffer t "Add evil bindings to minibuffer")
-    (evil-collection-company-use-tng t))
-#+end_src
-* ide
+* IDE
+:PROPERTIES:
+:HEADER-ARGS: :tangle no
+:END:
 ** base
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters
@@ -872,24 +1052,26 @@ baisc constants for operating system
 #+begin_src emacs-lisp
   (use-package projectile
     :general
-    (+general-global-project
-      "!" 'projectile-run-shell-command-in-root
-      "%" 'projectile-replace-regexp
-      "&" 'projectile-run-async-shell-command-in-root
-      "A" 'projectile-toggle-between-implementation-and-test
-      "bn" 'projectile-next-project-buffer
-      "bp" 'projectile-previous-project-buffer
-      "c" 'projectile-compile-project
-      "D" 'projectile-dired
-      "e" 'projectile-edit-dir-locals
-      "g" 'projectile-find-tag
-      "G" 'projectile-regenerate-tags
-      "I" 'projectile-invalidate-cache
-      "k" 'projectile-kill-buffers
-      "R" 'projectile-replace
-      "s" 'projectile-save-project-buffers
-      "T" 'projectile-test-project
-      "v" 'projectile-vc))
+    (emacy-definer
+      "p!" 'projectile-run-shell-command-in-root
+      "p%" 'projectile-replace-regexp
+      "pa" 'projectile-add-known-project
+      "pp" 'projectile-switch-project
+      "p&" 'projectile-run-async-shell-command-in-root
+      "pA" 'projectile-toggle-between-implementation-and-test
+      "pbn" 'projectile-next-project-buffer
+      "pbp" 'projectile-previous-project-buffer
+      "pc" 'projectile-compile-project
+      "pD" 'projectile-dired
+      "pe" 'projectile-edit-dir-locals
+      "pg" 'projectile-find-tag
+      "pG" 'projectile-regenerate-tags
+      "pI" 'projectile-invalidate-cache
+      "pk" 'projectile-kill-buffers
+      "pR" 'projectile-replace
+      "ps" 'projectile-save-project-buffers
+      "pT" 'projectile-test-project
+      "pv" 'projectile-vc))
 #+end_src
 ** lsp-bridge
 #+begin_src emacs-lisp
@@ -1010,7 +1192,7 @@ baisc constants for operating system
       :diminish
       :hook (restclient-mode . restclient-test-mode)))
 #+end_src
-* misc
+* Misc
 ** mind-wave
 #+begin_src emacs-lisp
   (use-package mind-wave :elpaca (mind-wave :repo "https://github.com/manateelazycat/mind-wave" :files (:defaults "*.py")))
@@ -1019,227 +1201,7 @@ baisc constants for operating system
 #+begin_src emacs-lisp
   (use-package whisper :elpaca (whisper :host github :repo "natrys/whisper.el"))
 #+end_src
-* completion
-** vertico
-#+begin_src emacs-lisp
-  ;; Enable vertico
-  (use-package vertico
-    :init
-    (vertico-mode)
-    :general
-    (:keymaps 'minibuffer-mode-map
-              "C-j" 'vertico-next
-              "C-k" 'vertico-last))
-
-  ;; Persist history over Emacs restarts. Vertico sorts by history position.
-  (savehist-mode)
-
-  ;; A few more useful configurations...
-  (use-package emacs
-    :elpaca nil
-    :init
-    ;; Add prompt indicator to `completing-read-multiple'.
-    ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
-    (defun crm-indicator (args)
-      (cons (format "[CRM%s] %s"
-                    (replace-regexp-in-string
-                     "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
-                     crm-separator)
-                    (car args))
-            (cdr args)))
-    (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
-
-    ;; Do not allow the cursor in the minibuffer prompt
-    (setq display-line-numbers-type 'relative)
-    (setq minibuffer-prompt-properties
-          '(read-only t cursor-intangible t face minibuffer-prompt))
-    (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
-
-    ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
-    ;; Vertico commands are hidden in normal buffers.
-    ;; (setq read-extended-command-predicate
-    ;;       #'command-completion-default-include-p)
-
-    ;; Enable recursive minibuffers
-    (setq enable-recursive-minibuffers t))
-#+end_src
-** orderless
-#+begin_src emacs-lisp
-  ;; support Pinyin first character match for orderless, avy etc.
-  (use-package pinyinlib :ensure t)
-
-  (use-package orderless
-    :ensure t
-    :init
-    (setq completion-styles '(orderless partial-completion basic))
-    (setq orderless-component-separator "[ &]") ; & is for company because space will break completion
-    (setq completion-category-defaults nil)
-    (setq completion-category-overrides nil)
-    :config
-    ;; make completion support pinyin, refer to
-    ;; https://emacs-china.org/t/vertico/17913/2
-    (defun completion--regex-pinyin (str) (orderless-regexp (pinyinlib-build-regexp-string str)))
-    (add-to-list 'orderless-matching-styles 'completion--regex-pinyin))
-#+end_src
-
-** marginalia
-#+begin_src emacs-lisp
-  ;; minibuffer helpful annotations
-  (use-package marginalia
-    :ensure t
-    :hook (elpaca-after-init . marginalia-mode)
-    :custom
-    (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
-#+end_src
-
-** consult
-#+begin_src emacs-lisp
-  (use-package consult
-  :ensure t
-  :after org
-  :bind (([remap goto-line]                     . consult-goto-line)
-         ([remap isearch-forward]               . consult-line-symbol-at-point) ; my-consult-ripgrep-or-line
-         ([remap switch-to-buffer]              . consult-buffer)
-         ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
-         ([remap switch-to-buffer-other-frame]  . consult-buffer-other-frame)
-         ([remap yank-pop]                      . consult-yank-pop)
-         ([remap apropos]                       . consult-apropos)
-         ([remap bookmark-jump]                 . consult-bookmark)
-         ([remap goto-line]                     . consult-goto-line)
-         ([remap imenu]                         . consult-imenu)
-         ([remap multi-occur]                   . consult-multi-occur)
-         ([remap recentf-open-files]            . consult-recent-file)
-         ("C-x j"                               . consult-mark)
-         ("C-c g"                               . consult-ripgrep)
-         ("C-c f"                               . consult-find)
-         ("\e\ef"                               . consult-locate) ; need to enable locate first
-         ("C-c n h"                             . my/consult-find-org-headings)
-         :map org-mode-map
-         ("C-c C-j"                             . consult-org-heading)
-         :map minibuffer-local-map
-         ("C-r"                                 . consult-history)
-         :map isearch-mode-map
-         ("C-;"                                 . consult-line)
-         :map prog-mode-map
-         ("C-c C-j"                             . consult-outline)
-         )
-  :hook (completion-list-mode . consult-preview-at-point-mode)
-  :init
-  ;; Optionally configure the register formatting. This improves the register
-  ;; preview for `consult-register', `consult-register-load',
-  ;; `consult-register-store' and the Emacs built-ins.
-  (setq register-preview-delay 0
-        register-preview-function #'consult-register-format)
-
-  ;; Optionally tweak the register preview window.
-  ;; This adds thin lines, sorting and hides the mode line of the window.
-  (advice-add #'register-preview :override #'consult-register-window)
-
-  ;; Use Consult to select xref locations with preview
-  (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
-
-  ;; MacOS locate doesn't support `--ignore-case --existing' args.
-  (setq consult-locate-args (pcase system-type
-                              ('gnu/linux "locate --ignore-case --existing --regex")
-                              ('darwin "mdfind -name")))
-  :config
-  (consult-customize
-   consult-theme
-   :preview-key '(:debounce 0.2 any)
-   consult-ripgrep consult-git-grep consult-grep
-   consult-bookmark consult-recent-file consult-xref
-   consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
-   :preview-key (kbd "M-."))
-
-  ;; Optionally configure the narrowing key.
-  ;; Both < and C-+ work reasonably well.
-  (setq consult-narrow-key "<") ;; (kbd "C-+")
-
-  (autoload 'projectile-project-root "projectile")
-  (setq consult-project-root-function #'projectile-project-root)
-
-  ;; Use `consult-ripgrep' instead of `consult-line' in large buffers
-  (defun consult-line-symbol-at-point ()
-    "Consult line the synbol where the point is"
-    (interactive)
-    (consult-line (thing-at-point 'symbol))))
-#+end_src
-
-** embark
-#+begin_src emacs-lisp
-  (use-package embark
-    :ensure t
-    :bind
-    (("C-." . embark-act)         ;; pick some comfortable binding
-     ("C-;" . embark-dwim)        ;; good alternative: M-.
-     ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
-
-    :init
-    ;; Optionally replace the key help with a completing-read interface
-    (setq prefix-help-command #'embark-prefix-help-command)
-
-    ;; Show the Embark target at point via Eldoc.  You may adjust the Eldoc
-    ;; strategy, if you want to see the documentation from multiple providers.
-    (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
-    ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
-
-    :config
-    ;; Hide the mode line of the Embark live/completions buffers
-    (add-to-list 'display-buffer-alist
-                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                   nil
-                   (window-parameters (mode-line-format . none)))))
-
-  ;; Consult users will also want the embark-consult package.
-  (use-package embark-consult
-    :ensure t ; only need to install it, embark loads it after consult if found
-    :hook
-    (embark-collect-mode . consult-preview-at-point-mode))
-#+end_src
-
-** TODO corfu
-#+begin_src emacs-lisp
-  (use-package corfu
-    :elpaca (corfu :host github :repo "minad/corfu" :files (:defaults "extensions/*"))
-    :defer 5
-    :custom
-    (corfu-cycle t)
-    :config
-    (global-corfu-mode)
-    (with-eval-after-load 'evil
-      (setq evil-complete-next-func (lambda (_) (completion-at-point)))))
-#+end_src
-** TODO cape
-#+begin_src emacs-lisp
-  (use-package cape
-  :ensure t
-  :init
-  ;; Add `completion-at-point-functions', used by `completion-at-point'.
-  (add-to-list 'completion-at-point-functions #'cape-file)
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-  (add-to-list 'completion-at-point-functions #'cape-keyword)  ; programming language keyword
-  (add-to-list 'completion-at-point-functions #'cape-ispell)
-  (add-to-list 'completion-at-point-functions #'cape-dict)
-  (add-to-list 'completion-at-point-functions #'cape-symbol)   ; elisp symbol
-  (add-to-list 'completion-at-point-functions #'cape-line)
-
-  :config
-  (setq cape-dict-file (expand-file-name "etc/hunspell_dict.txt" user-emacs-directory))
-
-  ;; for Eshell:
-  ;; ===========
-  ;; Silence the pcomplete capf, no errors or messages!
-  (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-silent)
-
-  ;; and behaves as a pure `completion-at-point-function'.
-  ;; Ensure that pcomplete does not write to the buffer
-  ;; and behaves as a pure `completion-at-point-function'.
-  (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify)
-  )
-#+end_src
-
-* footers
+* Footer
 ** early-init.el
 #+header: :tangle early-init.el
 #+begin_src emacs-lisp 
