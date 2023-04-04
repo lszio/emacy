@@ -10,8 +10,6 @@ https://remacs.cc/
 * TODO Tasks
 ** TODO line numbers width change
 xxx => xxxx lead to width change
-** TODO which key description override by menu name
-eg. description for "SPC a p <xx>" was override by "SPC p" as "project"
 ** TODO config packages
 *** TODO keyfreq
 [[http://blog.binchen.org/posts/how-to-be-extremely-efficient-in-emacs.html]]
@@ -220,7 +218,6 @@ eg. description for "SPC a p <xx>" was override by "SPC p" as "project"
     (general-auto-unbind-keys)
     ;;(general-evil-setup)
     <<general-configs>>)
-  (elpaca-wait)
 #+end_src
 **** menus
 :PROPERTIES:
@@ -363,6 +360,87 @@ eg. description for "SPC a p <xx>" was override by "SPC p" as "project"
     "Tdq" 'toggle-debug-on-quit
     )
 #+end_src
+*** hydra
+#+begin_src emacs-lisp
+  (use-package hydra
+    :demand t
+    :config
+    <<hydra-configs>>)
+  (use-package use-package-hydra :ensure t)
+#+end_src
+**** configs
+:PROPERTIES:
+:HEADER-ARGS: :noweb-ref hydra-configs
+:END:
+#+begin_src emacs-lisp
+  (defun hydra-move-split-left (arg)
+    "Move window split left."
+    (interactive "p")
+    (if (let* ((windmove-wrap-around))
+          (windmove-find-other-window 'right))
+        (shrink-window-horizontally arg)
+      (enlarge-window-horizontally arg)))
+
+  (defun hydra-move-split-right (arg)
+    "Move window split right."
+    (interactive "p")
+    (if (let* ((windmove-wrap-around))
+          (windmove-find-other-window 'right))
+        (enlarge-window-horizontally arg)
+      (shrink-window-horizontally arg)))
+
+  (defun hydra-move-split-up (arg)
+    "Move window split up."
+    (interactive "p")
+    (if (let* ((windmove-wrap-around))
+          (windmove-find-other-window 'up))
+        (enlarge-window arg)
+      (shrink-window arg)))
+
+  (defun hydra-move-split-down (arg)
+    "Move window split down."
+    (interactive "p")
+    (if (let* ((windmove-wrap-around))
+          (windmove-find-other-window 'up))
+        (shrink-window arg)
+      (enlarge-window arg)))
+
+  (defhydra emacy-hydra-window ()
+    "
+  Movement^^   ^Split^         ^Switch^     ^Resize^
+  -----------------------------------------------------
+  _h_ Left     _v_ertical                   _q_ X left
+  _j_ Down     _x_ horizontal  _f_ind files _w_ X Down
+  _k_ Top      _z_ undo        _a_ce 1      _e_ X Top
+  _l_ Right    _Z_ reset       _s_wap       _r_ X Right
+  _F_ollow     _D_elete Other  _S_ave       max_i_mize
+  _SPC_ cancel _o_nly this     _d_elete
+  "
+    ("h" windmove-left)
+    ("j" windmove-down)
+    ("k" windmove-up)
+    ("l" windmove-right)
+    ("q" hydra-move-split-left)
+    ("w" hydra-move-split-down)
+    ("e" hydra-move-split-up)
+    ("r" hydra-move-split-right)
+    ("f" counsel-find-file)
+    ("F" follow-mode)
+    ("a" (ace-window 1))
+    ("v" (lambda () (interactive) (split-window-right) (windmove-right)))
+    ("x" (lambda () (interactive) (split-window-below) (windmove-down)))
+    ("s" (ace-window 4))
+    ("S" save-buffer)
+    ("d" delete-window)
+    ("D" (ace-window 16))
+    ("o" delete-other-windows)
+    ("i" ace-delete-other-windows)
+    ("z" (progn (winner-undo) (setq this-command 'winner-undo)))
+    ("Z" winner-redo)
+    ("SPC" nil))
+
+  (emacy-definer "W" 'emacy-hydra-window/body)
+#+end_src
 *** which-key
 #+begin_src emacs-lisp
   (use-package which-key
@@ -377,6 +455,10 @@ eg. description for "SPC a p <xx>" was override by "SPC p" as "project"
     (which-key-side-window-max-width 0.33)
     (which-key-idle-delay 0.12)
     :diminish which-key-mode)
+#+end_src
+*** wait-process
+#+begin_src emacs-lisp
+  (elpaca-wait)
 #+end_src
 
 ** profile
@@ -411,19 +493,12 @@ eg. description for "SPC a p <xx>" was override by "SPC p" as "project"
         (expand-file-name  "var/eln-cache/" user-emacs-directory))))
 #+end_src
 ** completion
-:PROPERTIES:
-:HEADER-ARGS: :tangle no
-:END:
 *** vertico
 #+begin_src emacs-lisp
   ;; Enable vertico
   (use-package vertico
     :init
-    (vertico-mode)
-    :general
-    (:keymaps 'minibuffer-mode-map
-              "C-j" 'vertico-next
-              "C-k" 'vertico-last))
+    (vertico-mode))
 
   ;; Persist history over Emacs restarts. Vertico sorts by history position.
   (savehist-mode)
@@ -921,6 +996,10 @@ eg. description for "SPC a p <xx>" was override by "SPC p" as "project"
     (setq keycast-log-frame-alist '((minibuffer . nil)))
     (setq keycast-log-newest-first t))
 #+end_src
+** window
+#+begin_src emacs-lisp
+  (use-package ace-window :hook (elpaca-after-init . winner-mode))
+#+end_src
 * Org
 ** Misc
 #+begin_src emacs-lisp
@@ -1142,19 +1221,11 @@ eg. description for "SPC a p <xx>" was override by "SPC p" as "project"
     :elpaca nil
     :init (setq css-indent-offset 2))
 
-  ;; SCSS
-  (use-package scss-mode
-    :init
-    ;; Disable complilation on save
-    (setq scss-compile-at-save nil))
+  (use-package scss-mode :init (setq scss-compile-at-save nil))
 
-  ;; LESS
-  (unless (fboundp 'less-css-mode)
-    (use-package less-css-mode))
+  (unless (fboundp 'less-css-mode) (use-package less-css-mode))
 
-  ;; JSON
-  (unless (fboundp 'js-json-mode)
-    (use-package json-mode))
+  (unless (fboundp 'js-json-mode) (use-package json-mode))
 
   (use-package js2-mode
     :mode (("\\.js\\'" . js2-mode)
@@ -1169,8 +1240,7 @@ eg. description for "SPC a p <xx>" was override by "SPC p" as "project"
     :hook ((js-mode js2-mode css-mode sgml-mode web-mode) . prettier-mode)
     :init (setq prettier-pre-warm 'none))
 
-  (use-package typescript-mode
-    :mode ("\\.ts[x]\\'" . typescript-mode))
+  (use-package typescript-mode :mode ("\\.ts[x]\\'" . typescript-mode))
 
   ;; Major mode for editing web templates
   (use-package web-mode
@@ -1181,10 +1251,8 @@ eg. description for "SPC a p <xx>" was override by "SPC p" as "project"
     (setq web-mode-code-indent-offset 2))
 
   ;; Adds node_modules/.bin directory to `exec_path'
-  (use-package add-node-modules-path
-    :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
+  (use-package add-node-modules-path :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
 
-  ;; REST
   (use-package restclient
     :mode ("\\.http\\'" . restclient-mode)
     :config
