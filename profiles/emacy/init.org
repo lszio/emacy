@@ -14,6 +14,7 @@ xxx => xxxx lead to width change
 *** TODO keyfreq
 [[http://blog.binchen.org/posts/how-to-be-extremely-efficient-in-emacs.html]]
 ** TODO init debug config
+** TODO there are no known project in start                  :projectile:
 * Header
 ** early-init.el
 #+header: :tangle early-init.el :session early
@@ -259,32 +260,32 @@ xxx => xxxx lead to width change
 
     "ap" '(:ignore t :wk "elpaca")
     "apb" 'elpaca-browse
-    "apr" '((lambda () (interactive) (let ((current-prefix-arg (not current-prefix-arg))) (call-interactively #'elpaca-rebuild))) :which-key "rebuild")
+    "apr" '((lambda () (interactive) (let ((current-prefix-arg (not current-prefix-arg))) (call-interactively #'elpaca-rebuild))) :wk "rebuild")
     "apm" 'elpaca-manager
     "apl" 'elpaca-log
     "api" 'elpaca-info
-    "apI" '((lambda () (interactive) (info "Elpaca")) :which-key "elpaca-info")
+    "apI" '((lambda () (interactive) (info "Elpaca")) :wk "elpaca-info")
     "aps" 'elpaca-status
     "apt" 'elpaca-try
     "apv" 'elpaca-visit
 
     "bd"  'kill-current-buffer
     "bo" '((lambda () (interactive) (switch-to-buffer nil))
-          :which-key "other-buffer")
+          :wk "other-buffer")
     "bp"  'previous-buffer
     "bi"  'ibuffer
     "br"  'rename-buffer
     "bR"  'revert-buffer
-    "bM" '((lambda () (interactive) (switch-to-buffer "*Messages*")) :which-key "messages-buffer")
+    "bM" '((lambda () (interactive) (switch-to-buffer "*Messages*")) :wk "messages-buffer")
     "bn"  'next-buffer
-    "bs" '((lambda () (interactive) (switch-to-buffer "*scratch*")) :which-key "scratch-buffer")
-    "b TAB" '((lambda () (interactive) (switch-to-buffer nil)) :which-key "other-buffer")
+    "bs" '((lambda () (interactive) (switch-to-buffer "*scratch*")) :wk "scratch-buffer")
+    "b TAB" '((lambda () (interactive) (switch-to-buffer nil)) :wk "other-buffer")
 
     "w=" 'balance-windows
     "w/" 'split-window-horizontally
     "w?" 'split-window-vertically
     "wO" 'delete-other-windows
-    "wX" '((lambda () (interactive) (call-interactively #'other-window) (kill-buffer-and-window)) :which-key "kill-other-buffer-and-window")
+    "wX" '((lambda () (interactive) (call-interactively #'other-window) (kill-buffer-and-window)) :wk "kill-other-buffer-and-window")
     "wx" 'kill-buffer-and-window
     "wd" 'delete-window
     "wh" 'windmove-left
@@ -292,24 +293,7 @@ xxx => xxxx lead to width change
     "wk" 'windmove-up
     "wl" 'windmove-right
     "wo" 'other-window
-    "wt" '((lambda () (interactive)
-            (set-window-dedicated-p (selected-window) (not (window-dedicated-p))))
-          :which-key "toggle window dedication")
-    "w."  '(:ingore :which-key "resize")
-    "w.h" '((lambda () (interactive)
-             (call-interactively (if (window-prev-sibling) #'enlarge-window-horizontally
-                                   #'shrink-window-horizontally)))
-           :which-key "divider left")
-    "w.l" '((lambda () (interactive)
-             (call-interactively (if (window-next-sibling) #'enlarge-window-horizontally
-                                   #'shrink-window-horizontally)))
-           :which-key "divider right")
-    "w.j" '((lambda () (interactive)
-             (call-interactively (if (window-next-sibling) #'enlarge-window #'shrink-window)))
-           :which-key "divider up")
-    "w.k" '((lambda () (interactive)
-             (call-interactively (if (window-prev-sibling) #'enlarge-window #'shrink-window)))
-           :which-key "divider down")
+    "wt" '((lambda () (interactive) (set-window-dedicated-p (selected-window) (not (window-dedicated-p)))) :wk "toggle window dedication")
 
     "eb" 'eval-buffer
     "ed" 'eval-defun
@@ -320,10 +304,10 @@ xxx => xxxx lead to width change
     "fd"   '((lambda (&optional arg)
               (interactive "P")
               (let ((buffer (when arg (current-buffer))))
-                (diff-buffer-with-file buffer))) :which-key "diff-with-file")
-    "fe"   '(:ignore t :which-key "edit")
-    "fed"  '((lambda () (interactive) (find-file-existing literate-file) (widen)) :which-key "dotfile")
-    "feR"  '((lambda () (interactive) (load-file user-init-file)) :which-key "reload-init.el")
+                (diff-buffer-with-file buffer))) :wk "diff-with-file")
+    "fe"   '(:ignore t :wk "edit")
+    "fed"  '((lambda () (interactive) (find-file-existing literate-file) (widen)) :wk "dotfile")
+    "feR"  '((lambda () (interactive) (load-file user-init-file)) :wk "reload-init.el")
     "fet"  '((lambda ()
               (interactive)
               (save-restriction
@@ -331,9 +315,9 @@ xxx => xxxx lead to width change
                 (check-parens)
                 (org-babel-tangle-file literate-file))
               (load-file "~/.emacs.d/init.el"))
-            :which-key "tangle/reload-init.el")
+            :wk "tangle/reload-init.el")
     "fl"   '((lambda (&optional arg) (interactive "P") (call-interactively (if arg #'find-library-other-window #'find-library)))
-            :which-key "+find-library")
+            :wk "+find-library")
     "fp"   'find-function-at-point
     "fP"   'find-function
     "fR"   'rename-file-and-buffer
@@ -344,7 +328,7 @@ xxx => xxxx lead to width change
     "FD" 'delete-other-frames
     "FF" 'select-frame-by-name
     "FO" 'other-frame-prefix
-    "Fc" '(:ingore t :which-key "color")
+    "Fc" '(:ingore t :wk "color")
     "Fcb" 'set-background-color
     "Fcc" 'set-cursor-color
     "Fcf" 'set-foreground-color
@@ -355,7 +339,7 @@ xxx => xxxx lead to width change
     "Fp" 'previous-window-any-frame
     "Fr" 'set-frame-name
 
-    "Td" '(:ignore t :which-key "debug")
+    "Td" '(:ignore t :wk "debug")
     "Tde" 'toggle-debug-on-error
     "Tdq" 'toggle-debug-on-quit
     )
@@ -440,6 +424,59 @@ xxx => xxxx lead to width change
     ("SPC" nil))
 
   (emacy-definer "W" 'emacy-hydra-window/body)
+
+  (defhydra hydra-dired (:hint nil :color pink)
+    "
+  _+_ mkdir          _v_iew           _m_ark             _(_ details        _i_nsert-subdir    wdired
+  _C_opy             _O_ view other   _U_nmark all       _)_ omit-mode      _$_ hide-subdir    C-x C-q : edit
+  _D_elete           _o_pen other     _u_nmark           _l_ redisplay      _w_ kill-subdir    C-c C-c : commit
+  _R_ename           _M_ chmod        _t_oggle           _g_ revert buf     _e_ ediff          C-c ESC : abort
+  _Y_ rel symlink    _G_ chgrp        _E_xtension mark   _s_ort             _=_ pdiff
+  _S_ymlink          ^ ^              _F_ind marked      _._ toggle hydra   \\ flyspell
+  _r_sync            ^ ^              ^ ^                ^ ^                _?_ summary
+  _z_ compress-file  _A_ find regexp
+  _Z_ compress       _Q_ repl regexp
+
+  T - tag prefix
+  "
+    ("\\" dired-do-ispell)
+    ("(" dired-hide-details-mode)
+    (")" dired-omit-mode)
+    ("+" dired-create-directory)
+    ("=" diredp-ediff)         ;; smart diff
+    ("?" dired-summary)
+    ("$" diredp-hide-subdir-nomove)
+    ("A" dired-do-find-regexp)
+    ("C" dired-do-copy)        ;; Copy all marked files
+    ("D" dired-do-delete)
+    ("E" dired-mark-extension)
+    ("e" dired-ediff-files)
+    ("F" dired-do-find-marked-files)
+    ("G" dired-do-chgrp)
+    ("g" revert-buffer)        ;; read all directories again (refresh)
+    ("i" dired-maybe-insert-subdir)
+    ("l" dired-do-redisplay)   ;; relist the marked or singel directory
+    ("M" dired-do-chmod)
+    ("m" dired-mark)
+    ("O" dired-display-file)
+    ("o" dired-find-file-other-window)
+    ("Q" dired-do-find-regexp-and-replace)
+    ("R" dired-do-rename)
+    ("r" dired-do-rsynch)
+    ("S" dired-do-symlink)
+    ("s" dired-sort-toggle-or-edit)
+    ("t" dired-toggle-marks)
+    ("U" dired-unmark-all-marks)
+    ("u" dired-unmark)
+    ("v" dired-view-file)      ;; q to exit, s to search, = gets line #
+    ("w" dired-kill-subdir)
+    ("Y" dired-do-relsymlink)
+    ("z" diredp-compress-this-file)
+    ("Z" dired-do-compress)
+    ("q" nil)
+    ("." nil :color blue))
+
+  (define-key dired-mode-map "." 'hydra-dired/body)
 #+end_src
 *** which-key
 #+begin_src emacs-lisp
@@ -495,10 +532,7 @@ xxx => xxxx lead to width change
 ** completion
 *** vertico
 #+begin_src emacs-lisp
-  ;; Enable vertico
-  (use-package vertico
-    :init
-    (vertico-mode))
+  (use-package vertico :init (vertico-mode))
 
   ;; Persist history over Emacs restarts. Vertico sorts by history position.
   (savehist-mode)
@@ -511,9 +545,7 @@ xxx => xxxx lead to width change
     ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
     (defun crm-indicator (args)
       (cons (format "[CRM%s] %s"
-                    (replace-regexp-in-string
-                     "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
-                     crm-separator)
+                    (replace-regexp-in-string "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" "" crm-separator)
                     (car args))
             (cdr args)))
     (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
@@ -523,11 +555,6 @@ xxx => xxxx lead to width change
     (setq minibuffer-prompt-properties
           '(read-only t cursor-intangible t face minibuffer-prompt))
     (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
-
-    ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
-    ;; Vertico commands are hidden in normal buffers.
-    ;; (setq read-extended-command-predicate
-    ;;       #'command-completion-default-include-p)
 
     ;; Enable recursive minibuffers
     (setq enable-recursive-minibuffers t))
@@ -545,8 +572,6 @@ xxx => xxxx lead to width change
     (setq completion-category-defaults nil)
     (setq completion-category-overrides nil)
     :config
-    ;; make completion support pinyin, refer to
-    ;; https://emacs-china.org/t/vertico/17913/2
     (defun completion--regex-pinyin (str) (orderless-regexp (pinyinlib-build-regexp-string str)))
     (add-to-list 'orderless-matching-styles 'completion--regex-pinyin))
 #+end_src
@@ -668,18 +693,6 @@ xxx => xxxx lead to width change
     (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
 
-*** TODO corfu
-#+begin_src emacs-lisp
-  (use-package corfu
-    :elpaca (corfu :host github :repo "minad/corfu" :files (:defaults "extensions/*"))
-    :defer 5
-    :custom
-    (corfu-cycle t)
-    :config
-    (global-corfu-mode)
-    (with-eval-after-load 'evil
-      (setq evil-complete-next-func (lambda (_) (completion-at-point)))))
-#+end_src
 *** TODO cape
 #+begin_src emacs-lisp
   (use-package cape
@@ -1116,9 +1129,6 @@ xxx => xxxx lead to width change
 #+end_src
 
 * IDE
-:PROPERTIES:
-:HEADER-ARGS: :tangle no
-:END:
 ** base
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters
@@ -1260,6 +1270,120 @@ xxx => xxxx lead to width change
       :diminish
       :hook (restclient-mode . restclient-test-mode)))
 #+end_src
+** shell
+#+begin_src emacs-lisp
+  (use-package eshell
+    :elpaca nil
+    :ensure nil
+    :functions eshell/alias
+    :hook ((eshell-mode . (lambda () (term-mode-common-init) (visual-line-mode 1))))
+    :config
+    (defun term-mode-common-init ()
+      (setq-local scroll-margin 0)
+      (setq-local truncate-lines t))
+
+    (defalias 'eshell/vi 'find-file)
+    (defalias 'eshell/vim 'find-file)
+
+    (defun eshell/bat (file)
+      "cat FILE with syntax highlight."
+      (with-temp-buffer
+        (insert-file-contents file)
+        (let ((buffer-file-name file))
+          (delay-mode-hooks
+            (set-auto-mode)
+            (font-lock-ensure)))
+        (buffer-string)))
+    (defalias 'eshell/cat 'eshell/bat)
+
+    ;; 交互式进入目录
+    (defun eshell/z ()
+      "cd to directory with completion."
+      (let ((dir (completing-read "Directory: " (ring-elements eshell-last-dir-ring) nil t)))
+        (eshell/cd dir)))
+
+    ;; 查找文件
+    (defun eshell/f (filename &optional dir)
+      "Search for files matching FILENAME in either DIR or the
+  current directory."
+      (let ((cmd (concat
+                  ;; using find
+                  (executable-find "find")
+                  " " (or dir ".")
+                  " -not -path '*/.git*'"            ; ignore .git directory
+                  " -and -not -path 'build'"         ; ignore cmake build directory
+                  " -and -not -path '*/eln-cache*'"  ; ignore eln cache
+                  " -and -type f -and -iname "
+                  "'*" filename "*'")))
+        (eshell-command-result cmd)))
+
+    :custom
+    (eshell-banner-message
+     '(format "%s %s\n"
+              (propertize (format " %s " (string-trim (buffer-name)))
+                          'face 'mode-line-highlight)
+              (propertize (current-time-string)
+                          'face 'font-lock-keyword-face)))
+    (eshell-scroll-to-bottom-on-input 'all)
+    (eshell-scroll-to-bottom-on-output 'all)
+    (eshell-kill-on-exit t)
+    (eshell-kill-processes-on-exit t)
+    ;; Don't record command in history if starts with whitespace
+    (eshell-input-filter 'eshell-input-filter-initial-space)
+    (eshell-error-if-no-glob t)
+    (eshell-glob-case-insensitive t)
+    ;; set scripts
+    (eshell-rc-script (locate-user-emacs-file "etc/eshell/profile"))
+    (eshell-login-script (locate-user-emacs-file "etc/eshell/login"))
+    )
+
+
+  (use-package em-hist
+    :elpaca nil
+    :ensure nil
+    :defer t
+    :custom
+    (eshell-history-size 1024)
+    (eshell-hist-ignoredups t)
+    (eshell-save-history-on-exit t))
+
+  (use-package em-rebind
+    :elpaca nil
+    :ensure nil
+    :commands eshell-delchar-or-maybe-eof)
+
+  (use-package esh-mode
+    :elpaca nil
+    :ensure nil
+    :bind (:map eshell-mode-map
+                ("C-d" . eshell-delchar-or-maybe-eof)
+                ("C-r" . consult-history)
+                ("C-l" . eshell/clear))
+    )
+
+  (use-package eshell-syntax-highlighting
+    :after esh-mode
+    :ensure t
+    :hook (eshell-mode . eshell-syntax-highlighting-global-mode)
+    :custom-face
+    (eshell-syntax-highlighting-shell-command-face ((t (:foreground "#7cc77f" :bold t))))
+    )
+#+end_src
+*** alias
+#+header: :tangle etc/eshell/aliases :mkdir t
+#+begin_src text
+alias ff find-file $1
+alias fo find-file-other-window $1
+alias d dired $1
+alias ll ls -alh
+alias l. ls -dh .*
+alias up eshell-up $1
+alias pk eshell-up-peek $1
+alias less view-file $1
+alias more view-file $1
+#+end_src
+** TODO file manager
+
 * Misc
 ** mind-wave
 #+begin_src emacs-lisp
