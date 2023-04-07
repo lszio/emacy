@@ -227,7 +227,7 @@ xxx => xxxx lead to width change
 #+begin_src emacs-lisp :lexical t
   (general-define-key
    :keymaps 'override
-   :states '(insert normal visual emacs motion operator)
+   :states '(insert normal visual motion operator hybrid emacs)
    :prefix-map 'emacy-map
    :prefix "SPC"
    :global-prefix "S-SPC")
@@ -237,112 +237,140 @@ xxx => xxxx lead to width change
     :keymaps 'emacy-map)
 
   (emacy-definer
-    "!"  'shell-command
-    ":"  'eval-expression
-    "."  'repeat
-    "z"  '((lambda (local) (interactive "p")
+    "!"   'shell-command
+    ":"   'eval-expression
+    "."   'repeat
+    "z"   '((lambda (local) (interactive "p")
               (unless repeat-mode (repeat-mode))
               (let ((local current-prefix-arg)
                     (current-prefix-arg nil))
                 (call-interactively (if local #'text-scale-adjust #'global-text-scale-adjust))))
-            :wk "zoom")
+            :which-key "zoom"))
 
-    "a" '(:ignore t :wk "application")
-    "b" '(:ignore t :wk "buffer")
-    "e" '(:ignore t :wk "eval")
-    "w" '(:ignore t :wk "window")
-    "p" '(:ignore t :wk "project")
-    "f" '(:ignore t :wk "file")
-    "F" '(:ignore t :wk "frame")
-    "T" '(:ignore t :wk "toggle")
-    "g" '(:ignore t :wk "git")
-    "q" '(:ignore t :wk "quit")
+  (general-create-definer emacy-leader
+    :keymaps 'override
+    :states '(insert normal hybrid motion visual operator)
+    :prefix "SPC m"
+    :non-normal-prefix "S-SPC m"
+    "" '( :ignore t
+          :which-key
+          (lambda (arg)
+            (cons (cadr (split-string (car arg) " "))
+                  (replace-regexp-in-string "-mode$" "" (symbol-name major-mode))))))
 
-    "ap" '(:ignore t :wk "elpaca")
-    "apb" 'elpaca-browse
-    "apr" '((lambda () (interactive) (let ((current-prefix-arg (not current-prefix-arg))) (call-interactively #'elpaca-rebuild))) :wk "rebuild")
-    "apm" 'elpaca-manager
-    "apl" 'elpaca-log
-    "api" 'elpaca-info
-    "apI" '((lambda () (interactive) (info "Elpaca")) :wk "elpaca-info")
-    "aps" 'elpaca-status
-    "apt" 'elpaca-try
-    "apv" 'elpaca-visit
-
-    "bd"  'kill-current-buffer
-    "bo" '((lambda () (interactive) (switch-to-buffer nil))
-          :wk "other-buffer")
-    "bp"  'previous-buffer
-    "bi"  'ibuffer
-    "br"  'rename-buffer
-    "bR"  'revert-buffer
-    "bM" '((lambda () (interactive) (switch-to-buffer "*Messages*")) :wk "messages-buffer")
-    "bn"  'next-buffer
-    "bs" '((lambda () (interactive) (switch-to-buffer "*scratch*")) :wk "scratch-buffer")
-    "b TAB" '((lambda () (interactive) (switch-to-buffer nil)) :wk "other-buffer")
-
-    "w=" 'balance-windows
-    "w/" 'split-window-horizontally
-    "w?" 'split-window-vertically
-    "wO" 'delete-other-windows
-    "wX" '((lambda () (interactive) (call-interactively #'other-window) (kill-buffer-and-window)) :wk "kill-other-buffer-and-window")
-    "wx" 'kill-buffer-and-window
-    "wd" 'delete-window
-    "wh" 'windmove-left
-    "wj" 'windmove-down
-    "wk" 'windmove-up
-    "wl" 'windmove-right
-    "wo" 'other-window
-    "wt" '((lambda () (interactive) (set-window-dedicated-p (selected-window) (not (window-dedicated-p)))) :wk "toggle window dedication")
-
-    "eb" 'eval-buffer
-    "ed" 'eval-defun
-    "ee" 'eval-expression
-    "ep" 'pp-eval-last-sexp
-    "es" 'eval-last-sexp
-
-    "fd"   '((lambda (&optional arg)
-              (interactive "P")
-              (let ((buffer (when arg (current-buffer))))
-                (diff-buffer-with-file buffer))) :wk "diff-with-file")
-    "fe"   '(:ignore t :wk "edit")
-    "fed"  '((lambda () (interactive) (find-file-existing literate-file) (widen)) :wk "dotfile")
-    "feR"  '((lambda () (interactive) (load-file user-init-file)) :wk "reload-init.el")
-    "fet"  '((lambda ()
+  (defmacro create-emacy-menu (name infix-key &rest body)
+    "Create a definer named emacy-NAME-definer wrapping emacy-definer.
+    Create prefix map: emacy-NAME-map. Prefix bindings in BODY with INFIX-KEY."
+    (declare (indent 2))
+    (let* ((n (concat "emacy-" name "-definer"))
+           (prefix (intern (concat "emacy-" name "-map"))))
+      `(progn
+         (general-create-definer ,(intern n)
+           :wrapping emacy-definer
+           :prefix-map (quote ,prefix)
+           :infix ,infix-key
+           :wk-full-keys nil
+           "" '(:ignore t :which-key ,name))
+         (,(intern n) ,@body))))
+#+end_src
+***** applications
+#+begin_src emacs-lisp
+  (create-emacy-menu "application" "a"
+    "p" '(:ignore t "elpaca")
+    "pb" 'elpaca-browse
+    "pr"  '((lambda () (interactive) (let ((current-prefix-arg (not current-prefix-arg))) (call-interactively #'elpaca-rebuild))) :which-key "rebuild")
+    "pm" 'elpaca-manager
+    "pl" 'elpaca-log
+    "pi" 'elpaca-info
+    "pI" '((lambda () (interactive) (info "Elpaca")) :which-key "elpaca-info")
+    "ps" 'elpaca-status
+    "pt" 'elpaca-try
+    "pv" 'elpaca-visit)
+#+end_src
+***** buffers
+#+begin_src emacs-lisp
+  (create-emacy-menu "buffer" "b"
+    "d"  'kill-current-buffer
+    "o" '((lambda () (interactive) (switch-to-buffer nil)) :which-key "other-buffer")
+    "p"  'previous-buffer
+    "r"  'rename-buffer
+    "R"  'revert-buffer
+    "M" '((lambda () (interactive) (switch-to-buffer "*Messages*")) :which-key "messages-buffer")
+    "n"  'next-buffer
+    "s" '((lambda () (interactive) (switch-to-buffer "*scratch*")) :which-key "scratch-buffer")
+    "TAB" '((lambda () (interactive) (switch-to-buffer nil)) :which-key "other-buffer"))
+#+end_src
+***** window
+#+begin_src emacs-lisp
+  (create-emacy-menu "window" "w"
+    "?" 'split-window-vertically
+    "=" 'balance-windows
+    "/" 'split-window-horizontally
+    "O" 'delete-other-windows
+    "X" '((lambda () (interactive) (call-interactively #'other-window) (kill-buffer-and-window)) :which-key "kill-other-buffer-and-window")
+    "d" 'delete-window
+    "h" 'windmove-left
+    "j" 'windmove-down
+    "k" 'windmove-up
+    "l" 'windmove-right
+    "o" 'other-window
+    "t" '((lambda () (interactive) "toggle window dedication" (set-window-dedicated-p (selected-window) (not (window-dedicated-p)))) :which-key "toggle window dedication")
+    "x" 'kill-buffer-and-window)
+#+end_src
+***** file
+#+begin_src emacs-lisp
+  (create-emacy-menu "file" "f"
+    "d"   '((lambda (&optional arg) (interactive "P") (let ((buffer (when arg (current-buffer)))) (diff-buffer-with-file buffer))) :which-key "diff-with-file")
+    "e"   '(:ignore t :which-key "edit")
+    "ed"  '((lambda () (interactive) (find-file-existing literate-file) (widen)) :which-key "dotfile")
+    "eR"  '((lambda () (interactive) (load-file user-init-file)) :which-key "reload-init.el")
+    "et"  '((lambda ()
               (interactive)
               (save-restriction
                 (widen)
                 (check-parens)
                 (org-babel-tangle-file literate-file))
               (load-file "~/.emacs.d/init.el"))
-            :wk "tangle/reload-init.el")
-    "fl"   '((lambda (&optional arg) (interactive "P") (call-interactively (if arg #'find-library-other-window #'find-library)))
-            :wk "+find-library")
-    "fp"   'find-function-at-point
-    "fP"   'find-function
-    "fR"   'rename-file-and-buffer
-    "fs"   'save-buffer
-    "fv"   'find-variable-at-point
-    "fV"   'find-variable
-
-    "FD" 'delete-other-frames
-    "FF" 'select-frame-by-name
-    "FO" 'other-frame-prefix
-    "Fc" '(:ingore t :wk "color")
-    "Fcb" 'set-background-color
-    "Fcc" 'set-cursor-color
-    "Fcf" 'set-foreground-color
-    "Ff" 'set-frame-font
-    "Fm" 'make-frame-on-monitor
-    "Fn" 'next-window-any-frame
-    "Fo" 'other-frame
-    "Fp" 'previous-window-any-frame
-    "Fr" 'set-frame-name
-
-    "Td" '(:ignore t :wk "debug")
-    "Tde" 'toggle-debug-on-error
-    "Tdq" 'toggle-debug-on-quit
-    )
+            :which-key "tangle/reload-init.el")
+    "l"   '((lambda (&optional arg) (interactive "P") (call-interactively (if arg #'find-library-other-window #'find-library))) :which-key "+find-library")
+    "p"   'find-function-at-point
+    "P"   'find-function
+    "R"   'rename-file-and-buffer
+    "s"   'save-buffer
+    "v"   'find-variable-at-point
+    "V"   'find-variable)
+#+end_src
+***** frame
+#+begin_src emacs-lisp
+(create-emacy-menu "frame" "F"
+  "D" 'delete-other-frames
+  "F" 'select-frame-by-name
+  "O" 'other-frame-prefix
+  "c" '(:ingore t :which-key "color")
+  "cb" 'set-background-color
+  "cc" 'set-cursor-color
+  "cf" 'set-foreground-color
+  "f" 'set-frame-font
+  "m" 'make-frame-on-monitor
+  "n" 'next-window-any-frame
+  "o" 'other-frame
+  "p" 'previous-window-any-frame
+  "r" 'set-frame-name)
+#+end_src
+***** toggle
+#+begin_src emacs-lisp
+(create-emacy-menu "toggle" "T"
+  "d" '(:ignore t :which-key "debug")
+  "de" 'toggle-debug-on-error
+  "dq" 'toggle-debug-on-quit
+  "s" '(:ignore t :which-key "spelling"))
+#+end_src
+***** quit
+#+begin_src emacs-lisp
+(create-emacy-menu "quit" "q"
+  "q" 'save-buffers-kill-emacs
+  "r" 'restart-emacs
+  "Q" 'kill-emacs)
 #+end_src
 *** hydra
 #+begin_src emacs-lisp
@@ -423,7 +451,7 @@ xxx => xxxx lead to width change
     ("Z" winner-redo)
     ("SPC" nil))
 
-  (emacy-definer "W" 'emacy-hydra-window/body)
+  (emacy-definer "w ." 'emacy-hydra-window/body)
 
   (defhydra hydra-dired (:hint nil :color pink)
     "
@@ -476,7 +504,12 @@ xxx => xxxx lead to width change
     ("q" nil)
     ("." nil :color blue))
 
-  (define-key dired-mode-map "." 'hydra-dired/body)
+  ;;(define-key dired-mode-map "." 'hydra-dired/body)
+  (general-define-key
+    :keymaps 'override
+    :states '(normal visual motion emacs)
+    :prefix-map 'dired-mode-map
+    "." 'hydra-dired/body)
 #+end_src
 *** which-key
 #+begin_src emacs-lisp
