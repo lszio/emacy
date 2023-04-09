@@ -578,6 +578,18 @@ xxx => xxxx lead to width change
      (convert-standard-filename
         (expand-file-name  "var/eln-cache/" user-emacs-directory))))
 #+end_src
+** layout
+*** TODO shackle 
+#+begin_src emacs-lisp
+  (use-package shackle)
+#+end_src
+*** persp-mode
+#+begin_src emacs-lisp
+  (use-package persp-mode
+    :hook (window-setup-hook . (lambda () (persp-mode 1)))
+    :config (setq wg-morph-on nil
+                  persp-autokill-buffer-on-remove 'kill-weak))
+#+end_src
 * Completion
 *** vertico
 #+begin_src emacs-lisp
@@ -893,7 +905,10 @@ xxx => xxxx lead to width change
   (modify-coding-system-alist 'process "*" 'utf-8)
   (when (display-graphic-p) (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 #+end_src
-
+** Color
+#+begin_src emacs-lisp
+  (use-package rainbow-mode)
+#+end_src
 ** Theme
 #+begin_src emacs-lisp
   (use-package ef-themes
@@ -937,8 +952,7 @@ xxx => xxxx lead to width change
     :when (display-graphic-p)
     ;; :hook (kill-emacs . fontaine-store-latest-preset)
     :config
-    (setq fontaine-latest-state-file
-      (locate-user-emacs-file "etc/fontaine-latest-state.eld"))
+    (setq fontaine-latest-state-file (locate-user-emacs-file "etc/fontaine-latest-state.eld"))
     (setq fontaine-presets
       '((regular
          :default-height 140
@@ -1007,8 +1021,9 @@ xxx => xxxx lead to width change
                     ("Kaiti SC"            . 1.16)
                     ("Yuanti SC"           . 1.16)
                     ("Apple Color Emoji"   . 0.91))))
+  ;; TODO
+  (use-package fontify-face)
 #+end_src
-
 ** Modeline
 #+begin_src emacs-lisp
   (use-package doom-modeline
@@ -1180,8 +1195,7 @@ xxx => xxxx lead to width change
 * IDE
 ** base
 #+begin_src emacs-lisp
-  (use-package rainbow-delimiters
-    :hook (prog-mode . rainbow-delimiters-mode))
+  (use-package rainbow-delimiters :hook (prog-mode . rainbow-delimiters-mode))
 
   ;;(use-package citre
   ;;  :defer t)
@@ -1415,8 +1429,7 @@ xxx => xxxx lead to width change
     :ensure t
     :hook (eshell-mode . eshell-syntax-highlighting-global-mode)
     :custom-face
-    (eshell-syntax-highlighting-shell-command-face ((t (:foreground "#7cc77f" :bold t))))
-    )
+    (eshell-syntax-highlighting-shell-command-face ((t (:foreground "#7cc77f" :bold t)))))
 #+end_src
 *** alias
 #+header: :tangle etc/eshell/aliases :mkdir t
@@ -1430,6 +1443,10 @@ alias up eshell-up $1
 alias pk eshell-up-peek $1
 alias less view-file $1
 alias more view-file $1
+#+end_src
+*** vterm
+#+begin_src emacs-lisp
+  (use-package vterm :unless windows?)
 #+end_src
 ** treemacs
 #+begin_src emacs-lisp
