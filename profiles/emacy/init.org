@@ -50,9 +50,6 @@ xxx => xxxx lead to width change
   (push '(tool-bar-lines . 0) default-frame-alist)
   (push '(vertical-scroll-bars) default-frame-alist)
 
-  ;; 禁止自动缩放窗口先
-  (setq frame-inhibit-implied-resize t)
-
   ;; 禁止菜单栏、工具栏、滚动条模式，禁止启动屏幕和文件对话框
   (menu-bar-mode -1)
   (tool-bar-mode -1)
@@ -60,12 +57,10 @@ xxx => xxxx lead to width change
   (setq inhibit-splash-screen t)
   (setq use-file-dialog nil)
 
-  ;; 在这个阶段不编译
-  (setq comp-deferred-compilation nil)
-
-  (global-display-line-numbers-mode)
   (display-time-mode)
   (toggle-frame-maximized)
+  (global-auto-revert-mode)
+  (global-display-line-numbers-mode)
 #+end_src
 ** constants
 #+header: :tangle early-init.el
@@ -151,66 +146,42 @@ xxx => xxxx lead to width change
                    ((file-exists-p file))
                    (link   (cdr spec)))
           (make-directory (file-name-directory link) 'parents)
-          ;; (ignore-errors (make-symbolic-link file link 'overwrite))
           (condition-case err
              (make-symbolic-link file link 'overwrite)
              (file-already-exists nil)))))
-          ;;(make-symbolic-link file link 'overwrite)
-          ;;(copy-file file link :ok-if-already-exists 'overwrite)
-
     (elpaca--continue-build e "Build files linked"))
 
-  (when windows?
-    (advice-add 'elpaca--link-build-files :override 'emacy/elpaca--link-build-files))
+  (when windows? (advice-add 'elpaca--link-build-files :override 'emacy/elpaca--link-build-files))
 
   (elpaca `(,@elpaca-order))
+  (elpaca elpaca-use-package (elpaca-use-package-mode) (setq elpaca-use-package-by-default t))
+
   (setq elpaca-queue-limit 21)
-
-    ;; Install use-package support
-  (elpaca elpaca-use-package
-    ;; Enable :elpaca use-package keyword.
-    (elpaca-use-package-mode)
-    ;; Assume :elpaca t unless otherwise specified.
-    (setq elpaca-use-package-by-default t))
-
-    ;; Block until current queue processed.
-  (elpaca-wait)
 #+end_src
 ***** disable package.el
 #+begin_src emacs-lisp :tangle early-init.el
   (setq package-enable-at-startup nil)
 #+end_src
-** keybindings
-*** evil
+**** waitting
 #+begin_src emacs-lisp
-  (global-auto-revert-mode)
-
-  (use-package evil
-    :demand t
-    :preface (setq evil-want-keybinding nil)
-    :custom
-    (evil-want-integration t) ;; This is optional since it's already set to t by default.
-    (evil-want-C-i-jump t)
-    (evil-shift-width 2 "same behavior for vim")
-    (evil-complete-all-buffers nil)
-    :config
-    (defun +evil-kill-minibuffer ()
-    (interactive)
-    (when (windowp (active-minibuffer-window))
-        (evil-ex-search-exit)))
-
-    (add-hook 'mouse-leave-buffer-hook #'+evil-kill-minibuffer)
-    (evil-mode))
-
-  (use-package evil-collection
-    :after (evil)
-    :config (evil-collection-init)
-    :custom
-    (evil-collection-elpaca-want-g-filters nil)
-    (evil-collection-setup-minibuffer t "Add evil bindings to minibuffer")
-    (evil-collection-company-use-tng t))
+  (elpaca-wait)
 #+end_src
-
+** keybindings
+*** which-key
+#+begin_src emacs-lisp
+  (use-package which-key
+    :demand t
+    :init
+    (setq which-key-enable-extended-define-key t)
+    :config
+    (which-key-mode)
+    :custom
+    (which-key-side-window-location 'bottom)
+    (which-key-sort-order 'which-key-key-order-alpha)
+    (which-key-side-window-max-width 0.33)
+    (which-key-idle-delay 0.12)
+    :diminish which-key-mode)
+#+end_src
 *** general
 #+begin_src emacs-lisp :lexical t
   (use-package general
@@ -218,7 +189,7 @@ xxx => xxxx lead to width change
     :config
     (general-override-mode)
     (general-auto-unbind-keys)
-    ;;(general-evil-setup)
+    (general-evil-setup)
     <<general-configs>>)
 #+end_src
 **** menus
@@ -373,6 +344,10 @@ xxx => xxxx lead to width change
   "r" 'restart-emacs
   "Q" 'kill-emacs)
 #+end_src
+**** waitting
+#+begin_src emacs-lisp
+  (elpaca-wait)
+#+end_src
 *** hydra
 #+begin_src emacs-lisp
   (use-package hydra
@@ -512,26 +487,66 @@ xxx => xxxx lead to width change
     :prefix-map 'dired-mode-map
     "." 'hydra-dired/body)
 #+end_src
-*** which-key
+*** evil
 #+begin_src emacs-lisp
-  (use-package which-key
+  (use-package evil
     :demand t
-    :init
-    (setq which-key-enable-extended-define-key t)
-    :config
-    (which-key-mode)
+    :preface (setq evil-want-keybinding nil)
     :custom
-    (which-key-side-window-location 'bottom)
-    (which-key-sort-order 'which-key-key-order-alpha)
-    (which-key-side-window-max-width 0.33)
-    (which-key-idle-delay 0.12)
-    :diminish which-key-mode)
-#+end_src
-*** wait-process
-#+begin_src emacs-lisp
-  (elpaca-wait)
-#+end_src
+    (evil-want-integration t) ;; This is optional since it's already set to t by default.
+    (evil-want-C-i-jump t)
+    (evil-shift-width 2 "same behavior for vim")
+    (evil-complete-all-buffers nil)
+    :config
+    (defun +evil-kill-minibuffer () (interactive)
+      (when (windowp (active-minibuffer-window))
+        (evil-ex-search-exit)))
 
+    (add-hook 'mouse-leave-buffer-hook #'+evil-kill-minibuffer)
+    (evil-mode))
+
+  (use-package evil-collection
+    :after (evil)
+    :config (evil-collection-init)
+    :custom
+    (evil-collection-elpaca-want-g-filters nil)
+    (evil-collection-setup-minibuffer t "Add evil bindings to minibuffer")
+    (evil-collection-company-use-tng t))
+
+  (use-package evil-nerd-commenter
+    :after (general)
+    :commands (evilnc-comment-operator
+               evilnc-inner-comment
+               evilnc-outer-commenter)
+    ;; :custom (general-define-key :state '(normal visual) "gc" 'evilnc-comment-operator)
+    :general
+    ([remap comment-line] #'evilnc-comment-or-uncomment-lines
+     :keymaps 'prog-mode-map
+     :state '(normal visual) "gc" 'evilnc-comment-operator))
+
+  (use-package evil-matchit :config (global-evil-matchit-mode 1))
+  (use-package evil-lion :elpaca (evil-lion :host github :repo "edkolev/evil-lion" :files ("*" (:exclude ".git"))) :config (evil-lion-mode))
+
+  (use-package evil-surround :config (global-evil-surround-mode 1))
+  (use-package evil-embrace
+    :commands embrace-add-pair embrace-add-pair-regexp
+    :after evil-surround
+    :init (evil-embrace-enable-evil-surround-integration)
+    :config (setq evil-embrace-show-help nil)
+    :hook (org-mode . embrace-org-mode-hook)
+    :hook (emace-lisp-mode . embrace-emacs-lisp-mode-hook))
+
+  (use-package evil-escape
+    :commands evil-escape
+    :init
+    (setq evil-escape-excluded-states '(normal visual multiedit emacs motion)
+          evil-escape-excluded-major-modes '(treemacs-mode vterm-mode))
+    (evil-define-key '(insert replace visual operator) 'global "\C-g" #'evil-escape))
+
+  (use-package evil-exchange :config (evil-exchange-install))
+
+  (use-package evil-traces :after evil :config (evil-traces-use-diff-faces) (evil-traces-mode))
+#+end_src
 ** profile
 #+begin_src emacs-lisp
 (defun enable-profiler ()
@@ -563,7 +578,7 @@ xxx => xxxx lead to width change
      (convert-standard-filename
         (expand-file-name  "var/eln-cache/" user-emacs-directory))))
 #+end_src
-** completion
+* Completion
 *** vertico
 #+begin_src emacs-lisp
   (use-package vertico :init (vertico-mode))
@@ -1200,10 +1215,10 @@ xxx => xxxx lead to width change
 #+begin_src emacs-lisp
   (use-package posframe)
   (use-package yasnippet :config (yas-global-mode 1))
-
   (use-package lsp-bridge
     :elpaca (lsp-bridge :host github :repo "manateelazycat/lsp-bridge" :files ("*" (:exclude ".git")))
-    :config (global-lsp-bridge-mode))
+    :config (global-lsp-bridge-mode)
+    (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs))
 #+end_src
 ** treesit
 #+begin_src emacs-lisp
@@ -1259,7 +1274,7 @@ xxx => xxxx lead to width change
     (global-treesit-auto-mode))
 #+end_src
 ** langs
-*** web-dev
+*** web-development
 #+begin_src emacs-lisp
   (use-package css-mode
     :elpaca nil
