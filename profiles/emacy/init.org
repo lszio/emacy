@@ -158,6 +158,17 @@ xxx => xxxx lead to width change
 
   (setq elpaca-queue-limit 21)
 #+end_src
+***** use-feature
+#+begin_src emacs-lisp
+  (defmacro use-feature (name &rest args)
+    "Like `use-package' but accounting for asynchronous installation.
+    NAME and ARGS are in `use-package'."
+    (declare (indent defun))
+    `(use-package ,name
+       :elpaca nil
+       :ensure nil
+       ,@args))
+#+end_src
 ***** disable package.el
 #+begin_src emacs-lisp :tangle early-init.el
   (setq package-enable-at-startup nil)
@@ -1566,6 +1577,13 @@ alias more view-file $1
     :after (treemacs)
     :ensure t
     :config (treemacs-set-scope-type 'Tabs))
+#+end_src
+** debug
+#+begin_src emacs-lisp
+  (use-package dap-mode
+    :config
+    (setq dap-auto-configure-features '(sessions locals controls tooltip))
+    (dap-mode 1))
 #+end_src
 * Misc
 ** mind-wave
