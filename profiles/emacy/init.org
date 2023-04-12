@@ -270,6 +270,10 @@ xxx => xxxx lead to width change
     "pt" 'elpaca-try
     "pv" 'elpaca-visit)
 #+end_src
+***** workspaces
+#+begin_src emacs-lisp
+  (create-emacy-menu "workspaces" "TAB")
+#+end_src
 ***** buffers
 #+begin_src emacs-lisp
   (create-emacy-menu "buffer" "b"
@@ -492,12 +496,8 @@ xxx => xxxx lead to width change
     ("q" nil)
     ("." nil :color blue))
 
-  ;;(define-key dired-mode-map "." 'hydra-dired/body)
-  (general-define-key
-    :keymaps 'override
-    :states '(normal visual motion emacs)
-    :prefix-map 'dired-mode-map
-    "." 'hydra-dired/body)
+  ;; FIXME
+  (general-define-key :keymaps 'dired-mode-map "." 'hydra-dired/body)
 #+end_src
 *** evil
 #+begin_src emacs-lisp
@@ -595,12 +595,31 @@ xxx => xxxx lead to width change
 #+begin_src emacs-lisp
   (use-package shackle)
 #+end_src
-*** persp-mode
+*** QUIT persp-mode
+#+header: tangle no
 #+begin_src emacs-lisp
   (use-package persp-mode
     :hook (window-setup-hook . (lambda () (persp-mode 1)))
     :config (setq wg-morph-on nil
                   persp-autokill-buffer-on-remove 'kill-weak))
+#+end_src
+*** tabspaces
+#+begin_src emacs-lisp
+  (use-package tabspaces
+    :elpaca (:type git :host github :repo "mclear-tools/tabspaces")
+    :hook (elpaca-after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup. 
+    :commands (tabspaces-switch-or-create-workspace tabspaces-open-or-create-project-and-workspace)
+    :custom
+    (tabspaces-use-filtered-buffers-as-default t)
+    (tabspaces-default-tab "Default")
+    (tabspaces-remove-to-default t)
+    (tabspaces-include-buffers '("*scratch*"))
+    ;; sessions
+    (tabspaces-session t)
+    (tabspaces-session-auto-restore t)
+    :general
+    (emacy-workspace-menu
+     "b" 'tabspaces-switch-to-buffer))
 #+end_src
 * Completion
 *** vertico
@@ -1583,7 +1602,20 @@ alias more view-file $1
   (use-package dap-mode
     :config
     (setq dap-auto-configure-features '(sessions locals controls tooltip))
-    (dap-mode 1))
+    (dap-mode 1)
+    (dap-ui-mode 1)
+    (dap-ui-controls-mode 1)
+    (dap-tooltip-mode 1)
+    (tooltip-mode 1)
+    (require 'dap-python)
+    (setq dap-python-debugger 'debugpy)
+    (require 'dap-node))
+#+end_src
+** formatter
+#+begin_src emacs-lisp
+  (use-package apheleia
+    :config
+    (apheleia-global-mode +1))
 #+end_src
 * Misc
 ** mind-wave
