@@ -61,6 +61,8 @@ xxx => xxxx lead to width change
   (toggle-frame-maximized)
   (global-auto-revert-mode)
   (global-display-line-numbers-mode)
+
+  (electric-pair-mode)
 #+end_src
 ** constants
 #+header: :tangle early-init.el
@@ -1616,6 +1618,10 @@ alias more view-file $1
   (use-package apheleia
     :config
     (apheleia-global-mode +1))
+#+end_src
+** editorconfig
+#+begin_src emacs-lisp
+  (use-package editorconfig :config (editorconfig-mode 1))
 #+end_src
 * Misc
 ** mind-wave
