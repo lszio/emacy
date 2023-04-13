@@ -210,12 +210,13 @@ xxx => xxxx lead to width change
 #+end_src
 **** menus
 :PROPERTIES:
-:HEADER-ARGS: :noweb-ref general-configs
+:HEADER-ARGS: :noweb-ref old-general-configs
 :END:
+***** definer
 #+begin_src emacs-lisp :lexical t
   (general-define-key
    :keymaps 'override
-   :states '(insert normal visual motion operator hybrid emacs)
+   :states '(insert normal motion emacs)
    :prefix-map 'emacy-map
    :prefix "SPC"
    :global-prefix "S-SPC")
@@ -365,6 +366,189 @@ xxx => xxxx lead to width change
   "r" 'restart-emacs
   "Q" 'kill-emacs)
 #+end_src
+**** TODO menus
+:PROPERTIES:
+:HEADER-ARGS: :noweb-ref general-configs
+:END:
+***** definer
+#+begin_src emacs-lisp
+  (general-define-key
+   :states '(normal insert motion emacs)
+   :keymaps 'override
+   :prefix-map 'tyrant-map
+   :prefix "SPC"
+   :non-normal-prefix "M-SPC")
+
+  (general-create-definer tyrant-def :keymaps 'tyrant-map)
+  (tyrant-def "" nil)
+
+  (general-create-definer despot-def
+    :states '(normal insert motion emacs)
+    :keymaps 'override
+    :major-modes t
+    :prefix "SPC m"
+    :non-normal-prefix "M-SPC m")
+  (despot-def "" nil)
+
+  (general-def universal-argument-map "SPC u" 'universal-argument-more)
+#+end_src
+***** tyrant
+#+begin_src emacs-lisp
+  (tyrant-def
+      "SPC"     '("M-x" . execute-extended-command)
+      "!"       '("shell cmd" . shell-command)
+
+      ;; "TAB"     '("last buffer" . alternate-buffer)
+      "TAB"     (cons "workspaces" (make-sparse-keymap))
+      "TAB n"   'tabspaces-open-or-create-project-and-workspace
+
+      "a"       (cons "applications" (make-sparse-keymap))
+      "ac"      'calc-dispatch
+      "ap"      'list-processes
+      "aP"      'proced
+
+      "b"       (cons "buffers" (make-sparse-keymap))
+      "bb"      'switch-to-buffer
+      "bB"      'ibuffer
+      "bd"      'kill-current-buffer
+      "bm"      'switch-to-messages-buffer
+      "bs"      'switch-to-scratch-buffer
+      "bu"      'reopen-killed-buffer
+      "bx"      'kill-buffer-and-window
+
+      "c"       (cons "code" (make-sparse-keymap))
+      "cb"      'flymake-show-buffer-diagnostics
+      "cc"      'compile
+      "cn"      'next-error
+      "cp"      'previous-error
+      "cr"      'recompile
+      "cx"      'kill-compilation
+      "c="      'indent-region-or-buffer
+
+      "f"       (cons "files" (make-sparse-keymap))
+      "fC"      '("copy-file" . write-file)
+      "fD"      'delete-current-buffer-file
+      "fe"      'find-library
+      "fE"      'sudo-edit
+      "ff"      'find-file
+      "fj"      'dired-jump
+      "fJ"      'dired-jump-other-window
+      "fo"      'open-file-or-directory-in-external-app
+      "fr"      'read-only-mode
+      "fR"      'rename-current-buffer-file
+      "fs"      'save-buffer
+      "fv"      (cons "variables" (make-sparse-keymap))
+      "fvd"     'add-dir-local-variable
+      "fvf"     'add-file-local-variable
+      "fvp"     'add-file-local-variable-prop-line
+
+      "F"       (cons "frame" (make-sparse-keymap))
+      "Fd"      'delete-frame
+      "FD"      'delete-other-frames
+      "Fn"      'make-frame
+      "Fo"      'other-frame
+
+      "h"       (cons "help" (make-sparse-keymap))
+      "ha"      'apropos
+      "hb"      'describe-bindings
+      "hc"      'describe-char
+      "hf"      'describe-function
+      "hF"      'describe-face
+      "hi"      'info-emacs-manual
+      "hI"      'info-display-manual
+      "hk"      'describe-key
+      "hK"      'describe-keymap
+      "hm"      'describe-mode
+      "hM"      'woman
+      "hp"      'describe-package
+      "ht"      'describe-text-properties
+      "hv"      'describe-variable
+      "hP"      (cons "profiler" (make-sparse-keymap))
+      "hPs"     'profiler-start
+      "hPk"     'profiler-stop
+      "hPr"     'profiler-report
+
+      "j"       (cons "jump" (make-sparse-keymap))
+      "ji"      'imenu
+      "jg"      'avy-goto-char-2
+
+      "l"       (cons "layouts" tab-prefix-map)
+      "ld"      'tab-bar-close-tab
+      "lD"      'tab-bar-close-other-tabs
+      "lg"      'tab-bar-change-tab-group
+      "lm"      'tab-bar-move-tab-to
+      "lM"      'tab-bar-move-tab-to-group
+      "ll"      'tab-bar-switch-to-tab
+      "lR"      'tab-bar-rename-tab
+      "lt"      'other-tab-prefix
+      "lu"      'tab-bar-undo-close-tab
+      "l1"      '("select tab 1..8" . tab-bar-select-tab)
+      "l2"      'tab-bar-select-tab
+      "l3"      'tab-bar-select-tab
+      "l4"      'tab-bar-select-tab
+      "l5"      'tab-bar-select-tab
+      "l6"      'tab-bar-select-tab
+      "l7"      'tab-bar-select-tab
+      "l8"      'tab-bar-select-tab
+      "l TAB"   'tab-bar-switch-to-last-tab
+
+      "m"       (cons "major mode" (make-sparse-keymap))
+
+      "p"       (cons "projects" project-prefix-map)
+      "pt"      'project-open-in-tab
+
+      "q"       (cons "quit" (make-sparse-keymap))
+      "qd"      'restart-emacs-debug-init
+      "qr"      'restart-emacs
+      "qR"      'restart-emacs-without-desktop
+      "qf"      'delete-frame
+      "qq"      'save-buffers-kill-terminal
+      "qQ"      'save-buffers-kill-emacs
+
+      "s"       (cons "spelling" (make-sparse-keymap))
+      "sb"      'flyspell-buffer
+      "sn"      'flyspell-goto-next-error
+      "sr"      'flyspell-region
+
+      "T"       (cons "toggles" (make-sparse-keymap))
+      "Ta"      'auto-fill-mode
+      "Td"      'toggle-debug-on-error
+      "Tf"      'display-fill-column-indicator-mode
+      "Tl"      'toggle-truncate-lines
+      "Tm"      'flymake-mode
+      "Tn"      'display-line-numbers-mode
+      "Ts"      'flyspell-mode
+      "Tw"      'whitespace-mode
+      "TW"      'toggle-word-wrap
+
+      "u"       '("universal arg" . universal-argument)
+
+      "w"       (cons "windows" (make-sparse-keymap))
+      "w TAB"   'alternate-window
+      "w+"      'window-layout-toggle
+      "wb"      'switch-to-minibuffer-window
+      "wd"      'delete-window
+      "wD"      'delete-other-windows
+      "wm"      'toggle-maximize-buffer
+      "wf"      'follow-mode
+      "wh"      'evil-window-left
+      "wH"      'evil-window-move-far-left
+      "wj"      'evil-window-down
+      "wJ"      'evil-window-move-very-bottom
+      "wk"      'evil-window-up
+      "wK"      'evil-window-move-very-top
+      "wl"      'evil-window-right
+      "wL"      'evil-window-move-far-right
+      "wr"      'rotate-windows-forward
+      "wR"      'rotate-windows-backward
+      "ws"      'split-window-vertically
+      "wS"      'split-window-vertically-and-focus
+      "wt"      'toggle-current-window-dedication
+      "wu"      'winner-undo
+      "wU"      'winner-redo
+      "wv"      'split-window-horizontally
+      "wV"      'split-window-horizontally-and-focus)
+#+end_src
 **** waitting
 #+begin_src emacs-lisp
   (elpaca-wait)
@@ -448,7 +632,7 @@ xxx => xxxx lead to width change
     ("Z" winner-redo)
     ("SPC" nil))
 
-  (emacy-definer "w ." 'emacy-hydra-window/body)
+  ;;(emacy-definer "w ." 'emacy-hydra-window/body)
 
   (defhydra hydra-dired (:hint nil :color pink)
     "
@@ -622,9 +806,10 @@ xxx => xxxx lead to width change
     ;; sessions
     (tabspaces-session t)
     (tabspaces-session-auto-restore t)
-    :general
-    (emacy-workspace-menu
-     "b" 'tabspaces-switch-to-buffer))
+    ;; :general
+    ;; (emacy-workspace-menu
+    ;;  "b" 'tabspaces-switch-to-buffer)
+    )
 #+end_src
 * Completion
 *** vertico
@@ -1239,27 +1424,27 @@ xxx => xxxx lead to width change
 ** projectile
 #+begin_src emacs-lisp
   (use-package projectile
-    :general
-    (emacy-definer
-      "p!" 'projectile-run-shell-command-in-root
-      "p%" 'projectile-replace-regexp
-      "pa" 'projectile-add-known-project
-      "pp" 'projectile-switch-project
-      "p&" 'projectile-run-async-shell-command-in-root
-      "pA" 'projectile-toggle-between-implementation-and-test
-      "pbn" 'projectile-next-project-buffer
-      "pbp" 'projectile-previous-project-buffer
-      "pc" 'projectile-compile-project
-      "pD" 'projectile-dired
-      "pe" 'projectile-edit-dir-locals
-      "pg" 'projectile-find-tag
-      "pG" 'projectile-regenerate-tags
-      "pI" 'projectile-invalidate-cache
-      "pk" 'projectile-kill-buffers
-      "pR" 'projectile-replace
-      "ps" 'projectile-save-project-buffers
-      "pT" 'projectile-test-project
-      "pv" 'projectile-vc)
+    ;;:general
+    ;; (emacy-definer
+    ;;   "p!" 'projectile-run-shell-command-in-root
+    ;;   "p%" 'projectile-replace-regexp
+    ;;   "pa" 'projectile-add-known-project
+    ;;   "pp" 'projectile-switch-project
+    ;;   "p&" 'projectile-run-async-shell-command-in-root
+    ;;   "pA" 'projectile-toggle-between-implementation-and-test
+    ;;   "pbn" 'projectile-next-project-buffer
+    ;;   "pbp" 'projectile-previous-project-buffer
+    ;;   "pc" 'projectile-compile-project
+    ;;   "pD" 'projectile-dired
+    ;;   "pe" 'projectile-edit-dir-locals
+    ;;   "pg" 'projectile-find-tag
+    ;;   "pG" 'projectile-regenerate-tags
+    ;;   "pI" 'projectile-invalidate-cache
+    ;;   "pk" 'projectile-kill-buffers
+    ;;   "pR" 'projectile-replace
+    ;;   "ps" 'projectile-save-project-buffers
+    ;;   "pT" 'projectile-test-project
+    ;;   "pv" 'projectile-vc)
     :config
     (projectile-global-mode +1))
 #+end_src
