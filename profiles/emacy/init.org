@@ -63,6 +63,9 @@ xxx => xxxx lead to width change
   (global-display-line-numbers-mode)
 
   (electric-pair-mode)
+  (toggle-word-wrap)
+  (global-word-wrap-whitespace-mode 1)
+  (tab-bar-mode -1)
 #+end_src
 ** constants
 #+header: :tangle early-init.el
@@ -274,7 +277,7 @@ xxx => xxxx lead to width change
 #+end_src
 ***** workspaces
 #+begin_src emacs-lisp
-  (create-emacy-menu "workspaces" "TAB")
+  (create-emacy-menu "workspaces" "<tab>")
 #+end_src
 ***** buffers
 #+begin_src emacs-lisp
@@ -1611,7 +1614,14 @@ alias more view-file $1
     (tooltip-mode 1)
     (require 'dap-python)
     (setq dap-python-debugger 'debugpy)
-    (require 'dap-node))
+    (require 'dap-node)
+
+    (dap-register-debug-template
+      "Node::Attach"
+      (list :type "node"
+            :request "attach"
+            :port 9229
+            :name "Node::Attach")))
 #+end_src
 ** formatter
 #+begin_src emacs-lisp
