@@ -1303,6 +1303,26 @@ https://remacs.cc/
    (setq org-appear-autokeywords t)
    (setq org-appear-inside-latex t)) 
 #+end_src
+** org-roam
+#+begin_src emacs-lisp
+  (use-package org-roam)
+
+  (use-package org-roam-ui)
+#+end_src
+** org-elfeed
+#+begin_src emacs-lisp
+  (use-package elfeed)
+
+  (use-package elfeed-org
+    :config
+    (setq rmh-elfeed-org-files (list "~/Notes/feeds.org"))
+    (elfeed-org))
+#+end_src
+** latex
+#+begin_src emacs-lisp
+  (use-package tex
+    :ensure auctex)
+#+end_src
 ** mpvi
 #+begin_src emacs-lisp
   (use-package mpvi :elpaca (mpvi :repo "https://github.com/lorniu/mpvi")
@@ -1761,6 +1781,12 @@ alias more view-file $1
                                rime-predicate-tex-math-or-command-p));; 在 (La)TeX 数学环境中或者输入 (La)TeX 命令时
     :bind
     (:map rime-mode-map ("C-," . 'rime-force-enable)))
+#+end_src
+** beacon
+#+begin_src emacs-lisp
+  (use-package beacon
+    :config
+    (beacon-mode 1))
 #+end_src
 * Footer
 ** early-init.el
