@@ -640,6 +640,34 @@ https://remacs.cc/
   (use-package evil-exchange :config (evil-exchange-install))
 
   (use-package evil-traces :after evil :config (evil-traces-use-diff-faces) (evil-traces-mode))
+
+  (use-package evil-goggles
+    :after evil
+    :demand
+    :init
+    (setq evil-goggles-duration 0.05)
+    :config
+    (push '(evil-operator-eval
+            :face evil-goggles-yank-face
+            :switch evil-goggles-enable-yank
+            :advice evil-goggles--generic-async-advice)
+          evil-goggles--commands)
+    (evil-goggles-mode)
+    (evil-goggles-use-diff-faces))
+
+  (use-package evil-snipe
+    :after evil
+    :demand
+    :config
+    (evil-snipe-mode +1)
+    (evil-snipe-override-mode +1))
+
+  (use-package evil-iedit-state
+    :elpaca (evil-iedit-state :repo "kassick/evil-iedit-state")
+    :general
+    (tyrant-def
+      "s e" '(evil-iedit-state/iedit-mode :wk "iedit")
+      "s q" '(evil-iedit-state/quit-iedit-mode :wk "quit iedit")))
 #+end_src
 ** profiler
 #+begin_src emacs-lisp
@@ -1350,7 +1378,8 @@ https://remacs.cc/
 #+end_src
 ** latex
 #+begin_src emacs-lisp
-  (use-package tex :elpaca nil :ensure auctex)
+  ;; (use-package tex :elpaca nil :ensure auctex)
+  (elpaca auctex (require 'tex))
 #+end_src
 ** mpvi
 #+begin_src emacs-lisp
