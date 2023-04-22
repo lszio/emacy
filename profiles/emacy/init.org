@@ -30,22 +30,23 @@ https://remacs.cc/
 #+end_src
 
 * Basic
-** defaults
+** early defaults
 #+header: :tangle early-init.el :session early
 #+begin_src emacs-lisp
   ;; 设置垃圾回收参数
-  (setq gc-cons-threshold most-positive-fixnum)
-  (setq gc-cons-percentage 0.6)
+  (setq gc-cons-threshold most-positive-fixnum
+        gc-cons-percentage 0.6)
 
   ;; 启动早期不加载`package.el'包管理器
-  (setq package-enable-at-startup nil)
-  ;; 不从包缓存中加载
-  (setq package-quickstart nil)
+  (setq package-enable-at-startup nil
+        package-quickstart nil)
 
   ;; 禁止展示菜单栏、工具栏和纵向滚动条
   (push '(menu-bar-lines . 0) default-frame-alist)
   (push '(tool-bar-lines . 0) default-frame-alist)
   (push '(vertical-scroll-bars) default-frame-alist)
+
+  (setq frame-inhibit-implied-resize t)
 
   ;; 禁止菜单栏、工具栏、滚动条模式，禁止启动屏幕和文件对话框
   (menu-bar-mode -1)
@@ -54,15 +55,7 @@ https://remacs.cc/
   (setq inhibit-splash-screen t)
   (setq use-file-dialog nil)
 
-  (display-time-mode)
-  (toggle-frame-maximized)
-  (global-auto-revert-mode)
-  (global-display-line-numbers-mode)
-
-  (electric-pair-mode)
-  (toggle-word-wrap)
-  (global-word-wrap-whitespace-mode 1)
-  (tab-bar-mode -1)
+  (setq comp-deferred-compilation nil)
 #+end_src
 ** constants
 #+header: :tangle early-init.el
@@ -80,7 +73,19 @@ https://remacs.cc/
   (defvar user-local-directory "~/.local")
 #+end_src
 
-** load-path
+** modes
+#+begin_src emacs-lisp
+(display-time-mode)
+(toggle-frame-maximized)
+(global-auto-revert-mode)
+(global-display-line-numbers-mode)
+
+(electric-pair-mode)
+(toggle-word-wrap)
+(global-word-wrap-whitespace-mode 1)
+(tab-bar-mode -1)
+#+end_src
+** loads
 #+begin_src emacs-lisp
   ;; 将lisp目录放到加载路径的前面以加快启动速度
   (let ((dir (locate-user-emacs-file "lisp")))
@@ -96,7 +101,7 @@ https://remacs.cc/
 ** package manager
 *** elpaca
 [[https://github.com/progfolio/elpaca][elpaca]]
-**** install elpaca 
+**** install
 #+begin_src emacs-lisp
   (defvar elpaca-installer-version 0.3)
   ;;(defvar elpaca-directory (expand-file-name "elpaca/" user-local-directory))
@@ -156,9 +161,12 @@ https://remacs.cc/
   (when windows? (advice-add 'elpaca--link-build-files :override 'emacy/elpaca--link-build-files))
 
   (elpaca `(,@elpaca-order))
-  (elpaca elpaca-use-package (elpaca-use-package-mode) (setq elpaca-use-package-by-default t))
+  (elpaca elpaca-use-package
+    (elpaca-use-package-mode)
+    (setq elpaca-use-package-by-default t
+          use-package-compute-statistics t))
 
-  (setq elpaca-queue-limit 21)
+  (setq elpaca-queue-limit 63)
 #+end_src
 ***** use-feature
 #+begin_src emacs-lisp
@@ -259,7 +267,7 @@ https://remacs.cc/
       "bi"      'ibuffer
       "bd"      'kill-current-buffer
       "bm"      'switch-to-messages-buffer
-      "bs"      'switch-to-scratch-buffer
+      "bs"      'scratch-buffer
       "bu"      'reopen-killed-buffer
       "bx"      'kill-buffer-and-window
       "b TAB"    '("last buffer" . alternate-buffer)
@@ -267,6 +275,8 @@ https://remacs.cc/
       "c"       (cons "code" (make-sparse-keymap))
       "cb"      'flymake-show-buffer-diagnostics
       "cc"      'compile
+      "cd"      'lsp-bridge-find-def
+      "cD"      'lsp-bridge-find-references
       "cn"      'next-error
       "cp"      'previous-error
       "cr"      'recompile
@@ -631,7 +641,7 @@ https://remacs.cc/
 
   (use-package evil-traces :after evil :config (evil-traces-use-diff-faces) (evil-traces-mode))
 #+end_src
-** profile
+** profiler
 #+begin_src emacs-lisp
 (defun enable-profiler ()
   (add-hook 'elpaca-after-init-hook
@@ -648,11 +658,15 @@ https://remacs.cc/
   (enable-profiler)
   (remove "--with-profiler" command-line-args))
 #+end_src
-** config tree
+** configs
 #+begin_src emacs-lisp
   (use-package no-littering
-               :config
-               (setq suctom-file (no-littering-expand-etc-file-name "custom.el")))
+    :demand
+    :config
+    (setq suctom-file (no-littering-expand-etc-file-name "custom.el"))
+    (with-eval-after-load 'recentf
+      (add-to-list 'recentf-exclude no-littering-var-directory)
+      (add-to-list 'recentf-exclude no-littering-etc-directory)))
 #+end_src
 *** TODO eln-cache
 #+header: :tangle no
@@ -701,6 +715,22 @@ https://remacs.cc/
      "TAB R"  'tabspaces-remove-selected-buffer
      "TAB x"  'tabspaces-switch-buffer-and-tab
      "TAB b"  'tabspaces-switch-to-buffer))
+#+end_src
+** gcmh
+#+begin_src emacs-lisp
+  (use-package gcmh :demand :config (gcmh-mode 1))
+#+end_src
+** helpful
+#+begin_src emacs-lisp
+  (use-package helpful
+    :after evil
+    :init
+    (setq evil-lookup-func #'helpful-at-point)
+    :bind
+    ([remap describe-function] . helpful-callable)
+    ([remap describe-command] . helpful-command)
+    ([remap describe-variable] . helpful-variable)
+    ([remap describe-key] . helpful-key))
 #+end_src
 * Completion
 *** vertico
@@ -1320,8 +1350,7 @@ https://remacs.cc/
 #+end_src
 ** latex
 #+begin_src emacs-lisp
-  (use-package tex
-    :ensure auctex)
+  (use-package tex :elpaca nil :ensure auctex)
 #+end_src
 ** mpvi
 #+begin_src emacs-lisp
@@ -1334,36 +1363,10 @@ https://remacs.cc/
 ** base
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters :hook (prog-mode . rainbow-delimiters-mode))
-
-  ;;(use-package citre
-  ;;  :defer t)
 #+end_src
 ** projectile
 #+begin_src emacs-lisp
-  (use-package projectile
-    ;;:general
-    ;; (emacy-definer
-    ;;   "p!" 'projectile-run-shell-command-in-root
-    ;;   "p%" 'projectile-replace-regexp
-    ;;   "pa" 'projectile-add-known-project
-    ;;   "pp" 'projectile-switch-project
-    ;;   "p&" 'projectile-run-async-shell-command-in-root
-    ;;   "pA" 'projectile-toggle-between-implementation-and-test
-    ;;   "pbn" 'projectile-next-project-buffer
-    ;;   "pbp" 'projectile-previous-project-buffer
-    ;;   "pc" 'projectile-compile-project
-    ;;   "pD" 'projectile-dired
-    ;;   "pe" 'projectile-edit-dir-locals
-    ;;   "pg" 'projectile-find-tag
-    ;;   "pG" 'projectile-regenerate-tags
-    ;;   "pI" 'projectile-invalidate-cache
-    ;;   "pk" 'projectile-kill-buffers
-    ;;   "pR" 'projectile-replace
-    ;;   "ps" 'projectile-save-project-buffers
-    ;;   "pT" 'projectile-test-project
-    ;;   "pv" 'projectile-vc)
-    :config
-    (projectile-global-mode +1))
+  (use-package projectile :config (projectile-global-mode +1))
 #+end_src
 ** lsp-bridge
 #+begin_src emacs-lisp
@@ -1428,16 +1431,12 @@ https://remacs.cc/
     (global-treesit-auto-mode))
 #+end_src
 ** langs
-*** web-development
+*** web
 #+begin_src emacs-lisp
-  (use-package css-mode
-    :elpaca nil
-    :init (setq css-indent-offset 2))
-
+  (use-package css-mode :elpaca nil :init (setq css-indent-offset 2))
   (use-package scss-mode :init (setq scss-compile-at-save nil))
 
   (unless (fboundp 'less-css-mode) (use-package less-css-mode))
-
   (unless (fboundp 'js-json-mode) (use-package json-mode))
 
   (use-package js2-mode
@@ -1455,7 +1454,6 @@ https://remacs.cc/
 
   (use-package typescript-mode :mode ("\\.ts[x]\\'" . typescript-mode))
 
-  ;; Major mode for editing web templates
   (use-package web-mode
     :mode "\\.\\(phtml\\|php\\|[gj]sp\\|as[cp]x\\|erb\\|djhtml\\|html?\\|hbs\\|ejs\\|jade\\|swig\\|tm?pl\\|vue\\)$"
     :config
@@ -1657,15 +1655,12 @@ alias more view-file $1
       (treemacs-follow-mode t)
       (treemacs-filewatch-mode t)
       (treemacs-fringe-indicator-mode 'always)
-      (when treemacs-python-executable
-        (treemacs-git-commit-diff-mode t))
+      (when treemacs-python-executable (treemacs-git-commit-diff-mode t))
 
       (pcase (cons (not (null (executable-find "git")))
                    (not (null treemacs-python-executable)))
-        (`(t . t)
-         (treemacs-git-mode 'deferred))
-        (`(t . _)
-         (treemacs-git-mode 'simple)))
+        (`(t . t) (treemacs-git-mode 'deferred))
+        (`(t . _) (treemacs-git-mode 'simple)))
 
       (treemacs-hide-gitignored-files-mode nil))
     :bind
@@ -1678,31 +1673,25 @@ alias more view-file $1
           ("C-x t C-t" . treemacs-find-file)
           ("C-x t M-t" . treemacs-find-tag)))
 
-  (use-package treemacs-evil
-    :after (treemacs evil)
-    :ensure t)
+  (use-package treemacs-evil :after (treemacs evil) :ensure t)
 
-  (use-package treemacs-projectile
-    :after (treemacs projectile)
-    :ensure t)
+  (use-package treemacs-projectile :after (treemacs projectile) :ensure t)
 
   (use-package treemacs-icons-dired
     :hook (dired-mode . treemacs-icons-dired-enable-once)
     :ensure t)
 
-  (use-package treemacs-magit
-    :after (treemacs magit)
-    :ensure t)
+  (use-package treemacs-magit :after (treemacs magit) :ensure t)
 
-  (use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
-    :after (treemacs persp-mode) ;;or perspective vs. persp-mode
-    :ensure t
-    :config (treemacs-set-scope-type 'Perspectives))
+  ;; (use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
+  ;;   :after (treemacs persp-mode) ;;or perspective vs. persp-mode
+  ;;   :ensure t
+  ;;   :config (treemacs-set-scope-type 'Perspectives))
 
   (use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
     :after (treemacs)
     :ensure t
-    :config (treemacs-set-scope-type 'Tabs))
+    :config (treemacs-set-scope-type 'Workspaces))
 #+end_src
 ** debug
 #+begin_src emacs-lisp
@@ -1728,9 +1717,7 @@ alias more view-file $1
 #+end_src
 ** formatter
 #+begin_src emacs-lisp
-  (use-package apheleia
-    :config
-    (apheleia-global-mode +1))
+  (use-package apheleia :config (apheleia-global-mode +1))
 #+end_src
 ** editorconfig
 #+begin_src emacs-lisp
@@ -1784,9 +1771,7 @@ alias more view-file $1
 #+end_src
 ** beacon
 #+begin_src emacs-lisp
-  (use-package beacon
-    :config
-    (beacon-mode 1))
+  (use-package beacon :config (beacon-mode 1))
 #+end_src
 * Footer
 ** early-init.el
