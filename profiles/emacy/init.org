@@ -710,6 +710,7 @@ https://remacs.cc/
   (use-package shackle)
 #+end_src
 *** tabspaces
+#+header: :tangle no
 #+begin_src emacs-lisp
   (use-package tabspaces
     :elpaca (:type git :host github :repo "mclear-tools/tabspaces")
@@ -743,6 +744,123 @@ https://remacs.cc/
      "TAB R"  'tabspaces-remove-selected-buffer
      "TAB x"  'tabspaces-switch-buffer-and-tab
      "TAB b"  'tabspaces-switch-to-buffer))
+#+end_src
+*** perspective
+#+header: :tangle no
+#+begin_src emacs-lisp
+  (use-package perspective
+    :commands (persp-new persp-switch persp-state-save)
+    :general
+    (tyrant-def
+      "TAB" (cons "workspace" (make-sparse-keymap))
+      "TAB TAB" 'persp-switch
+      "TAB ." 'persp-switch-last
+      "TAB d" 'persp-kill
+      "TAB p" 'persp-prev
+      "TAB h" 'persp-prev
+      "TAB n" 'persp-next
+      "TAB l" 'persp-next
+      "TAB r" 'persp-rename
+      "TAB x" '((lambda () (interactive) (persp-kill (persp-current-name))) :wk "kill current")
+      "TAB m" '(emacy/main-workspace :wk "main"))
+    :init
+    (setq persp-state-default-file (expand-file-name "perspective.eld" no-littering-var-directory))
+    (defun emacy/main-workspace ()
+      "Jump to the dashboard bufer"
+      (interactive)
+      (persp-switch "main")
+      (switch-to-buffer dashboard-buffer-name)
+      (dashboard-mode)
+      (dashboard-insert-startupify-lists)
+      (dashboard-refersh-buffer))
+    :custom
+    (persp-mode-prefix-key (kbd "C-c C-p"))
+    :config
+    (persp-mode)
+    (setq  persp-suppress-no-prefix-key-warning t)
+    :hook
+    (ibuffer . (lambda () (persp-ibuffer-set-filter-grpups)
+                 (unless (eq ibuffer-sorting-mode 'alphabetic)
+                   (ibuffer-do-sort-by-alphabetic)))))
+
+  (use-package persp-projectile
+    :after projectile
+    :init
+    (defun emacy/get-last-folder-from-known-project (path) (car (last (split-string path "\/" 2))))
+    (defun emacy/find-project-from-persp ()
+      (car (seq-filter (lambda (proj) (string= persp-name (emacy/get-last-folder-from-known-project proj))))
+           projectile-known-projects-on-file))
+    (defun emacy/persp-reload-project ()
+      (interactive)
+      (let* ((persp (persp-current-name))
+             (project-root (emacy/find-project-from-persp)))
+        (persp-kill)
+        (projectile-persp-switch-project project-root)))
+    :general
+    (tyrant-def
+     "p p" 'projectile-persp-switch-project
+     "TAB r" '(emacy/persp-reload-project :wk "reload")))
+
+  (use-package treemacs-perspective ;;treemacs-perspective if you use perspective.el vs. persp-mode
+    :after (treemacs perspective) ;;or perspective vs. persp-mode
+    :ensure t
+    :config (treemacs-set-scope-type 'Perspectives))
+#+end_src
+*** persp-mode
+#+begin_src emacs-lisp
+  (use-package persp-mode
+    :commands (persp-new persp-switch persp-state-save)
+    :general
+    (tyrant-def
+      "TAB" (cons "workspace" (make-sparse-keymap))
+      "TAB n" #'persp-next
+      "TAB p" #'persp-prev
+      "TAB s" #'persp-frame-switch
+      "TAB S" #'persp-window-switch
+      "TAB r" #'persp-rename
+      "TAB c" #'persp-copy
+      "TAB C" #'persp-kill
+      "TAB z" #'persp-save-and-kill
+      "TAB a" #'persp-add-buffer
+      "TAB b" #'persp-switch-to-buffer
+      "TAB t" #'persp-temporarily-display-buffer
+      "TAB i" #'persp-import-buffers
+      "TAB I" #'persp-import-win-conf
+      "TAB k" #'persp-remove-buffer
+      "TAB K" #'persp-kill-buffer
+      "TAB w" #'persp-save-state-to-file
+      "TAB W" #'persp-save-to-file-by-names
+      "TAB l" #'persp-load-state-from-file
+      "TAB L" #'persp-load-from-file-by-names
+
+      "TAB x" '((lambda () (interactive) (persp-kill (persp-current-name))) :wk "kill current")
+      "TAB m" '(emacy/main-workspace :wk "main"))
+    :init
+    (defun emacy/main-workspace ()
+      "Jump to the dashboard bufer"
+      (interactive)
+      (persp-switch "main")
+      (switch-to-buffer dashboard-buffer-name)
+      (dashboard-mode)
+      (dashboard-insert-startupify-lists)
+      (dashboard-refersh-buffer))
+    :config
+    (persp-mode)
+    :hook
+    (kill-emacs . #'persp-state-save))
+
+  (use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
+    :after (treemacs persp-ode) ;;or perspective vs. persp-mode
+    :ensure t
+    :config (treemacs-set-scope-type 'Perspectives))
+
+  (use-package persp-mode-projectile-bridge
+    :after (projectile persp-mode)
+    :hook
+    (persp-mode-projectile-bridge-mode . (lambda () (if persp-mode-projectile-bridge-mode
+                                                        (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
+                                                      (persp-mode-projectile-bridge-kill-perspectives))))
+    (elpaca-after-init . (lambda () (persp-mode-projectile-bridge-mode 1))))
 #+end_src
 ** gcmh
 #+begin_src emacs-lisp
@@ -1255,6 +1373,35 @@ https://remacs.cc/
     :hook (org-mode . org-auto-tangle-mode)
     :config (setq org-auto-tangle-default t))
 #+end_src
+** org-roam
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :after org
+    :init
+    (setq org-roam-directory org-directory
+          org-roam-v2-ack t)
+    :config
+    (org-roam-setup)
+    (add-to-list 'display-buffer-alist
+                 '(("*org-roam*"
+                    (display-buffer-in-direcion)
+                    (direction . right)
+                    (window-width . 0.33)
+                    (window-height . fit-window-to-buffer))))
+    :general
+    (tyrant-def
+      "n" (cons "Notes" (make-sparse-keymap))
+      "n b" 'org-roam-buffer-toggle
+      "n f" 'org-roam-node-find
+      "n g" 'org-roam-graph
+      "n i" 'org-roam-node-insert
+      "n c" 'org-roam-capture
+      "n t" 'org-roam-tag-add
+      "n r" 'org-roam-ref-add
+      "n a" 'org-roam-alias-add))
+
+  (use-package org-roam-ui)
+#+end_src
 ** org-config
 #+begin_src emacs-lisp
   (setq org-directory  "~/Notes"
@@ -1361,12 +1508,6 @@ https://remacs.cc/
    (setq org-appear-autokeywords t)
    (setq org-appear-inside-latex t)) 
 #+end_src
-** org-roam
-#+begin_src emacs-lisp
-  (use-package org-roam)
-
-  (use-package org-roam-ui)
-#+end_src
 ** org-elfeed
 #+begin_src emacs-lisp
   (use-package elfeed)
@@ -1375,6 +1516,10 @@ https://remacs.cc/
     :config
     (setq rmh-elfeed-org-files (list "~/Notes/feeds.org"))
     (elfeed-org))
+#+end_src
+** org-fragtog
+#+begin_src emacs-lisp
+  (use-package org-fragtog :hook (org-mode . org-fragtog-mode))
 #+end_src
 ** latex
 #+begin_src emacs-lisp
@@ -1712,15 +1857,11 @@ alias more view-file $1
 
   (use-package treemacs-magit :after (treemacs magit) :ensure t)
 
-  ;; (use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
-  ;;   :after (treemacs persp-mode) ;;or perspective vs. persp-mode
-  ;;   :ensure t
-  ;;   :config (treemacs-set-scope-type 'Perspectives))
 
   (use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
     :after (treemacs)
     :ensure t
-    :config (treemacs-set-scope-type 'Workspaces))
+    :config (treemacs-set-scope-type 'Tabs))
 #+end_src
 ** debug
 #+begin_src emacs-lisp
