@@ -33,6 +33,8 @@
 ;; `load-theme' function. This is the default:
 
 (setq doom-theme 'doom-one)
+      
+;; (when IS-WSL (setq straight-base-dir "~/.local/var"))
 
 (let ((guix-site-lisp-directory "~/.guix-profile/share/emacs/site-lisp"))
   (when (file-directory-p guix-site-lisp-directory)

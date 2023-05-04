@@ -15,6 +15,8 @@
 ;;      directory (for easy access to its source code).
 
 (defconst IS-WSL     (and IS-LINUX (string-match-p "microsoft" operating-system-release)) "Are we on wsl?")
+(when IS-WSL (setq straight-base-dir "~/.local/var/"))
+;; (when IS-WSL (setq doom-local-dir "~/.local/var/doom/")) ;; FIXME
 
 (doom! :input
        ;;bidi              ; (tfel ot) thgir etirw uoy gnipleh
@@ -91,7 +93,7 @@
        ;;ansible
        (debugger)       ; FIXME stepping through code, to help you add bugs
        ;; direnv
-       docker
+       ;; docker
        editorconfig     ; let someone else argue about tabs vs spaces
        ;; ein               ; tame Jupyter notebooks with emacs
        (eval +overlay)       ; run code, run (also, repls)
