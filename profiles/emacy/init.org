@@ -103,7 +103,7 @@ https://remacs.cc/
 [[https://github.com/progfolio/elpaca][elpaca]]
 **** install
 #+begin_src emacs-lisp
-  (defvar elpaca-installer-version 0.3)
+  (defvar elpaca-installer-version 0.4)
   ;;(defvar elpaca-directory (expand-file-name "elpaca/" user-local-directory))
   (defvar elpaca-directory (expand-file-name "var/elpaca" (if wsl? user-local-directory user-emacs-directory)))
   (defvar elpaca-builds-directory (expand-file-name "builds" elpaca-directory))
@@ -166,7 +166,7 @@ https://remacs.cc/
     (setq elpaca-use-package-by-default t
           use-package-compute-statistics t))
 
-  (setq elpaca-queue-limit 63)
+  (when windows? (setq elpaca-queue-limit 21))
 #+end_src
 ***** use-feature
 #+begin_src emacs-lisp
@@ -239,6 +239,7 @@ https://remacs.cc/
 
   (general-def universal-argument-map "SPC u" 'universal-argument-more)
 #+end_src
+
 ***** tyrant
 #+begin_src emacs-lisp
   (tyrant-def
@@ -589,12 +590,12 @@ https://remacs.cc/
     :custom
     (evil-want-integration t) ;; This is optional since it's already set to t by default.
     (evil-want-C-i-jump t)
+    (evil-undo-system 'undo-fu)
     (evil-shift-width 2 "same behavior for vim")
     (evil-complete-all-buffers nil)
     :config
     (defun +evil-kill-minibuffer () (interactive)
-      (when (windowp (active-minibuffer-window))
-        (evil-ex-search-exit)))
+      (when (windowp (active-minibuffer-window)) (evil-ex-search-exit)))
 
     (add-hook 'mouse-leave-buffer-hook #'+evil-kill-minibuffer)
     (evil-mode))
@@ -844,23 +845,27 @@ https://remacs.cc/
       (dashboard-mode)
       (dashboard-insert-startupify-lists)
       (dashboard-refersh-buffer))
+    (setq persp-autokill-buffer-on-remove 'kill-weak
+          persp-reset-windows-on-nil-window-conf nil
+          persp-nil-hidden t
+          persp-remove-buffers-from-nil-persp-behaviour nil
+          persp-kill-foreign-buffer-behaviour 'kill
+          persp-set-last-persp-for-net-frames t
+          persp-switch-to-added-buffer nil)
     :config
     (persp-mode)
     :hook
     (kill-emacs . #'persp-state-save))
 
   (use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
-    :after (treemacs persp-ode) ;;or perspective vs. persp-mode
+    :after (treemacs persp-mode) ;;or perspective vs. persp-mode
     :ensure t
     :config (treemacs-set-scope-type 'Perspectives))
 
   (use-package persp-mode-projectile-bridge
     :after (projectile persp-mode)
-    :hook
-    (persp-mode-projectile-bridge-mode . (lambda () (if persp-mode-projectile-bridge-mode
-                                                        (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
-                                                      (persp-mode-projectile-bridge-kill-perspectives))))
-    (elpaca-after-init . (lambda () (persp-mode-projectile-bridge-mode 1))))
+    :config
+    (persp-mode-projectile-bridge-mode 1))
 #+end_src
 ** gcmh
 #+begin_src emacs-lisp
@@ -878,17 +883,27 @@ https://remacs.cc/
     ([remap describe-variable] . helpful-variable)
     ([remap describe-key] . helpful-key))
 #+end_src
+** undo
+#+begin_src emacs-lisp
+  (use-package undo-fu)
+#+end_src
 * Completion
 *** vertico
 #+begin_src emacs-lisp
-  (use-package vertico :init (vertico-mode))
+  (use-package vertico
+    :demand
+    :general
+    (:keymaps 'vertico-map
+              "C-j" #'vertico-next
+              "C-k" #'vertico-previous)
+    :config
+    (vertico-mode))
 
   ;; Persist history over Emacs restarts. Vertico sorts by history position.
   (savehist-mode)
 
   ;; A few more useful configurations...
-  (use-package emacs
-    :elpaca nil
+  (use-feature emacs
     :init
     ;; Add prompt indicator to `completing-read-multiple'.
     ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
@@ -1014,10 +1029,11 @@ https://remacs.cc/
   (use-package embark
     :demand t
     :ensure t
-    :bind
-    (("C-." . embark-act)         ;; pick some comfortable binding
-     ("C-;" . embark-dwim)        ;; good alternative: M-.
-     ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+    :general
+    (:keymaps 'override
+     "C-;" 'embark-dwim
+     :states '(normal insert motion emacs)
+     "C-." 'embark-act)
 
     :init
     ;; Optionally replace the key help with a completing-read interface
@@ -1360,10 +1376,81 @@ https://remacs.cc/
     (setq keycast-log-format "%-20K%C\n")
     (setq keycast-log-frame-alist '((minibuffer . nil)))
     (setq keycast-log-newest-first t))
+
+    (use-package anzu
+      :config
+      (global-anzu-mode +1))
+
+    (use-package evil-anzu :after evil)
 #+end_src
 ** Window
 #+begin_src emacs-lisp
   (use-package ace-window :hook (elpaca-after-init . winner-mode))
+
+  (use-package transpose-frame
+    :general
+    (tyrant-def
+      "w [" 'transpose-frame
+      "w ]" 'rotate-frame))
+#+end_src
+** Icons
+*** all-the-icons
+#+begin_src emacs-lisp
+  (use-package all-the-icons
+    :if (display-graphic-p)
+    :demand)
+
+  (use-package all-the-icons-completion
+    :if (display-graphic-p)
+    :after (marginalia all-the-icons)
+    :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
+    :init (all-the-icons-completion-mode))
+
+  (use-package treemacs-all-the-icons :after (treemacs all-the-icons))
+#+end_src
+
+*** TODO nerd-fonts
+#+header: :tangle no
+#+begin_src emacs-lisp
+  (use-package nerd-icons :elpaca (nerd-icons :type git :host github :repo "rainstormstudio/nerd-icons"))
+
+  (use-package treemacs-nerd-icons
+    :after (treemacs nerd-icons)
+    :elpaca (treemacs-nerd-icons :type git :host github :repo "rainstormstudio/treemacs-nerd-icons")
+    :config
+    (treemacs-load-theme "nerd-icons"))
+
+  (use-package nerd-icons-ibuffer
+    :ensure t
+    :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
+
+  (use-package nerd-icons-dired
+    :hook
+    (dired-mode . nerd-icons-dired-mode))
+
+  (use-package nerd-icons-completion
+    :config
+    (nerd-icons-completion-mode))
+#+end_src
+** Guides
+#+begin_src emacs-lisp
+  (use-package highlight-indent-guides
+    :hook (prog-mode . highlight-indent-guides-mode)
+    :custom
+    (highlight-indent-guides-method 'fill))
+#+end_src
+** Dashboard
+#+begin_src emacs-lisp
+  (use-package dashboard
+    :hook
+    (elpaca-after-init . (lambda () (dashboard-open)))
+    :config
+    ;; FIXME
+    ;;(dashboard-setup-startup-hook)
+    (setq dashboard-center-content t)
+    (setq dashboard-set-file-icons t)
+    (setq dashboard-set-heading-icons t)
+    (setq dashboard-projects-backend 'projectile))
 #+end_src
 * Org
 ** Misc
@@ -1856,7 +1943,6 @@ alias more view-file $1
     :ensure t)
 
   (use-package treemacs-magit :after (treemacs magit) :ensure t)
-
 
   (use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
     :after (treemacs)
