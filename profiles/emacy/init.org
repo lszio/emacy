@@ -746,7 +746,7 @@ https://remacs.cc/
      "TAB x"  'tabspaces-switch-buffer-and-tab
      "TAB b"  'tabspaces-switch-to-buffer))
 #+end_src
-*** perspective
+*** QUIT perspective
 #+header: :tangle no
 #+begin_src emacs-lisp
   (use-package perspective
@@ -850,7 +850,7 @@ https://remacs.cc/
           persp-nil-hidden t
           persp-remove-buffers-from-nil-persp-behaviour nil
           persp-kill-foreign-buffer-behaviour 'kill
-          persp-set-last-persp-for-net-frames t
+          persp-set-last-persp-for-new-frames t
           persp-switch-to-added-buffer nil)
     :config
     (persp-mode)
@@ -2007,6 +2007,7 @@ alias more view-file $1
     ;; (rime-user-data-dir (if IS-LINUX (if IS-WSL "/mnt/c/Users/Liszt/AppData/Roaming/Rime" "~/.local/share/fcitx5/rime") "C:/Users/Liszt/AppData/Roaming/Rime"))
     (default-input-method "rime")
     (rime-show-candidate 'posframe)
+    (rime-user-data-dir "~/Dotfiles/config/rime")
     (rime-disable-predicates '(rime-predicate-after-alphabet-char-p ;; 在英文字符串之后（必须为以字母开头的英文字符串）
                                ;; rime-predicate-after-ascii-char-p ;; 任意英文字符后
                                rime-predicate-prog-in-code-p ;; 在 prog-mode 和 conf-mode 中除了注释和引号内字符串之外的区域
