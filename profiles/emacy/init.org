@@ -28,6 +28,10 @@ https://remacs.cc/
 
   ;;; Code:
 #+end_src
+** requires
+#+begin_src emacs-lisp
+  (require 'cl-lib)
+#+end_src
 
 * Basic
 ** early defaults
@@ -1251,10 +1255,11 @@ https://remacs.cc/
 
 ** Fonts
 #+begin_src emacs-lisp
+  (defun fonts-installed (&rest font-list) (reverse (cl-intersection font-list (font-family-list) :test #'equal)))
+
   (use-package fontaine
     :ensure t
     :when (display-graphic-p)
-    ;; :hook (kill-emacs . fontaine-store-latest-preset)
     :config
     (setq fontaine-latest-state-file (locate-user-emacs-file "etc/fontaine-latest-state.eld"))
     (setq fontaine-presets
@@ -1281,38 +1286,24 @@ https://remacs.cc/
     (fontaine-set-preset 'regular)
 
     ;; set emoji font
-    (set-fontset-font t
-     (if (version< emacs-version "28.1") '(#x1f300 . #x1fad0) 'emoji)
-     (cond
-      ((member "Noto Emoji" (font-family-list)) "Noto Emoji")
-      ((member "Symbola" (font-family-list)) "Symbola")
-      ((member "Apple Color Emoji" (font-family-list)) "Apple Color Emoji")
-      ((member "Noto Color Emoji" (font-family-list)) "Noto Color Emoji")
-      ((member "Segoe UI Emoji" (font-family-list)) "Segoe UI Emoji")))
-
+    (set-fontset-font t (if (version< emacs-version "28.1") '(#x1f300 . #x1fad0) 'emoji)
+      (car (fonts-installed
+            "Noto Emoji"
+            "Symbola"
+            "Apple Color Emoji"
+            "Noto Color Emoji"
+            "Segoe UI Emoji")))
     ;; set Chinese font
     (dolist (charset '(kana han symbol cjk-misc bopomofo))
       (set-fontset-font
        (frame-parameter nil 'font)
        charset
        (font-spec :family
-          (cond
-           ((eq system-type 'darwin)
-            (cond
-             ((member "Sarasa Mono SC Nerd" (font-family-list)) "Sarasa Mono SC Nerd")
-             ((member "PingFang SC" (font-family-list)) "PingFang SC")
-             ((member "WenQuanYi Zen Hei" (font-family-list)) "WenQuanYi Zen Hei")
-             ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")))
-           ((eq system-type 'gnu/linux)
-            (cond
-             ((member "LXGW Wenkai Mono" (font-family-list)) "LXGW Wenkai Mono")
-             ((member "WenQuanYi Micro Hei" (font-family-list)) "WenQuanYi Micro Hei")
-             ((member "WenQuanYi Zen Hei" (font-family-list)) "WenQuanYi Zen Hei")
-             ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")))
-           (t
-            (cond
-             ((member "Sarasa Mono SC Nerd" (font-family-list)) "Sarasa Mono SC Nerd")
-             ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")))))))
+                  (car (fonts-installed
+                         "LXGW Wenkai"
+                         "霞鹜文楷"
+                         "Sarasa Gothic SC"
+                         "更纱黑体 SC")))))
 
     ;; set Chinese font scale
     (setq face-font-rescale-alist `(
