@@ -891,15 +891,22 @@ https://remacs.cc/
 #+begin_src emacs-lisp
   (use-package undo-fu)
 #+end_src
+** env
+#+header: :tangle no
+#+begin_src emacs-lisp
+  (use-package exec-path-from-shell
+    :config
+    (exec-path-from-shell-initialize))
+#+end_src
 * Completion
 *** vertico
 #+begin_src emacs-lisp
   (use-package vertico
     :demand
-    :general
-    (:keymaps 'vertico-map
-              "C-j" #'vertico-next
-              "C-k" #'vertico-previous)
+    ;; :general
+    ;; (:keymaps 'vertico-map
+    ;;           "C-j" #'vertico-next
+    ;;           "C-k" #'vertico-previous)
     :config
     (vertico-mode))
 
@@ -1200,18 +1207,18 @@ https://remacs.cc/
 
   ;; 配置所有的编码为UTF-8，参考：
   ;; https://thraxys.wordpress.com/2016/01/13/utf-8-in-emacs-everywhere-forever/
-  (setq locale-coding-system 'utf-8)
-  (set-terminal-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
-  (set-selection-coding-system 'utf-8)
-  (set-default-coding-systems 'utf-8)
-  (set-language-environment 'utf-8)
-  (set-clipboard-coding-system 'utf-8)
-  (set-file-name-coding-system 'utf-8)
-  (set-buffer-file-coding-system 'utf-8)
-  (prefer-coding-system 'utf-8)
-  (modify-coding-system-alist 'process "*" 'utf-8)
-  (when (display-graphic-p) (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+  ;; (setq locale-coding-system 'utf-8)
+  ;; (set-terminal-coding-system 'utf-8)
+  ;; (set-keyboard-coding-system 'utf-8)
+  ;; (set-selection-coding-system 'utf-8)
+  ;; (set-default-coding-systems 'utf-8)
+  ;; (set-language-environment 'utf-8)
+  ;; (set-clipboard-coding-system 'utf-8)
+  ;; (set-file-name-coding-system 'utf-8)
+  ;; (set-buffer-file-coding-system 'utf-8)
+  ;; (prefer-coding-system 'utf-8)
+  ;; (modify-coding-system-alist 'process "*" 'utf-8)
+  ;; (when (display-graphic-p) (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 #+end_src
 ** Color
 #+begin_src emacs-lisp
@@ -1975,6 +1982,72 @@ alias more view-file $1
 #+begin_src emacs-lisp
   (use-package mind-wave :elpaca (mind-wave :repo "https://github.com/manateelazycat/mind-wave" :files (:defaults "*.py")))
 #+end_src
+** eaf
+#+begin_src emacs-lisp
+  (use-package eaf :elpaca (eaf :host github :repo "emacs-eaf/emacs-application-framework" :files ("*") :post-build (shell-command "python install-eaf.py --install-core-deps")))
+
+  (defconst eaf-apps
+    '(eaf-jupyter
+      eaf-browser
+      eaf-airshare
+      eaf-file-browser
+      eaf-file-manager
+      eaf-file-sender
+      eaf-music-player
+      eaf-system-monitor
+      eaf-mindmap
+      eaf-org-previewer
+      eaf-terminal
+      eaf-netease-cloud-music
+      eaf-video-player
+      eaf-image-viewer
+      eaf-demo
+      eaf-vue-demo
+      eaf-pdf-viewer
+      eaf-markdown-previewer
+      eaf-camera))
+
+  (defun +emacy/install-eaf-app-deps (app-dir)
+    "Install deps from dependencies.json."
+    (let* ((dep-file (expand-file-name "dependencies.json" app-dir))
+           (deps-dict (with-temp-buffer
+                        (if (file-exists-p dep-file)
+                          (insert-file-contents dep-file)
+                          (insert "{}"))
+                        (json-parse-string (buffer-string))))
+           (pip-deps (gethash (if IS-LINUX "linux" "darwin")
+                              (or (gethash "pip" deps-dict)
+                                  (make-hash-table))))
+           (vue-install (gethash "vue_install" deps-dict))
+           (npm-install (gethash "npm_install" deps-dict))
+           (npm-rebuild (gethash "npm_rebuild" deps-dict)))
+      (when pip-deps
+        (dolist (pkg (append pip-deps nil))
+          (message "%s" (shell-command-to-string (format "pip install %s" pkg)))))
+      (when vue-install
+        (let ((default-directory app-dir))
+          (message "%s" (shell-command-to-string "pnpm install"))
+          (message "%s" (shell-command-to-string "pnpm run build"))))
+      (when npm-install
+        (let ((default-directory app-dir))
+          (message "%s" (shell-command-to-string "pnpm install"))))
+      (when npm-rebuild
+        (let ((default-directory app-dir))
+          (message "%s" (shell-command-to-string "pnpm rebuild"))))))
+
+  (defmacro add-eaf-apps (apps)
+    `(progn ,@(mapcar (lambda (app) `(use-package ,app
+                                       :elpaca (,app :host github
+                                                     :repo ,(concat "emacs-eaf/" (symbol-name app))
+                                                     :files ("*")
+                                                     :post-build (+emacy/install-eaf-app-deps ,(concat elpaca-builds-directory "/" (symbol-name app))))))
+                      (if (symbolp apps) (eval apps) apps))))
+
+  (add-eaf-apps eaf-apps)
+
+  ;; (dolist (app eaf-apps)
+  ;;   )
+#+end_src
 ** whisper
 #+begin_src emacs-lisp
   (use-package whisper :elpaca (whisper :host github :repo "natrys/whisper.el")
@@ -1995,7 +2068,6 @@ alias more view-file $1
   (use-package rime
     :defer t
     :custom
-    ;; (rime-user-data-dir (if IS-LINUX (if IS-WSL "/mnt/c/Users/Liszt/AppData/Roaming/Rime" "~/.local/share/fcitx5/rime") "C:/Users/Liszt/AppData/Roaming/Rime"))
     (default-input-method "rime")
     (rime-show-candidate 'posframe)
     (rime-user-data-dir "~/Dotfiles/config/rime")
@@ -2004,8 +2076,8 @@ alias more view-file $1
                                rime-predicate-prog-in-code-p ;; 在 prog-mode 和 conf-mode 中除了注释和引号内字符串之外的区域
                                rime-predicate-in-code-string-p ;; 在代码的字符串中，不含注释的字符串。
                                rime-predicate-evil-mode-p ;; 在 evil-mode 的非编辑状态下
+                               rime-predicate-hydra-p ;; 如果激活了一个 hydra keymap
                                ;; rime-predicate-ace-window-p ;; 激活 ace-window-mode
-                               ;; rime-predicate-hydra-p ;; 如果激活了一个 hydra keymap
                                ;; rime-predicate-current-input-punctuation-p ;; 当要输入的是符号时
                                rime-predicate-punctuation-after-space-cc-p ;; 当要在中文字符且有空格之后输入符号时
                                rime-predicate-punctuation-after-ascii-p ;; 当要在任意英文字符之后输入符号时
