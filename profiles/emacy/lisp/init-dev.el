@@ -10,10 +10,10 @@
 (add-to-list 'load-path "~/Projects/Emacy/libraries/org-auto-tangle/")
 
 (setq-local org-confirm-babel-evaluate nil)
-(require 'auto-tangle-mode)
-(auto-tangle-mode)
-(add-hook 'auto-tangle-before-tangle-hook #'check-parens)
-(add-hook 'auto-tangle-after-tangle-hook
+(require 'org-auto-tangle)
+(org-auto-tangle-mode)
+(add-hook 'org-auto-tangle-before-tangle-hook #'check-parens)
+(add-hook 'org-auto-tangle-after-tangle-hook
           (lambda () (load-file "~/Projects/Emacy/profiles/emacy/init.el")
             (when-let ((forms (elpaca-q<-forms (car elpaca--queues))))
               (eval `(progn ,@(apply #'append (mapcar #'cdr (reverse forms)))) t))))
