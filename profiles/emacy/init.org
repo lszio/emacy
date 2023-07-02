@@ -1827,19 +1827,6 @@ https://remacs.cc/
     :custom-face
     (eshell-syntax-highlighting-shell-command-face ((t (:foreground "#7cc77f" :bold t)))))
 #+end_src
-*** alias
-#+header: :tangle etc/eshell/aliases :mkdir t
-#+begin_src text
-alias ff find-file $1
-alias fo find-file-other-window $1
-alias d dired $1
-alias ll ls -alh
-alias l. ls -dh .*
-alias up eshell-up $1
-alias pk eshell-up-peek $1
-alias less view-file $1
-alias more view-file $1
-#+end_src
 *** vterm
 #+begin_src emacs-lisp
   (use-package vterm :unless windows?)
