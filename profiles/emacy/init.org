@@ -106,8 +106,7 @@ https://remacs.cc/
 [[https://github.com/progfolio/elpaca][elpaca]]
 **** install
 #+begin_src emacs-lisp
-  (defvar elpaca-installer-version 0.4)
-  ;;(defvar elpaca-directory (expand-file-name "elpaca/" user-local-directory))
+  (defvar elpaca-installer-version 0.5)
   (defvar elpaca-directory (expand-file-name "var/elpaca" (if wsl? user-local-directory user-emacs-directory)))
   (defvar elpaca-builds-directory (expand-file-name "builds" elpaca-directory))
   (defvar elpaca-cache-directory (expand-file-name "var/elpaca/menus" user-emacs-directory))
@@ -118,58 +117,43 @@ https://remacs.cc/
                                 :build (:not elpaca--activate-package)))
 
   (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-         (build (expand-file-name "elpaca/" elpaca-builds-directory))
-         (order (cdr elpaca-order))
-         (default-directory repo))
+        (build (expand-file-name "elpaca/" elpaca-builds-directory))
+        (order (cdr elpaca-order))
+        (default-directory repo))
     (add-to-list 'load-path (if (file-exists-p build) build repo))
     (unless (file-exists-p repo)
       (make-directory repo t)
+      (when (< emacs-major-version 28) (require 'subr-x))
       (condition-case-unless-debug err
-        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                 ((zerop (call-process "git" nil buffer t "clone"
-                                       (plist-get order :repo) repo)))
-                 ((zerop (call-process "git" nil buffer t "checkout"
-                                       (or (plist-get order :ref) "--"))))
-                 (emacs (concat invocation-directory invocation-name))
-                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-                 ((require 'elpaca))
-                 ((elpaca-generate-autoloads "elpaca" repo)))
-          (kill-buffer buffer)
-          (error "%s" (with-current-buffer buffer (buffer-string))))
+          (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                  ((zerop (call-process "git" nil buffer t "clone"
+                                        (plist-get order :repo) repo)))
+                  ((zerop (call-process "git" nil buffer t "checkout"
+                                        (or (plist-get order :ref) "--"))))
+                  (emacs (concat invocation-directory invocation-name))
+                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                  ((require 'elpaca))
+                  ((elpaca-generate-autoloads "elpaca" repo)))
+              (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+            (error "%s" (with-current-buffer buffer (buffer-string))))
         ((error) (warn "%s" err) (delete-directory repo 'recursive))))
     (unless (require 'elpaca-autoloads nil t)
-        (require 'elpaca)
-        (elpaca-generate-autoloads "elpaca" repo)
-        (load "./elpaca-autoloads"))
-    (add-hook 'after-init-hook #'elpaca-process-queues))
-
-  (defun emacy/elpaca--link-build-files (e)
-    "Link E's :files into its builds subdirectory."
-    (elpaca--signal e "Linking build files" 'linking)
-    (let* ((build-dir (elpaca<-build-dir e))
-           (files (elpaca--files e)))
-      (when (file-exists-p build-dir) (delete-directory build-dir 'recusrive))
-      (make-directory build-dir 'parents)
-      (dolist (spec files)
-        (when-let ((file   (car spec))
-                   ((file-exists-p file))
-                   (link   (cdr spec)))
-          (make-directory (file-name-directory link) 'parents)
-          (condition-case err
-             (make-symbolic-link file link 'overwrite)
-             (file-already-exists nil)))))
-    (elpaca--continue-build e "Build files linked"))
-
-  (when windows? (advice-add 'elpaca--link-build-files :override 'emacy/elpaca--link-build-files))
-
+      (require 'elpaca)
+      (elpaca-generate-autoloads "elpaca" repo)
+      (load "./elpaca-autoloads")))
+  (add-hook 'after-init-hook #'elpaca-process-queues)
   (elpaca `(,@elpaca-order))
+  #+end_src
+***** setup
+#+begin_src emacs-lisp
   (elpaca elpaca-use-package
     (elpaca-use-package-mode)
     (setq elpaca-use-package-by-default t
           use-package-compute-statistics t))
 
   (when windows? (setq elpaca-queue-limit 21))
+  
 #+end_src
 ***** use-feature
 #+begin_src emacs-lisp
