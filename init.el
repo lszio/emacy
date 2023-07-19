@@ -29,6 +29,8 @@
     (normal-top-level-add-subdirs-to-load-path)))
 ;;(when windows? (add-subdirs-to-load-path elpaca-repos-directory))
 
+(require 'init-elpaca)
+
 (provide 'init)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init.el ends here

@@ -14,7 +14,6 @@
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
-
 (setq frame-inhibit-implied-resize t)
 
 ;; 禁止菜单栏、工具栏、滚动条模式，禁止启动屏幕和文件对话框
@@ -23,7 +22,6 @@
 (scroll-bar-mode -1)
 (setq inhibit-splash-screen t)
 (setq use-file-dialog nil)
-
 (setq comp-deferred-compilation nil)
 
 (defconst windows? (memq system-type '(cygwin windows-nt ms-dos)) "are we on windows")
