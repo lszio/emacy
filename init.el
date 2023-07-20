@@ -27,8 +27,12 @@
       (normal-top-level-add-subdirs-to-load-path)))
 ;;(when windows? (add-subdirs-to-load-path elpaca-repos-directory))
 
+(setq custom-file (expand-file-name "var/custom.el" user-emacs-directory))
+
 (require 'init-elpaca)
 (require 'init-keys)
+(require 'init-misc)
+(require 'init-ui)
 
 (provide 'init)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
