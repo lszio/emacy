@@ -5,7 +5,7 @@
 
 (defvar elpaca-directory (expand-file-name "var/elpaca" (if wsl? user-local-directory user-emacs-directory)))
 (defvar elpaca-builds-directory (expand-file-name "builds" elpaca-directory))
-(defvar elpaca-cache-directory (expand-file-name "var/elpaca/menus" user-emacs-directory))
+(defvar elpaca-cache-directory (expand-file-name "menus" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "libraries" user-emacs-directory))
 
 ;;; introduce elpaca https://github.com/progfolio/elpaca
@@ -46,6 +46,24 @@
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 ;;; ends elpaca init
+
+(elpaca elpaca-use-package
+  (elpaca-use-package-mode)
+  (setq elpaca-use-package-by-default t
+        use-package-compute-statistics t))
+
+(when windows? (setq elpaca-queue-limit 21))
+
+(defmacro use-feature (name &rest args)
+  "Like `use-package' but accounting for asynchronous installation.
+  NAME and ARGS are in `use-package'."
+  (declare (indent defun))
+  `(use-package ,name
+     :elpaca nil
+     :ensure nil
+     ,@args))
+
+(elpaca-wait)
 
 (provide 'init-elpaca)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

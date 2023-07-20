@@ -3,7 +3,6 @@
 
 ;;; Code:
 (require 'cl-lib)
-(message "Emacy init")
 
 (defvar emacy-directory "~/Emacy")
 (defvar user-local-directory "~/.local")
@@ -19,17 +18,17 @@
 (tab-bar-mode -1)
 
 ;; 将lisp目录放到加载路径的前面以加快启动速度
-(let ((dir (locate-user-emacs-file "lisp")))
-    (add-to-list 'load-path (file-name-as-directory dir)))
+(add-to-list 'load-path (file-name-as-directory (locate-user-emacs-file "lisp")))
 
 (defun add-subdirs-to-load-path (dir)
-"Recursive add directories to `load-path'."
-(let ((default-directory (file-name-as-directory dir)))
-    (add-to-list 'load-path dir)
-    (normal-top-level-add-subdirs-to-load-path)))
+  "Recursive add directories to `load-path'."
+  (let ((default-directory (file-name-as-directory dir)))
+      (add-to-list 'load-path dir)
+      (normal-top-level-add-subdirs-to-load-path)))
 ;;(when windows? (add-subdirs-to-load-path elpaca-repos-directory))
 
 (require 'init-elpaca)
+(require 'init-keys)
 
 (provide 'init)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
