@@ -63,6 +63,59 @@
 ;; TODO
 (use-package fontify-face)
 
+(use-package doom-modeline
+  :ensure t
+  :hook (elpaca-after-init . doom-modeline-mode)
+  :custom
+  (doom-modeline-irc nil)
+  (doom-modeline-mu4e nil)
+  (doom-modeline-gnus nil)
+  (doom-modeline-github nil)
+  (doom-modeline-buffer-file-name-style 'truncate-upto-root) ; : auto
+  (doom-modeline-persp-name nil)
+  (doom-modeline-unicode-fallback t)
+  (doom-modeline-enable-word-count nil))
+
+;; [[https://github.com/tarsius/minions][minions]] 插件能让模式栏变得清爽，将次要模式隐藏起来。
+(use-package minions
+  :ensure t
+  :hook (elpaca-after-init . minions-mode))
+
+(use-package keycast
+  :ensure t
+  :hook (elpaca-after-init . keycast-mode)
+  ;; :custom-face
+  ;; (keycast-key ((t (:background "#0030b4" :weight bold))))
+  ;; (keycast-command ((t (:foreground "#0030b4" :weight bold))))
+  :config
+  ;; set for doom-modeline support
+  ;; With the latest change 72d9add, mode-line-keycast needs to be modified to keycast-mode-line.
+  (define-minor-mode keycast-mode
+    "Show current command and its key binding in the mode line (fix for use with doom-mode-line)."
+    :global t
+    (if keycast-mode)
+    (progn))
+  (add-hook 'pre-command-hook 'keycast--update t)
+  (add-to-list 'global-mode-string '("" keycast-mode-line "  "))
+  (remove-hook 'pre-command-hook 'keycast--update)
+  (setq global-mode-string (delete '("" keycast-mode-line "  ") global-mode-string))
+
+  (dolist (input '(self-insert-command org-self-insert-command))
+    (add-to-list 'keycast-substitute-alist `(,input "." "Typing…")))
+
+  (dolist (event '(mouse-event-p mouse-movement-p mwheel-scroll))
+    (add-to-list 'keycast-substitute-alist `(,event nil)))
+
+  (setq keycast-log-format "%-20K%C\n")
+  (setq keycast-log-frame-alist '((minibuffer . nil)))
+  (setq keycast-log-newest-first t))
+
+(use-package anzu
+    :config
+    (global-anzu-mode +1))
+
+(use-package evil-anzu :after evil)
+
 (require 'init-theme)
 
 (provide 'init-ui)
