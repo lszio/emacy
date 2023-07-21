@@ -237,6 +237,17 @@
 
 (use-package rainbow-mode)
 
+(use-package dashboard
+  :hook
+  (elpaca-after-init . (lambda () (dashboard-open)))
+  :config
+  ;; FIXME
+  ;;(dashboard-setup-startup-hook)
+  (setq dashboard-center-content t)
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-projects-backend 'projectile))
+
 (require 'init-theme)
 
 (provide 'init-ui)
