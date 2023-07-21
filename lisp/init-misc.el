@@ -6,7 +6,10 @@
     (add-to-list 'recentf-exclude no-littering-var-directory)
     (add-to-list 'recentf-exclude no-littering-etc-directory)))
 
-(use-package gcmh :demand :config (gcmh-mode 1))
+(use-package gcmh
+  :demand
+  :config
+  (gcmh-mode 1))
 
 (use-package helpful
   :after evil

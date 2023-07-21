@@ -242,7 +242,6 @@
       "wv"      'split-window-horizontally
       "wV"      'split-window-horizontally-and-focus))
 
-
 (use-package hydra
   :demand t
   :config
