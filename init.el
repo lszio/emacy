@@ -34,6 +34,7 @@
 (require 'init-misc)
 (require 'init-ui)
 (require 'init-complete)
+(require 'init-org)
 
 (provide 'init)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
