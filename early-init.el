@@ -30,6 +30,10 @@
 (defconst bsd? (memq system-type '(darwin berkeley-unix gnu/kfreebsd)) "are we on bsd")
 (defconst wsl? (and linux? (string-match-p "microsoft" operating-system-release)) "are we on wsl")
 
+(when (boundp 'native-comp-eln-load-path)
+  (startup-redirect-eln-cache 
+    (expand-file-name "var/cache/eln" user-emacs-directory)))
+
 (provide 'early-init)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; early-init.el ends here

@@ -33,6 +33,7 @@
 (require 'init-keys)
 (require 'init-misc)
 (require 'init-ui)
+(require 'init-complete)
 
 (provide 'init)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
