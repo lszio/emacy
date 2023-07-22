@@ -4,6 +4,9 @@
 ;;; Code:
 (require 'cl-lib)
 
+(setq user-full-name "Li Shuzhi"
+      user-email-address "liszt21@qq.com")
+
 (defvar emacy-directory "~/Emacy")
 (defvar user-local-directory "~/.local")
 
@@ -35,6 +38,8 @@
 (require 'init-ui)
 (require 'init-complete)
 (require 'init-org)
+(require 'init-dev)
+(require 'init-edit)
 
 (provide 'init)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
