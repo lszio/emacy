@@ -249,5 +249,6 @@
   (setq dashboard-projects-backend 'projectile))
 
 (require 'init-theme)
+(require 'init-highlight)
 
 (provide 'init-ui)
