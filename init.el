@@ -39,6 +39,7 @@
 (require 'init-complete)
 (require 'init-org)
 (require 'init-dev)
+(require 'init-window)
 (require 'init-edit)
 (require 'init-file)
 (require 'init-term)
