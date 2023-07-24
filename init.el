@@ -40,6 +40,7 @@
 (require 'init-org)
 (require 'init-dev)
 (require 'init-edit)
+(require 'init-file)
 (require 'init-term)
 
 (provide 'init)
