@@ -20,5 +20,9 @@
   ([remap describe-command] . helpful-command)
   ([remap describe-variable] . helpful-variable)
   ([remap describe-key] . helpful-key))
+  
+(use-package exec-path-from-shell
+  :config
+  (exec-path-from-shell-initialize))
 
 (provide 'init-misc)

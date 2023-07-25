@@ -38,7 +38,7 @@
 (require 'init-ui)
 (require 'init-complete)
 (require 'init-org)
-(require 'init-dev)
+(require 'init-ide)
 (require 'init-window)
 (require 'init-edit)
 (require 'init-file)
