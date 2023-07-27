@@ -35,7 +35,9 @@
           :port 9229
           :name "Node::Attach")))
 
-(require 'init-dev)
+(require 'init-lsp-bridge)
+(require 'init-treesit)
+(require 'init-web)
 
 (provide 'init-ide)
 
