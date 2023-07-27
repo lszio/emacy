@@ -1,3 +1,17 @@
+;;; init-theme.el --- theme -*- lexical-binding: t -*-
+
+;; Author: Li Shuzhi
+;; Maintainer: Li Shuzhi
+;; Version: version
+;; Package-Requires: (dependencies)
+;; Homepage: homepage
+;; Keywords: keywords
+
+
+;;; Commentary:
+
+
+;;; Code:
 
 (use-package ef-themes
   :ensure t
@@ -33,3 +47,5 @@
   (when macos? (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)))
 
 (provide 'init-theme)
+
+;;; init-theme.el ends here

@@ -248,19 +248,9 @@
   (setq dashboard-set-heading-icons t)
   (setq dashboard-projects-backend 'projectile))
 
-(use-package all-the-icons
-  :if (display-graphic-p)
-  :demand)
-
-(use-package all-the-icons-completion
-  :if (display-graphic-p)
-  :after (marginalia all-the-icons)
-  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
-  :init (all-the-icons-completion-mode))
-
-(use-package treemacs-all-the-icons :after (treemacs all-the-icons))
 
 (require 'init-theme)
+(require 'init-icon)
 (require 'init-highlight)
 
 (provide 'init-ui)
