@@ -9,10 +9,9 @@
 
 ;;; Code:
 (use-package css-mode :elpaca nil :init (setq css-indent-offset 2))
-(use-package scss-mode :init (setq scss-compile-at-save nil))
-
-(unless (fboundp 'less-css-mode) (use-package less-css-mode))
-(unless (fboundp 'js-json-mode) (use-package json-mode))
+;; (use-package scss-mode :init (setq scss-compile-at-save nil))
+;; (use-package less-css-mode)
+(use-package json-mode)
 
 (use-package js2-mode
   :mode (("\\.js\\'" . js2-mode)

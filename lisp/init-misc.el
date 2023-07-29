@@ -25,4 +25,17 @@
   :config
   (exec-path-from-shell-initialize))
 
+(use-package whisper :elpaca (whisper :host github :repo "natrys/whisper.el")
+  :after (no-littering)
+  :general
+  (tyrant-def
+    "aw" (cons "whisper" (make-sparse-keymap))
+    "awr" 'whisper-run
+    "awf" 'whisper-file)
+  :config
+  (setq whisper-model "base"
+        whisper-install-directory (no-littering-expand-var-file-name "whisper")
+        whisper-language "cn"
+        whisper-translate nil))
+
 (provide 'init-misc)

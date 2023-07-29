@@ -35,6 +35,8 @@
           :port 9229
           :name "Node::Attach")))
 
+(use-package beacon :config (beacon-mode 1))
+
 (require 'init-lsp-bridge)
 (require 'init-treesit)
 (require 'init-web)
