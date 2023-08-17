@@ -40,6 +40,7 @@
 (require 'init-lsp-bridge)
 (require 'init-treesit)
 (require 'init-web)
+(require 'init-lisp)
 
 (provide 'init-ide)
 

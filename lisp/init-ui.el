@@ -1,9 +1,19 @@
+;;; init-ui.el --- ui -*- lexical-binding: t -*-
+
+;; Author: Li Shuzhi
+;; Maintainer: Li Shuzhi
+;; Version: version
+
+;;; Commentary:
+
+;;; Code:
+
 ;; 禁用一些GUI特性
 (setq use-dialog-box nil)               ; 鼠标操作不使用对话框
-;;(setq inhibit-default-init t)           ; 不加载 `default' 库
-;;(setq inhibit-startup-screen t)         ; 不加载启动画面
-;;(setq inhibit-startup-message t)        ; 不加载启动消息
-;;(setq inhibit-startup-buffer-menu t)    ; 不显示缓冲区列表
+(setq inhibit-default-init t)           ; 不加载 `default' 库
+(setq inhibit-startup-screen t)         ; 不加载启动画面
+(setq inhibit-startup-message t)        ; 不加载启动消息
+(setq inhibit-startup-buffer-menu t)    ; 不显示缓冲区列表
 
 ;; 设置自动折行宽度为80个字符，默认值为70
 (setq-default fill-column 80)
@@ -52,23 +62,22 @@
 (defalias 'original-y-or-n-p (symbol-function 'y-or-n-p))
 (defun default-yes-sometimes (prompt)
   "automatically say y when buffer name match following string"
-  (if (or
-    (string-match "has a running process" prompt)
-    (string-match "does not exist; create" prompt)
-    (string-match "modified; kill anyway" prompt)
-    (string-match "Delete buffer using" prompt)
-    (string-match "Kill buffer of" prompt)
-    (string-match "still connected.  Kill it?" prompt)
-    (string-match "Shutdown the client's kernel" prompt)
-    (string-match "kill them and exit anyway" prompt)
-    (string-match "Revert buffer from file" prompt)
-    (string-match "Kill Dired buffer of" prompt)
-    (string-match "delete buffer using" prompt)
-(string-match "Kill all pass entry" prompt)
-(string-match "for all cursors" prompt)
-    (string-match "Do you want edit the entry" prompt))
-   t
-    (original-y-or-n-p prompt)))
+  (if (or (string-match "has a running process" prompt)
+          (string-match "does not exist; create" prompt)
+          (string-match "modified; kill anyway" prompt)
+          (string-match "Delete buffer using" prompt)
+          (string-match "Kill buffer of" prompt)
+          (string-match "still connected.  Kill it?" prompt)
+          (string-match "Shutdown the client's kernel" prompt)
+          (string-match "kill them and exit anyway" prompt)
+          (string-match "Revert buffer from file" prompt)
+          (string-match "Kill Dired buffer of" prompt)
+          (string-match "delete buffer using" prompt)
+          (string-match "Kill all pass entry" prompt)
+          (string-match "for all cursors" prompt)
+          (string-match "Do you want edit the entry" prompt))
+      t
+      (original-y-or-n-p prompt)))
 (defalias 'yes-or-no-p 'default-yes-sometimes)
 (defalias 'y-or-n-p 'default-yes-sometimes)
 
@@ -97,7 +106,7 @@
 (xterm-mouse-mode 1)
 
 ;; 退出Emacs时进行确认
-;;(setq confirm-kill-emacs 'y-or-n-p)
+(setq confirm-kill-emacs 'y-or-n-p)
 
 ;; 在模式栏上显示当前光标的列号
 (column-number-mode t)
@@ -150,23 +159,13 @@
 
   ;; set emoji font
   (set-fontset-font t (if (version< emacs-version "28.1") '(#x1f300 . #x1fad0) 'emoji)
-    (car (fonts-installed
-          "Noto Emoji"
-          "Symbola"
-          "Apple Color Emoji"
-          "Noto Color Emoji"
-          "Segoe UI Emoji")))
+    (car (fonts-installed "Noto Emoji" "Symbola" "Apple Color Emoji" "Noto Color Emoji" "Segoe UI Emoji")))
   ;; set Chinese font
   (dolist (charset '(kana han symbol cjk-misc bopomofo))
     (set-fontset-font
      (frame-parameter nil 'font)
      charset
-     (font-spec :family
-                (car (fonts-installed
-                       "LXGW Wenkai"
-                       "霞鹜文楷"
-                       "Sarasa Gothic SC"
-                       "更纱黑体 SC")))))
+     (font-spec :family (car (fonts-installed "LXGW Wenkai" "霞鹜文楷" "Sarasa Gothic SC" "更纱黑体 SC")))))
 
   ;; set Chinese font scale
   (setq face-font-rescale-alist `(
@@ -191,9 +190,9 @@
   (doom-modeline-gnus nil)
   (doom-modeline-github nil)
   (doom-modeline-buffer-file-name-style 'truncate-upto-root) ; : auto
-  (doom-modeline-persp-name nil)
+  (doom-modeline-persp-name t)
   (doom-modeline-unicode-fallback t)
-  (doom-modeline-enable-word-count nil))
+  (doom-modeline-enable-word-count t))
 
 ;; [[https://github.com/tarsius/minions][minions]] 插件能让模式栏变得清爽，将次要模式隐藏起来。
 (use-package minions
@@ -212,12 +211,12 @@
   (define-minor-mode keycast-mode
     "Show current command and its key binding in the mode line (fix for use with doom-mode-line)."
     :global t
-    (if keycast-mode)
-    (progn))
-  (add-hook 'pre-command-hook 'keycast--update t)
-  (add-to-list 'global-mode-string '("" keycast-mode-line "  "))
-  (remove-hook 'pre-command-hook 'keycast--update)
-  (setq global-mode-string (delete '("" keycast-mode-line "  ") global-mode-string))
+    (if keycast-mode
+      (progn
+        (add-hook 'pre-command-hook 'keycast--update t)
+        (add-to-list 'global-mode-string '("" keycast-mode-line "  ")))
+      (remove-hook 'pre-command-hook 'keycast--update)
+      (setq global-mode-string (delete '("" keycast-mode-line "  ") global-mode-string))))
 
   (dolist (input '(self-insert-command org-self-insert-command))
     (add-to-list 'keycast-substitute-alist `(,input "." "Typing…")))
@@ -242,15 +241,16 @@
   (elpaca-after-init . (lambda () (dashboard-open)))
   :config
   ;; FIXME
-  ;;(dashboard-setup-startup-hook)
+  ;(dashboard-setup-startup-hook)
   (setq dashboard-center-content t)
   (setq dashboard-set-file-icons t)
   (setq dashboard-set-heading-icons t)
   (setq dashboard-projects-backend 'projectile))
-
 
 (require 'init-theme)
 (require 'init-icon)
 (require 'init-highlight)
 
 (provide 'init-ui)
+
+;;; init-ui.el ends here

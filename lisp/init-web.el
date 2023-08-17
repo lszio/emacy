@@ -2,8 +2,6 @@
 
 ;; Author: Li Shuzhi
 ;; Maintainer: Li Shuzhi
-;; Version: version
-;; Package-Requires: (dependencies)
 
 ;;; Commentary:
 

@@ -13,3 +13,5 @@ eln-cache
 /library
 
 var
+tree-sitter
+auto-save-list

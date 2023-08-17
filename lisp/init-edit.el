@@ -2,9 +2,6 @@
 
 ;; Author: Li Shuzhi
 ;; Maintainer: Li Shuzhi
-;; Version: 0.0.0
-;; Package-Requires: (dependencies)
-;; Homepage: homepage
 ;; Keywords: edit undo
 
 ;;; Commentary:

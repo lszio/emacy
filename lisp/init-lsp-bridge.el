@@ -2,8 +2,6 @@
 
 ;; Author: Liszt21
 ;; Maintainer: liszt21
-;; Version: 0.0.1
-;;; Commentary:
 
 ;;; Code:
 

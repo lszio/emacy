@@ -1,3 +1,11 @@
+;;; init-org.el --- org -*- lexical-binding: t -*-
+
+;; Author: Li Shuzhi
+;; Maintainer: Li Shuzhi
+
+;;; Commentary:
+
+;;; Code:
 (use-package org-roam
   :after org
   :init
@@ -142,3 +150,5 @@
   (tyrant-def))
 
 (provide 'init-org)
+
+;;; init-org.el ends here

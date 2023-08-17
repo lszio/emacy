@@ -3,11 +3,6 @@
 ;; Author: Li Shuzhi
 ;; Maintainer: Li Shuzhi
 ;; Version: version
-;; Package-Requires: (dependencies)
-;; Homepage: homepage
-;; Keywords: keywords
-
-
 
 ;;; Commentary:
 
@@ -75,9 +70,6 @@
                     (if (symbolp apps) (eval apps) apps))))
 
 (add-eaf-apps eaf-apps)
-
-;; (dolist (app eaf-apps)
-;;   )
 
 (provide 'init-eaf)
 

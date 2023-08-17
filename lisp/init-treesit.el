@@ -1,3 +1,12 @@
+;;; init-treesit.el --- treesit -*- lexical-binding: t -*-
+
+;; Author: Li Shuzhi
+;; Maintainer: Li Shuzhi
+
+;;; Commentary:
+
+;;; Code:
+
 (setq treesit-language-source-alist
       '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
         (c . ("https://github.com/tree-sitter/tree-sitter-c"))
@@ -50,3 +59,5 @@
   (global-treesit-auto-mode))
 
 (provide 'init-treesit)
+
+;;; init-treesit.el ends here

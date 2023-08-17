@@ -1,3 +1,12 @@
+;;; init-misc.el --- misc -*- lexical-binding: t -*-
+
+;; Author: Li Shuzhi
+;; Maintainer: Li Shuzhi
+
+;;; Commentary:
+
+;;; Code:
+
 (use-package no-littering
   :demand
   :config
@@ -39,3 +48,5 @@
         whisper-translate nil))
 
 (provide 'init-misc)
+
+;;; init-misc.el ends here
