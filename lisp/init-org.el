@@ -142,7 +142,7 @@
 
 (use-package org-fragtog :hook (org-mode . org-fragtog-mode))
 
-(use-package tex :elpaca auctex)
+;; (use-package tex :elpaca auctex)
 
 (use-package mpvi :elpaca (mpvi :repo "https://github.com/lorniu/mpvi")
   :general

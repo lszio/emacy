@@ -31,6 +31,7 @@
   ([remap describe-key] . helpful-key))
   
 (use-package exec-path-from-shell
+  :when (not windows?)
   :config
   (exec-path-from-shell-initialize))
 

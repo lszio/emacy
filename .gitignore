@@ -2,16 +2,14 @@
 __pycache__
 *ipynb_checkpoints
 
-.local
-local
-
-tmp
-temp
-
-eln-cache
 /libraries
+/history
 /library
 
+tmp
 var
+temp
+local
+eln-cache
 tree-sitter
 auto-save-list

@@ -2,17 +2,22 @@
 
 ;; Author: Li Shuzhi
 ;; Maintainer: Li Shuzhi
-;; Version: version
-;; Package-Requires: (dependencies)
-;; Homepage: homepage
-;; Keywords: keywords
-
 
 ;;; Commentary:
 
 
 ;;; Code:
 
+;; (use-package tempel
+;;   :bind (("M-+" . tempel-complete)
+;;          ("M-*" . tempel-insert)))
+
+;; (use-package tempel-collection)
+
+(use-package lentic
+  :config (global-lentic-mode))
+
+(use-package beacon :config (beacon-mode 1))
 (use-package apheleia :config (apheleia-global-mode +1))
 (use-package editorconfig :config (editorconfig-mode 1))
 (use-package dap-mode
@@ -34,8 +39,6 @@
           :request "attach"
           :port 9229
           :name "Node::Attach")))
-
-(use-package beacon :config (beacon-mode 1))
 
 (require 'init-lsp-bridge)
 (require 'init-treesit)

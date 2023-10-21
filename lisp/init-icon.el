@@ -14,9 +14,6 @@
   ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
   )
 
-(use-package nerd-icons-dired
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
 
 (use-package nerd-icons-ibuffer
   :ensure t
@@ -28,9 +25,8 @@
   (nerd-icons-completion-mode)
   (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 
-(use-package treemacs-nerd-icons
-  :config
-  (treemacs-load-theme "nerd-icons"))
+(use-package nerd-icons-dired :hook (dired-mode . nerd-icons-dired-mode))
+(use-package treemacs-nerd-icons :config (treemacs-load-theme "nerd-icons"))
 
 ;; (use-package all-the-icons
 ;;   :if (display-graphic-p)
