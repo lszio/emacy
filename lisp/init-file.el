@@ -103,5 +103,4 @@
   :config (treemacs-set-scope-type 'Tabs))
 
 (provide 'init-file)
-
 ;;; init-file.el ends here

@@ -69,5 +69,4 @@
   (setq popper-display-control nil))
 
 (provide 'init-window)
-
 ;;; init-window.el ends here

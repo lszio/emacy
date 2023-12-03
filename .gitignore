@@ -2,6 +2,7 @@
 __pycache__
 *ipynb_checkpoints
 
+/libs
 /libraries
 /history
 /library
@@ -13,3 +14,4 @@ local
 eln-cache
 tree-sitter
 auto-save-list
+parinfer-rust

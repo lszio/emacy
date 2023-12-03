@@ -6,11 +6,12 @@
 ;;; Commentary:
 
 ;;; Code:
-
 (use-package no-littering
   :demand
   :config
-  (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
+  (setq custom-file (no-littering-expand-etc-file-name "custom.el")
+        whisper-install-directory (no-littering-expand-var-file-name "whisper")
+        parinfer-rust-library-directory (no-littering-expand-var-file-name "parinfer-rust"))
   (with-eval-after-load 'recentf
     (add-to-list 'recentf-exclude no-littering-var-directory)
     (add-to-list 'recentf-exclude no-littering-etc-directory)))
@@ -25,18 +26,17 @@
   :init
   (setq evil-lookup-func #'helpful-at-point)
   :bind
-  ([remap describe-function] . helpful-callable)
+  ([remap describe-key] . helpful-key)
   ([remap describe-command] . helpful-command)
-  ([remap describe-variable] . helpful-variable)
-  ([remap describe-key] . helpful-key))
-  
+  ([remap describe-function] . helpful-callable)
+  ([remap describe-variable] . helpful-variable))
+
 (use-package exec-path-from-shell
   :when (not windows?)
   :config
   (exec-path-from-shell-initialize))
 
 (use-package whisper :elpaca (whisper :host github :repo "natrys/whisper.el")
-  :after (no-littering)
   :general
   (tyrant-def
     "aw" (cons "whisper" (make-sparse-keymap))
@@ -44,10 +44,8 @@
     "awf" 'whisper-file)
   :config
   (setq whisper-model "base"
-        whisper-install-directory (no-littering-expand-var-file-name "whisper")
         whisper-language "cn"
         whisper-translate nil))
 
 (provide 'init-misc)
-
 ;;; init-misc.el ends here
