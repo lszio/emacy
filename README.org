@@ -1,4 +1,4 @@
-# ;-*- eval: (load-file "./lisp/init-dev.el");   -*-
+# ;-*- eval: (load-file "./init-dev.el");   -*-
 #+TITLE: My Emacs Config
 #+AUTHOR: Li Shuzhi
 #+STARTUP: content
@@ -6,25 +6,53 @@
 #+PROPERTY: emacs config emacy
 #+PROPERTY: header-args :tangle init.el :noweb yes :session init
 
-* INBOX
+* Inbox
 ** TODO Refactor
 ** TODO [[https://depp.brause.cc/shackle/][shackle]]
 
-* EARLY
+* EarlyInit
 :PROPERTIES:
 :HEADER-ARGS: :tangle early-init.el
 :END:
 #+BEGIN_SRC emacs-lisp
+
 #+END_SRC
 
-* BASIC
-** defaults
+* Basic
+** Defaults
 #+BEGIN_SRC emacs-lisp
+  
 #+END_SRC
 
-* THEME
+* Theme
 
-* PROGRAM
+* Program
 
-* REFERENCES
+* Others
+** TODO Develop
+:PROPERTIES:
+:HEADER-ARGS: :tangle init-dev.el
+:END:
+Evaluated when loading init file.
+Cleaner to keep this in a separate file rather than a long single line at the top of init.org
+#+BEGIN_SRC emacs-lisp
+  ;;; init-dev.el --- development settings for init file  -*- lexical-binding: t; -*-
+  (defcustom emacy-library-directory (concat user-emacs-directory "libs/"))
+
+  (add-to-list 'load-path (concat emacy-library-directory "org-auto-tangle"))
+
+  (setq-local org-confirm-babel-evaluate nil)
+  (require 'org-auto-tangle)
+  (org-auto-tangle-mode)
+  (add-hook 'org-auto-tangle-before-tangle-hook #'check-parens)
+  (add-hook 'org-auto-tangle-after-tangle-hook
+            (lambda () (load-file (concat user-emacs-directory "init.el"))
+              (when-let ((forms (elpaca-q<-forms (car elpaca--queues))))
+                (eval `(progn ,@(apply #'append (mapcar #'cdr (reverse forms)))) t))))
+  (eldoc-mode)
+  (provide 'init-dev)
+  ;;; init-dev.el ends here
+#+END_SRC
+
+* Reference
 https://remacs.cc/

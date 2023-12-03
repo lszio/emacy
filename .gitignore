@@ -8,6 +8,7 @@ __pycache__
 /library
 
 /init.el
+/init-dev.el
 /early-init.el
 
 tmp
