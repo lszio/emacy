@@ -1,17 +1,30 @@
-#+TITLE: My Emacs World
+# ;-*- eval: (load-file "./lisp/init-dev.el");   -*-
+#+TITLE: My Emacs Config
+#+AUTHOR: Li Shuzhi
+#+STARTUP: content
+#+FILETAGS: :Emacy:Config:Emacs:EmacsLisp:
+#+PROPERTY: emacs config emacy
+#+PROPERTY: header-args :tangle init.el :noweb yes :session init
 
-* Installation
-#+begin_src shell
-git clone --recursive https://github.com/Liszt21/Emacy ~/Emacy
-#+end_src
+* INBOX
+** TODO Refactor
+** TODO [[https://depp.brause.cc/shackle/][shackle]]
 
-* Scripts
-** emacy.el
-#+begin_example
-commands:
-    init
-    use
-#+end_example
+* EARLY
+:PROPERTIES:
+:HEADER-ARGS: :tangle early-init.el
+:END:
+#+BEGIN_SRC emacs-lisp
+#+END_SRC
 
-* TODO
-** [[https://depp.brause.cc/shackle/][shackle]]
+* BASIC
+** defaults
+#+BEGIN_SRC emacs-lisp
+#+END_SRC
+
+* THEME
+
+* PROGRAM
+
+* REFERENCES
+https://remacs.cc/

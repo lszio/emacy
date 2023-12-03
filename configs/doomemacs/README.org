@@ -1,3 +1,0 @@
-#+TITLE: My doom-emacs config
-
-[[http://github.com/Liszt21/Emacy]]

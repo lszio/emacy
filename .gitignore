@@ -7,6 +7,9 @@ __pycache__
 /history
 /library
 
+/init.el
+/early-init.el
+
 tmp
 var
 temp
