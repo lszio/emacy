@@ -8,27 +8,150 @@
 
 * Inbox
 ** TODO Refactor
-** TODO [[https://depp.brause.cc/shackle/][shackle]]
+* TODO [[https://depp.brause.cc/shackle/][shackle]]
 
-* EarlyInit
-:PROPERTIES:
-:HEADER-ARGS: :tangle early-init.el
-:END:
-#+BEGIN_SRC emacs-lisp
-
+* Header
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
+;;; early-init.el --- emacs init file  -*- lexical-binding: t; -*-
 #+END_SRC
 
-* Basic
-** Defaults
 #+BEGIN_SRC emacs-lisp
-  
+;;; init.el --- emacs init file  -*- lexical-binding: t; -*-
+(require 'cl-lib)
 #+END_SRC
 
-* Theme
+* Constant
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
+(defconst windows? (memq system-type '(cygwin windows-nt ms-dos)) "are we on windows")
+(defconst macos? (eq system-type 'darwin) "are we on macos")
+(defconst linux? (memq system-type '(gnu gnu/linux gnu/kfreebds berkeley-unix)) "are we on linux")
+(defconst bsd? (memq system-type '(darwin berkeley-unix gnu/kfreebsd)) "are we on bsd")
+(defconst wsl? (and linux? (string-match-p "microsoft" operating-system-release)) "are we on wsl")
+#+END_SRC
+
+* Variable
+#+BEGIN_SRC emacs-lisp
+(defvar elpaca-directory (expand-file-name "var/elpaca" (if wsl? user-local-directory user-emacs-directory)))
+(defvar elpaca-builds-directory (expand-file-name "builds" elpaca-directory))
+(defvar elpaca-cache-directory (expand-file-name "menus" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "libs" user-emacs-directory))
+#+END_SRC
+
+* Default
+#+BEGIN_SRC emacs-lisp
+(display-time-mode)
+(toggle-frame-maximized)
+(global-auto-revert-mode)
+(global-display-line-numbers-mode)
+(toggle-word-wrap)
+(global-word-wrap-whitespace-mode 1)
+
+(tab-bar-mode -1)
+
+(setq custom-file (expand-file-name "var/custom.el" user-emacs-directory))
+#+END_SRC
+
+* Package Manager
+** [[https://github.com/progfolio/elpaca][Elpaca]]
+*** Introduce
+#+BEGIN_SRC emacs-lisp
+(defvar elpaca-installer-version 0.6)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (< emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                 ((zerop (call-process "git" nil buffer t "clone"
+                                       (plist-get order :repo) repo)))
+                 ((zerop (call-process "git" nil buffer t "checkout"
+                                       (or (plist-get order :ref) "--"))))
+                 (emacs (concat invocation-directory invocation-name))
+                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                 ((require 'elpaca))
+                 ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (load "./elpaca-autoloads")))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
+#+END_SRC
+*** config
+#+BEGIN_SRC emacs-lisp
+(elpaca elpaca-use-package
+  (elpaca-use-package-mode)
+  (setq elpaca-use-package-by-default t
+        use-package-compute-statistics t))
+
+(when windows? (setq elpaca-queue-limit 21))
+
+(defmacro use-feature (name &rest args)
+  "Like `use-package' but accounting for asynchronous installation.
+  NAME and ARGS are in `use-package'."
+  (declare (indent defun))
+  `(use-package ,name
+     :elpaca nil
+     :ensure nil
+     ,@args))
+
+(elpaca-wait)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+#+END_SRC
+
+* UI
+禁止展示菜单栏、工具栏和纵向滚动条
+禁止菜单栏、工具栏、滚动条模式，禁止启动屏幕和文件对话框
+禁止自动缩放窗口先
+在这个阶段不编译
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+
+(push '(menu-bar-lines . 0) default-frame-alist)
+(push '(tool-bar-lines . 0) default-frame-alist)
+(push '(vertical-scroll-bars) default-frame-alist)
+
+(setq frame-inhibit-implied-resize t)
+(setq inhibit-splash-screen t)
+(setq use-file-dialog nil)
+
+(setq comp-deferred-compilation nil)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+#+END_SRC
+
+** Theme
+
+* Optimize
+设置垃圾回收参数
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
+(setq gc-cons-threshold most-positive-fixnum)
+(setq gc-cons-percentage 0.6)
+#+END_SRC
 
 * Program
 
-* Others
+* Other
 ** TODO Develop
 :PROPERTIES:
 :HEADER-ARGS: :tangle init-dev.el
@@ -52,6 +175,17 @@ Cleaner to keep this in a separate file rather than a long single line at the to
   (eldoc-mode)
   (provide 'init-dev)
   ;;; init-dev.el ends here
+#+END_SRC
+
+* Footer
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
+  (provide 'early-init)
+  ;;; early-init.el ends here
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (provide 'init)
+  ;;; init.el ends here
 #+END_SRC
 
 * Reference
