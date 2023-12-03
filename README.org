@@ -1185,9 +1185,372 @@
   (setq dashboard-set-heading-icons t)
   (setq dashboard-projects-backend 'projectile))
 #+END_SRC
+** Terminal
+#+begin_src emacs-lisp
+
+(use-package eshell
+  :elpaca nil
+  :ensure nil
+  :functions eshell/alias
+  :hook ((eshell-mode . (lambda () (term-mode-common-init) (visual-line-mode 1))))
+  :config
+  (defun term-mode-common-init ()
+    (setq-local scroll-margin 0)
+    (setq-local truncate-lines t))
+
+  (defalias 'eshell/vi 'find-file)
+  (defalias 'eshell/vim 'find-file)
+
+  (defun eshell/bat (file)
+    "cat FILE with syntax highlight."
+    (with-temp-buffer
+      (insert-file-contents file)
+      (let ((buffer-file-name file))
+        (delay-mode-hooks
+          (set-auto-mode)
+          (font-lock-ensure)))
+      (buffer-string)))
+  (defalias 'eshell/cat 'eshell/bat)
+
+  ;; 交互式进入目录
+  (defun eshell/z ()
+    "cd to directory with completion."
+    (let ((dir (completing-read "Directory: " (ring-elements eshell-last-dir-ring) nil t)))
+      (eshell/cd dir)))
+
+  ;; 查找文件
+  (defun eshell/f (filename &optional dir)
+    "Search for files matching FILENAME in either DIR or the
+current directory."
+    (let ((cmd (concat
+                ;; using find
+                (executable-find "find")
+                " " (or dir ".")
+                " -not -path '*/.git*'"            ; ignore .git directory
+                " -and -not -path 'build'"         ; ignore cmake build directory
+                " -and -not -path '*/eln-cache*'"  ; ignore eln cache
+                " -and -type f -and -iname "
+                "'*" filename "*'")))
+      (eshell-command-result cmd)))
+
+  :custom
+  (eshell-banner-message
+   '(format "%s %s\n"
+            (propertize (format " %s " (string-trim (buffer-name)))
+                        'face 'mode-line-highlight)
+            (propertize (current-time-string)
+                        'face 'font-lock-keyword-face)))
+  (eshell-scroll-to-bottom-on-input 'all)
+  (eshell-scroll-to-bottom-on-output 'all)
+  (eshell-kill-on-exit t)
+  (eshell-kill-processes-on-exit t)
+  ;; Don't record command in history if starts with whitespace
+  (eshell-input-filter 'eshell-input-filter-initial-space)
+  (eshell-error-if-no-glob t)
+  (eshell-glob-case-insensitive t)
+  ;; set scripts
+  (eshell-rc-script (locate-user-emacs-file "etc/eshell/profile"))
+  (eshell-login-script (locate-user-emacs-file "etc/eshell/login")))
+  
+
+
+(use-package em-hist
+  :elpaca nil
+  :ensure nil
+  :defer t
+  :custom
+  (eshell-history-size 1024)
+  (eshell-hist-ignoredups t)
+  (eshell-save-history-on-exit t))
+
+(use-package em-rebind
+  :elpaca nil
+  :ensure nil
+  :commands eshell-delchar-or-maybe-eof)
+
+(use-package esh-mode
+  :elpaca nil
+  :ensure nil
+  :bind (:map eshell-mode-map
+              ("C-d" . eshell-delchar-or-maybe-eof)
+              ("C-r" . consult-history)
+              ("C-l" . eshell/clear)))
+  
+
+(use-package eshell-syntax-highlighting
+  :after esh-mode
+  :ensure t
+  :hook (eshell-mode . eshell-syntax-highlighting-global-mode)
+  :custom-face
+  (eshell-syntax-highlighting-shell-command-face ((t (:foreground "#7cc77f" :bold t)))))
+
+(use-package vterm :unless windows?)
+#+end_src
 ** Theme
+#+begin_src emacs-lisp
+
+(use-package ef-themes
+  :ensure t
+  :bind ("C-c t" . ef-themes-toggle)
+  :init
+  ;; set two specific themes and switch between them
+  (setq ef-themes-to-toggle '(ef-summer ef-winter))
+  ;; set org headings and function syntax
+  (setq ef-themes-headings ; read the manual's entry or the doc string
+      '((0 . (variable-pitch light 1.2))
+        (1 . (variable-pitch light 1.1))
+        (2 . (variable-pitch regular 1.0))
+        (3 . (variable-pitch regular 1.0))
+        (4 . (variable-pitch regular 1.0))
+        (5 . (variable-pitch 1.0)) ; absence of weight means `bold'
+        (6 . (variable-pitch 1.0))
+        (7 . (variable-pitch 1.0))
+        (t . (variable-pitch 1.0))))
+  (setq ef-themes-region '(intense no-extend neutral))
+  ;; Disable all other themes to avoid awkward blending:
+  (mapc #'disable-theme custom-enabled-themes)
+  (ef-themes-load-random 'dark)
+
+  :config
+  ;; auto change theme, aligning with system themes.
+  (defun my/apply-theme (appearance)
+    "Load theme, taking current system APPEARANCE into consideration."
+    (mapc #'disable-theme custom-enabled-themes)
+    (pcase appearance
+      ('light (if (display-graphic-p) (ef-themes-load-random 'light) (ef-themes-load-random 'dark)))
+      ('dark (ef-themes-load-random 'dark))))
+
+  (when macos? (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)))
+
+#+end_src
+** Misc
+#+begin_src emacs-lisp
+    (use-package undo-fu)
+
+  (use-package ace-window :hook (elpaca-after-init . winner-mode))
+
+  (use-package transpose-frame
+    :general
+    (tyrant-def
+      "w [" 'transpose-frame
+      "w ]" 'rotate-frame))
+
+  (use-package shackle
+    :hook (elpaca-after-init . shackle-mode)
+    :init
+    (setq shackle-lighter "")
+    (setq shackle-select-reused-windows nil) ; default nil
+    (setq shackle-default-alignment 'below)  ; default below
+    (setq shackle-rules
+          ;; CONDITION(:regexp)            :select     :inhibit-window-quit   :size+:align|:other     :same|:popup
+          '((compilation-mode              :ignore t)
+            ("\\*Async Shell.*\\*" :regexp t :ignore t)
+            ("\\*corfu.*\\*"       :regexp t :ignore t)
+            ("*eshell*"                    :select t                          :size 0.4  :align t     :popup t)
+            (helpful-mode                  :select t                          :size 0.6  :align right :popup t)
+            ("*Messages*"                  :select t                          :size 0.4  :align t     :popup t)
+            ("*Calendar*"                  :select t                          :size 0.3  :align t     :popup t)
+            ("*info*"                      :select t                                                  :same t)
+            (magit-status-mode             :select t   :inhibit-window-quit t                         :same t)
+            (magit-log-mode                :select t   :inhibit-window-quit t                         :same t))))
+
+  (use-package popper
+    :ensure t
+    :bind (("M-`"     . popper-toggle-latest)
+           ("M-<tab>" . popper-cycle)
+           ("M-\\"    . popper-toggle-type))
+    :init
+    (setq popper-reference-buffers
+          '("\\*Messages\\*"
+            "\\*Async Shell Command\\*"
+            help-mode
+            helpful-mode
+            occur-mode
+            pass-view-mode
+            "^\\*eshell.*\\*$" eshell-mode ;; eshell as a popup
+            "^\\*shell.*\\*$"  shell-mode  ;; shell as a popup
+            ("\\*corfu\\*" . hide)
+            (compilation-mode . hide)
+            ;; derived from `fundamental-mode' and fewer than 10 lines will be considered a popup
+            (lambda (buf) (with-current-buffer buf
+                            (and (derived-mode-p 'fundamental-mode)
+                                 (< (count-lines (point-min) (point-max))
+                                    10))))))
+    (popper-mode +1)
+    (popper-echo-mode +1)
+    :config
+    ;; group by project.el, projectile, directory or perspective
+    (setq popper-group-function nil)
+
+    ;; pop in child frame or not
+    (setq popper-display-function #'display-buffer-in-child-frame)
+
+    ;; use `shackle.el' to control popup
+    (setq popper-display-control nil))
+
+(use-package rime
+  :defer t
+  :custom
+  (default-input-method "rime")
+  (rime-show-candidate 'posframe)
+  (rime-user-data-dir "~/Dotfiles/config/rime")
+  (rime-disable-predicates '(rime-predicate-after-alphabet-char-p ;; 在英文字符串之后（必须为以字母开头的英文字符串）
+                             ;; rime-predicate-after-ascii-char-p ;; 任意英文字符后
+                             rime-predicate-prog-in-code-p ;; 在 prog-mode 和 conf-mode 中除了注释和引号内字符串之外的区域
+                             rime-predicate-in-code-string-p ;; 在代码的字符串中，不含注释的字符串。
+                             rime-predicate-evil-mode-p ;; 在 evil-mode 的非编辑状态下
+                             rime-predicate-hydra-p ;; 如果激活了一个 hydra keymap
+                             ;; rime-predicate-ace-window-p ;; 激活 ace-window-mode
+                             ;; rime-predicate-current-input-punctuation-p ;; 当要输入的是符号时
+                             rime-predicate-punctuation-after-space-cc-p ;; 当要在中文字符且有空格之后输入符号时
+                             rime-predicate-punctuation-after-ascii-p ;; 当要在任意英文字符之后输入符号时
+                             rime-predicate-punctuation-line-begin-p ;; 在行首要输入符号时
+                             rime-predicate-space-after-ascii-p ;; 在任意英文字符且有空格之后
+                             rime-predicate-space-after-cc-p ;; 在中文字符且有空格之后
+                             rime-predicate-current-uppercase-letter-p ;; 将要输入的为大写字母时
+                             rime-predicate-tex-math-or-command-p));; 在 (La)TeX 数学环境中或者输入 (La)TeX 命令时
+  :bind
+  (:map rime-mode-map ("C-," . 'rime-force-enable)))
+#+end_src
 
 * IDE
+#+begin_src emacs-lisp
+
+(use-package beacon :config (beacon-mode 1))
+(use-package lentic :config (global-lentic-mode))
+(use-package apheleia :config (apheleia-global-mode 1))
+(use-package editorconfig :config (editorconfig-mode 1))
+
+(use-package dap-mode
+  :defer t
+  :config
+  (setq dap-auto-configure-features '(sessions locals controls tooltip))
+  (dap-mode 1)
+  (require 'dap-python)
+  (setq dap-python-debugger 'debugpy)
+  (require 'dap-node)
+
+  (dap-register-debug-template
+    "Node::Attach"
+    (list :type "node"
+          :request "attach"
+          :port 9229
+          :name "Node::Attach")))
+#+end_src
+
+** Treesit
+#+begin_src emacs-lisp
+
+(setq treesit-language-source-alist
+      '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
+        (c . ("https://github.com/tree-sitter/tree-sitter-c"))
+        (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+        (css . ("https://github.com/tree-sitter/tree-sitter-css"))
+        (cmake . ("https://github.com/uyha/tree-sitter-cmake"))
+        (csharp     . ("https://github.com/tree-sitter/tree-sitter-c-sharp.git"))
+        (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
+        (elisp . ("https://github.com/Wilfred/tree-sitter-elisp"))
+        (go . ("https://github.com/tree-sitter/tree-sitter-go"))
+        (gomod      . ("https://github.com/camdencheek/tree-sitter-go-mod.git"))
+        (html . ("https://github.com/tree-sitter/tree-sitter-html"))
+        (java       . ("https://github.com/tree-sitter/tree-sitter-java.git"))
+        (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+        (json . ("https://github.com/tree-sitter/tree-sitter-json"))
+        (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
+        (make . ("https://github.com/alemuller/tree-sitter-make"))
+        (markdown . ("https://github.com/MDeiml/tree-sitter-markdown" nil "tree-sitter-markdown/src"))
+        (ocaml . ("https://github.com/tree-sitter/tree-sitter-ocaml" nil "ocaml/src"))
+        (org . ("https://github.com/milisims/tree-sitter-org"))
+        (python . ("https://github.com/tree-sitter/tree-sitter-python"))
+        (php . ("https://github.com/tree-sitter/tree-sitter-php"))
+        (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "typescript/src"))
+        (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "tsx/src"))
+        (ruby . ("https://github.com/tree-sitter/tree-sitter-ruby"))
+        (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
+        (sql . ("https://github.com/m-novikov/tree-sitter-sql"))
+        (vue . ("https://github.com/merico-dev/tree-sitter-vue"))
+        (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))
+        (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
+        (zig . ("https://github.com/GrayJack/tree-sitter-zig"))))
+
+(setq major-mode-remap-alist
+      '((c-mode          . c-ts-mode)
+        (c++-mode        . c++-ts-mode)
+        (cmake-mode      . cmake-ts-mode)
+        (conf-toml-mode  . toml-ts-mode)
+        (css-mode        . css-ts-mode)
+        (js-mode         . js-ts-mode)
+        (js-json-mode    . json-ts-mode)
+        (python-mode     . python-ts-mode)
+        (sh-mode         . bash-ts-mode)
+        (typescript-mode . typescript-ts-mode)))
+
+(add-hook 'emacs-lisp-mode-hook #'(lambda () (treesit-parser-create 'elisp)))
+(setq treesit-extra-load-path (list (expand-file-name "var/treesit" user-emacs-directory)))
+
+(use-package treesit-auto
+  :config
+  (global-treesit-auto-mode))
+
+#+end_src
+
+** Lisp
+#+begin_src emacs-lisp
+(use-package cider)
+
+(use-package slime
+  :general
+  (:keymaps 'slime-mode-map
+            "C-<return>" 'slime-eval-last-expression)
+  :config
+  (setq inferior-lisp-program "ros run"))
+
+(use-package parinfer-rust-mode
+  :hook '(emacs-lisp-mode lisp-mode)
+  :config
+  (electric-pair-mode -1))
+#+end_src
+
+** Web
+#+begin_src emacs-lisp
+(use-package css-mode :elpaca nil :init (setq css-indent-offset 2))
+;; (use-package scss-mode :init (setq scss-compile-at-save nil))
+;; (use-package less-css-mode)
+(use-package json-mode)
+
+(use-package js2-mode
+  :mode (("\\.js\\'" . js2-mode)
+         ("\\.jsx\\'" . js2-jsx-mode))
+  :interpreter (("node" . js2-mode)
+                ("node" . js2-jsx-mode))
+  :hook ((js2-mode . js2-imenu-extras-mode)
+         (js2-mode . js2-highlight-unused-variables-mode)))
+
+(use-package prettier
+  :diminish
+  :hook ((js-mode js2-mode css-mode sgml-mode web-mode) . prettier-mode)
+  :init (setq prettier-pre-warm 'none))
+
+(use-package typescript-mode :mode ("\\.ts[x]\\'" . typescript-mode))
+
+(use-package web-mode
+  :mode "\\.\\(phtml\\|php\\|[gj]sp\\|as[cp]x\\|erb\\|djhtml\\|html?\\|hbs\\|ejs\\|jade\\|swig\\|tm?pl\\|vue\\)$"
+  :config
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-css-indent-offset 2)
+  (setq web-mode-code-indent-offset 2))
+
+;; Adds node_modules/.bin directory to `exec_path'
+(use-package add-node-modules-path :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
+
+(use-package restclient
+  :mode ("\\.http\\'" . restclient-mode)
+  :config
+  (use-package restclient-test
+    :diminish
+    :hook (restclient-mode . restclient-test-mode)))
+#+end_src
+
 ** Misc
 #+BEGIN_SRC emacs-lisp
 (use-package rainbow-mode)
@@ -1199,11 +1562,187 @@
 (use-package rainbow-delimiters :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
 
+* Org Mode
+#+begin_src emacs-lisp
+  (use-package org-roam
+  :after org
+  :init
+  (setq org-roam-directory org-directory
+        org-roam-v2-ack t)
+  :config
+  (org-roam-setup)
+  (add-to-list 'display-buffer-alist
+               '(("*org-roam*"
+                  (display-buffer-in-direcion)
+                  (direction . right)
+                  (window-width . 0.33)
+                  (window-height . fit-window-to-buffer))))
+  :general
+  (tyrant-def
+    "n" (cons "Notes" (make-sparse-keymap))
+    "n b" 'org-roam-buffer-toggle
+    "n f" 'org-roam-node-find
+    "n g" 'org-roam-graph
+    "n i" 'org-roam-node-insert
+    "n c" 'org-roam-capture
+    "n t" 'org-roam-tag-add
+    "n r" 'org-roam-ref-add
+    "n a" 'org-roam-alias-add))
+
+(use-package org-roam-ui)
+
+(setq org-directory  "~/Notes"
+      org-archive-location (concat org-directory "/archive/%s::")
+      org-contacts-files (list (concat org-directory "/archive/contacts.org"))
+      org-agenda-files (list org-directory)
+      deft-directory org-directory
+      org-roam-directory org-directory
+      org-brain-path org-directory
+      org-roam-file-exclude-regexp ".*/bak/.*"
+      org-brain-visualize-default-choices 'all
+      rmh-elfeed-org-files (list (concat org-directory "/feeds.org")))
+
+(setq org-fontify-whole-heading-line t
+      org-fontify-quote-and-verse-blocks t
+      org-hide-macro-markers t
+      org-startup-indented t
+      org-adapt-indentation t
+      org-startup-with-inline-images t
+      org-startup-with-latex-preview t)
+
+(setq deft-recursive t
+      deft-recursive-ignore-dir-regexp (rx (or "." ".." "logseq") eol))
+
+(setq org-agenda-archives-mode t)
+(setq org-export-select-tags '("Publish" "Public" "export")
+      org-publish-project-alist
+      '(("content"
+         :base-directory "~/Notes/content"
+         :publishing-directory "~/Notes/publish"
+         ;; :publishing-function (org-org-publish-to-org org-md-publish-to-md)
+         :publishing-function org-org-publish-to-org
+         :select-tags ("Publish" "Public" "Export" "export" "publish" "public")
+         :exclude-tags ("Private" "Secret" "noexport")
+         :recursive t
+         :with-broken-links t
+         :with-toc nil)))
+
+(setq org-log-done 'time)
+;; (setq org-priority-lowest ?E)
+(setq org-contacts-icon-use-gravatar nil)
+(setq org-superstar-headline-bullets-list '("☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷"))
+(setq org-todo-keywords
+      '((sequence "NEXT(n)" "TODO(t)" "PEND(p)" "WILL(w@/!)" "|" "DONE(d)" "QUIT(q@)")
+        (sequence "[-](N)" "[ ](T)" "[:](P)" "[?](W)" "|" "[X](D)" "[Q](Q)")))
+(setq org-todo-keyword-faces
+      '(("TODO" :foreground "orange"       :weight bold)
+        ("[ ]"  :foreground "orange"       :weight bold)
+        ("NEXT" :foreground "yellow"       :weight bold)
+        ("[-]"  :foreground "yellow"       :weight bold)
+        ("PEND" :foreground "pink"         :weight bold)
+        ("[:]"  :foreground "pink"         :weight bold)
+        ("WILL" :foreground "purple"       :weight bold)
+        ("[?]"  :foreground "purple"       :weight bold)
+        ("DONE" :foreground "forest green" :weight bold)
+        ("[X]"  :foreground "forest green" :weight bold)
+        ("QUIT" :foreground "grey"         :weight bold)
+        ("[Q]"  :foreground "grey"         :weight bold)))
+
+(use-package org-contrib)
+
+(use-package org-modern
+  :ensure t
+  :hook (elpaca-after-init . (lambda () (setq org-modern-hide-stars 'leading) (global-org-modern-mode t)))
+  :config
+  ;; 标题行型号字符
+  (setq org-modern-star ["☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷"])
+  ;; 额外的行间距，0.1表示10%，1表示1px
+  (setq-default line-spacing 0.1)
+  ;; tag边框宽度，还可以设置为 `auto' 即自动计算
+  (setq org-modern-label-border 1)
+  ;; 设置表格竖线宽度，默认为3
+  (setq org-modern-table-vertical 2)
+  ;; 设置表格横线为0，默认为0.1
+  (setq org-modern-table-horizontal 0)
+  ;; 复选框美化
+  (setq org-modern-checkbox
+        '((?X . #("▢✓" 0 2 (composition ((2)))))
+          (?- . #("▢–" 0 2 (composition ((2)))))
+          (?\s . #("▢" 0 1 (composition ((1)))))))
+  ;; 列表符号美化
+  (setq org-modern-list
+        '((?- . "•")
+          (?+ . "◦")
+          (?* . "▹")))
+  ;; 代码块左边加上一条竖边线（需要Org mode顶头，如果启用了 `visual-fill-column-mode' 会很难看）
+  (setq org-modern-block-fringe t)
+  ;; 代码块类型美化，我们使用了 `prettify-symbols-mode'
+  (setq org-modern-block-name nil)
+  ;; #+关键字美化，我们使用了 `prettify-symbols-mode'
+  (setq org-modern-keyword nil))
+
+(use-package org-appear
+ :ensure t
+ :hook (org-mode . org-appear-mode)
+ :config
+ (setq org-appear-autolinks t)
+ (setq org-appear-autosubmarkers t)
+ (setq org-appear-autoentities t)
+ (setq org-appear-autokeywords t)
+ (setq org-appear-inside-latex t))
+
+(use-package elfeed)
+
+(use-package elfeed-org
+  :config
+  (setq rmh-elfeed-org-files (list "~/Notes/feeds.org"))
+  (elfeed-org))
+
+(use-package org-fragtog :hook (org-mode . org-fragtog-mode))
+
+;; (use-package tex :elpaca auctex)
+
+(use-package mpvi :elpaca (mpvi :repo "https://github.com/lorniu/mpvi")
+  :general
+  (tyrant-def))
+#+end_src
 * Optimize
 设置垃圾回收参数
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
 (setq gc-cons-threshold most-positive-fixnum)
 (setq gc-cons-percentage 0.6)
+#+END_SRC
+** Override
+#+BEGIN_SRC emacs-lisp
+(use-package no-littering
+  :demand
+  :config
+  (setq custom-file (no-littering-expand-etc-file-name "custom.el")
+        whisper-install-directory (no-littering-expand-var-file-name "whisper")
+        parinfer-rust-library-directory (no-littering-expand-var-file-name "parinfer-rust/"))
+  (with-eval-after-load 'recentf
+    (add-to-list 'recentf-exclude no-littering-var-directory)
+    (add-to-list 'recentf-exclude no-littering-etc-directory)))
+
+(use-package gcmh
+  :demand
+  :config
+  (gcmh-mode 1))
+
+(use-package helpful
+  :after evil
+  :init
+  (setq evil-lookup-func #'helpful-at-point)
+  :bind
+  ([remap describe-key] . helpful-key)
+  ([remap describe-command] . helpful-command)
+  ([remap describe-function] . helpful-callable)
+  ([remap describe-variable] . helpful-variable))
+
+(use-package exec-path-from-shell
+  :when (not windows?)
+  :config
+  (exec-path-from-shell-initialize))
 #+END_SRC
 
 * Other
@@ -1232,6 +1771,96 @@ Cleaner to keep this in a separate file rather than a long single line at the to
   ;;; init-dev.el ends here
 #+END_SRC
 
+** TODO Misc
+#+BEGIN_SRC emacs-lisp
+  (use-package whisper :elpaca (whisper :host github :repo "natrys/whisper.el")
+    :general
+    (tyrant-def
+      "aw" (cons "whisper" (make-sparse-keymap))
+      "awr" 'whisper-run
+      "awf" 'whisper-file)
+    :config
+    (setq whisper-model "base"
+          whisper-language "cn"
+          whisper-translate nil))
+
+
+  ;; (use-package eaf :elpaca (eaf :host github :repo "emacs-eaf/emacs-application-framework" :files ("*") :post-build (shell-command "python install-eaf.py --install-core-deps")))
+
+  ;; (defconst eaf-apps
+  ;;   '(eaf-jupyter
+  ;;     eaf-browser
+  ;;     eaf-airshare
+  ;;     eaf-file-browser
+  ;;     eaf-file-manager
+  ;;     eaf-file-sender
+  ;;     eaf-music-player
+  ;;     eaf-system-monitor
+  ;;     eaf-mindmap
+  ;;     eaf-org-previewer
+  ;;     eaf-terminal
+  ;;     eaf-netease-cloud-music
+  ;;     eaf-video-player
+  ;;     eaf-image-viewer
+  ;;     eaf-demo
+  ;;     eaf-vue-demo
+  ;;     eaf-pdf-viewer
+  ;;     eaf-markdown-previewer
+  ;;     eaf-camera))
+
+  ;; (defun +emacy/install-eaf-app-deps (app-dir)
+  ;;   "Install deps from dependencies.json."
+  ;;   (let* ((dep-file (expand-file-name "dependencies.json" app-dir))
+  ;;          (deps-dict (with-temp-buffer
+  ;;                       (if (file-exists-p dep-file)
+  ;;                         (insert-file-contents dep-file)
+  ;;                         (insert "{}"))
+  ;;                       (json-parse-string (buffer-string))))
+  ;;          (pip-deps (gethash (if IS-LINUX "linux" "darwin")
+  ;;                             (or (gethash "pip" deps-dict)
+  ;;                                 (make-hash-table))))
+  ;;          (vue-install (gethash "vue_install" deps-dict))
+  ;;          (npm-install (gethash "npm_install" deps-dict))
+  ;;          (npm-rebuild (gethash "npm_rebuild" deps-dict)))
+  ;;     (when pip-deps
+  ;;       (dolist (pkg (append pip-deps nil))
+  ;;         (message "%s" (shell-command-to-string (format "pip install %s" pkg)))))
+  ;;     (when vue-install
+  ;;       (let ((default-directory app-dir))
+  ;;         (message "%s" (shell-command-to-string "npm install"))
+  ;;         (message "%s" (shell-command-to-string "npm run build"))))
+  ;;     (when npm-install
+  ;;       (let ((default-directory app-dir))
+  ;;         (message "%s" (shell-command-to-string "npm install"))))
+  ;;     (when npm-rebuild
+  ;;       (let ((default-directory app-dir))
+  ;;         (message "%s" (shell-command-to-string "npm rebuild"))))))
+
+  ;; (defmacro add-eaf-apps (apps)
+  ;;   `(progn ,@(mapcar (lambda (app) `(use-package ,app
+  ;;                                      :elpaca (,app :host github
+  ;;                                                    :repo ,(concat "emacs-eaf/" (symbol-name app))
+  ;;                                                    :files ("*")
+  ;;                                                    :post-build (+emacy/install-eaf-app-deps ,(concat elpaca-builds-directory "/" (symbol-name app))))))
+  ;;                     (if (symbolp apps) (eval apps) apps))))
+
+  ;; (add-eaf-apps eaf-apps)
+
+  (use-package yasnippet
+    :config
+    (yas-global-mode 1))
+
+  (use-package yasnippet-snippets)
+
+  (use-package lsp-bridge
+    :elpaca (lsp-bridge
+             :host github
+             :repo "manateelazycat/lsp-bridge"
+             :files ("*" (:exclude ".git")))
+    :config
+    (global-lsp-bridge-mode)
+    (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs))
+#+END_SRC
 * Footer
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (provide 'early-init)
