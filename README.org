@@ -8,8 +8,6 @@
 
 * Inbox
 ** TODO Refactor
-* TODO [[https://depp.brause.cc/shackle/][shackle]]
-
 * Header
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
 ;;; early-init.el --- emacs init file  -*- lexical-binding: t; -*-
@@ -31,9 +29,9 @@
 
 * Variable
 #+BEGIN_SRC emacs-lisp
-(defvar elpaca-directory (expand-file-name "var/elpaca" (if wsl? user-local-directory user-emacs-directory)))
-(defvar elpaca-builds-directory (expand-file-name "builds" elpaca-directory))
+(defvar elpaca-directory (expand-file-name "var" (if wsl? user-local-directory user-emacs-directory)))
 (defvar elpaca-cache-directory (expand-file-name "menus" elpaca-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "libs" user-emacs-directory))
 #+END_SRC
 
@@ -47,13 +45,11 @@
 (global-word-wrap-whitespace-mode 1)
 
 (tab-bar-mode -1)
-
-(setq custom-file (expand-file-name "var/custom.el" user-emacs-directory))
 #+END_SRC
 
 * Package Manager
 ** [[https://github.com/progfolio/elpaca][Elpaca]]
-*** Introduce
+*** introduce
 #+BEGIN_SRC emacs-lisp
 (defvar elpaca-installer-version 0.6)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
@@ -92,28 +88,43 @@
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 #+END_SRC
-
+*** default
+#+begin_src emacs-lisp :tangle early-init.el
+(setq package-enable-at-startup nil)
+#+end_src
 *** config
 #+BEGIN_SRC emacs-lisp
-(elpaca elpaca-use-package
-  (elpaca-use-package-mode)
-  (setq elpaca-use-package-by-default t
-        use-package-compute-statistics t))
+  (elpaca elpaca-use-package
+    (elpaca-use-package-mode)
+    (setq elpaca-use-package-by-default t
+          use-package-compute-statistics t))
 
-(when windows? (setq elpaca-queue-limit 21))
+  (when windows? (setq elpaca-queue-limit 21))
 
-(defmacro use-feature (name &rest args)
-  "Like `use-package' but accounting for asynchronous installation.
-  NAME and ARGS are in `use-package'."
-  (declare (indent defun))
-  `(use-package ,name
-     :elpaca nil
-     :ensure nil
-     ,@args))
+  (defmacro use-feature (name &rest args)
+    "Like `use-package' but accounting for asynchronous installation.
+    NAME and ARGS are in `use-package'."
+    (declare (indent defun))
+    `(use-package ,name
+       :elpaca nil
+       :ensure nil
+       ,@args))
 
-(elpaca-wait)
+  (elpaca-wait)
 #+END_SRC
 
+* Custom
+#+begin_src emacs-lisp
+(use-package no-littering
+  :demand
+  :config
+  (setq custom-file (no-littering-expand-var-file-name "custom.el")
+        whisper-install-directory (no-littering-expand-var-file-name "whisper")
+        parinfer-rust-library-directory (no-littering-expand-var-file-name "parinfer-rust/"))
+  (with-eval-after-load 'recentf
+    (add-to-list 'recentf-exclude no-littering-var-directory)
+    (add-to-list 'recentf-exclude no-littering-etc-directory)))
+#+end_src
 * Keybind
 ** which-key
 #+BEGIN_SRC emacs-lisp
@@ -358,139 +369,152 @@
       "wU"      'winner-redo
       "wv"      'split-window-horizontally
       "wV"      'split-window-horizontally-and-focus))
-
-
 #+END_SRC
 
 ** hydra
 #+BEGIN_SRC emacs-lisp
-(use-package hydra
-  :demand t
-  :config
-  (defun hydra-move-split-left (arg)
-    "Move window split left."
-    (interactive "p")
-    (if (let* ((windmove-wrap-around))
-          (windmove-find-other-window 'right))
-        (shrink-window-horizontally arg)
-      (enlarge-window-horizontally arg)))
-  
-  (defun hydra-move-split-right (arg)
-    "Move window split right."
-    (interactive "p")
-    (if (let* ((windmove-wrap-around))
-          (windmove-find-other-window 'right))
-        (enlarge-window-horizontally arg)
-      (shrink-window-horizontally arg)))
-  
-  (defun hydra-move-split-up (arg)
-    "Move window split up."
-    (interactive "p")
-    (if (let* ((windmove-wrap-around))
-          (windmove-find-other-window 'up))
-        (enlarge-window arg)
-      (shrink-window arg)))
-  
-  (defun hydra-move-split-down (arg)
-    "Move window split down."
-    (interactive "p")
-    (if (let* ((windmove-wrap-around))
-          (windmove-find-other-window 'up))
-        (shrink-window arg)
-      (enlarge-window arg)))
-  
-  (defhydra emacy-hydra-window ()
-    "
-  Movement^^   ^Split^         ^Switch^     ^Resize^
-  -----------------------------------------------------
-  _h_ Left     _v_ertical                   _q_ X left
-  _j_ Down     _x_ horizontal  _f_ind files _w_ X Down
-  _k_ Top      _z_ undo        _a_ce 1      _e_ X Top
-  _l_ Right    _Z_ reset       _s_wap       _r_ X Right
-  _F_ollow     _D_elete Other  _S_ave       max_i_mize
-  _SPC_ cancel _o_nly this     _d_elete
-  "
-    ("h" windmove-left)
-    ("j" windmove-down)
-    ("k" windmove-up)
-    ("l" windmove-right)
-    ("q" hydra-move-split-left)
-    ("w" hydra-move-split-down)
-    ("e" hydra-move-split-up)
-    ("r" hydra-move-split-right)
-    ("f" counsel-find-file)
-    ("F" follow-mode)
-    ("a" (ace-window 1))
-    ("v" (lambda () (interactive) (split-window-right) (windmove-right)))
-    ("x" (lambda () (interactive) (split-window-below) (windmove-down)))
-    ("s" (ace-window 4))
-    ("S" save-buffer)
-    ("d" delete-window)
-    ("D" (ace-window 16))
-    ("o" delete-other-windows)
-    ("i" ace-delete-other-windows)
-    ("z" (progn (winner-undo) (setq this-command 'winner-undo)))
-    ("Z" winner-redo)
-    ("SPC" nil))
-  
-  ;;(emacy-definer "w ." 'emacy-hydra-window/body)
-  
-  (defhydra hydra-dired (:hint nil :color pink)
-    "
-  _+_ mkdir          _v_iew           _m_ark             _(_ details        _i_nsert-subdir    wdired
-  _C_opy             _O_ view other   _U_nmark all       _)_ omit-mode      _$_ hide-subdir    C-x C-q : edit
-  _D_elete           _o_pen other     _u_nmark           _l_ redisplay      _w_ kill-subdir    C-c C-c : commit
-  _R_ename           _M_ chmod        _t_oggle           _g_ revert buf     _e_ ediff          C-c ESC : abort
-  _Y_ rel symlink    _G_ chgrp        _E_xtension mark   _s_ort             _=_ pdiff
-  _S_ymlink          ^ ^              _F_ind marked      _._ toggle hydra   \\ flyspell
-  _r_sync            ^ ^              ^ ^                ^ ^                _?_ summary
-  _z_ compress-file  _A_ find regexp
-  _Z_ compress       _Q_ repl regexp
-  
-  T - tag prefix
-  "
-    ("\\" dired-do-ispell)
-    ("(" dired-hide-details-mode)
-    (")" dired-omit-mode)
-    ("+" dired-create-directory)
-    ("=" diredp-ediff)         ;; smart diff
-    ("?" dired-summary)
-    ("$" diredp-hide-subdir-nomove)
-    ("A" dired-do-find-regexp)
-    ("C" dired-do-copy)        ;; Copy all marked files
-    ("D" dired-do-delete)
-    ("E" dired-mark-extension)
-    ("e" dired-ediff-files)
-    ("F" dired-do-find-marked-files)
-    ("G" dired-do-chgrp)
-    ("g" revert-buffer)        ;; read all directories again (refresh)
-    ("i" dired-maybe-insert-subdir)
-    ("l" dired-do-redisplay)   ;; relist the marked or singel directory
-    ("M" dired-do-chmod)
-    ("m" dired-mark)
-    ("O" dired-display-file)
-    ("o" dired-find-file-other-window)
-    ("Q" dired-do-find-regexp-and-replace)
-    ("R" dired-do-rename)
-    ("r" dired-do-rsynch)
-    ("S" dired-do-symlink)
-    ("s" dired-sort-toggle-or-edit)
-    ("t" dired-toggle-marks)
-    ("U" dired-unmark-all-marks)
-    ("u" dired-unmark)
-    ("v" dired-view-file)      ;; q to exit, s to search, = gets line #
-    ("w" dired-kill-subdir)
-    ("Y" dired-do-relsymlink)
-    ("z" diredp-compress-this-file)
-    ("Z" dired-do-compress)
-    ("q" nil)
-    ("." nil :color blue))
-  
-  ;; FIXME
-  (general-define-key :keymaps 'dired-mode-map "." 'hydra-dired/body))
-(use-package use-package-hydra :ensure t)
+  (use-package hydra
+    :demand t
+    :config
+    (defun hydra-move-split-left (arg)
+      "Move window split left."
+      (interactive "p")
+      (if (let* ((windmove-wrap-around))
+            (windmove-find-other-window 'right))
+          (shrink-window-horizontally arg)
+        (enlarge-window-horizontally arg)))
 
-(elpaca-wait)
+    (defun hydra-move-split-right (arg)
+      "Move window split right."
+      (interactive "p")
+      (if (let* ((windmove-wrap-around))
+            (windmove-find-other-window 'right))
+          (enlarge-window-horizontally arg)
+        (shrink-window-horizontally arg)))
+
+    (defun hydra-move-split-up (arg)
+      "Move window split up."
+      (interactive "p")
+      (if (let* ((windmove-wrap-around))
+            (windmove-find-other-window 'up))
+          (enlarge-window arg)
+        (shrink-window arg)))
+
+    (defun hydra-move-split-down (arg)
+      "Move window split down."
+      (interactive "p")
+      (if (let* ((windmove-wrap-around))
+            (windmove-find-other-window 'up))
+          (shrink-window arg)
+        (enlarge-window arg)))
+
+    (defhydra emacy-hydra-window ()
+      "
+    Movement^^   ^Split^         ^Switch^     ^Resize^
+    -----------------------------------------------------
+    _h_ Left     _v_ertical                   _q_ X left
+    _j_ Down     _x_ horizontal  _f_ind files _w_ X Down
+    _k_ Top      _z_ undo        _a_ce 1      _e_ X Top
+    _l_ Right    _Z_ reset       _s_wap       _r_ X Right
+    _F_ollow     _D_elete Other  _S_ave       max_i_mize
+    _SPC_ cancel _o_nly this     _d_elete
+    "
+      ("h" windmove-left)
+      ("j" windmove-down)
+      ("k" windmove-up)
+      ("l" windmove-right)
+      ("q" hydra-move-split-left)
+      ("w" hydra-move-split-down)
+      ("e" hydra-move-split-up)
+      ("r" hydra-move-split-right)
+      ("f" counsel-find-file)
+      ("F" follow-mode)
+      ("a" (ace-window 1))
+      ("v" (lambda () (interactive) (split-window-right) (windmove-right)))
+      ("x" (lambda () (interactive) (split-window-below) (windmove-down)))
+      ("s" (ace-window 4))
+      ("S" save-buffer)
+      ("d" delete-window)
+      ("D" (ace-window 16))
+      ("o" delete-other-windows)
+      ("i" ace-delete-other-windows)
+      ("z" (progn (winner-undo) (setq this-command 'winner-undo)))
+      ("Z" winner-redo)
+      ("SPC" nil))
+
+    ;;(emacy-definer "w ." 'emacy-hydra-window/body)
+
+    (defhydra hydra-dired (:hint nil :color pink)
+      "
+    _+_ mkdir          _v_iew           _m_ark             _(_ details        _i_nsert-subdir    wdired
+    _C_opy             _O_ view other   _U_nmark all       _)_ omit-mode      _$_ hide-subdir    C-x C-q : edit
+    _D_elete           _o_pen other     _u_nmark           _l_ redisplay      _w_ kill-subdir    C-c C-c : commit
+    _R_ename           _M_ chmod        _t_oggle           _g_ revert buf     _e_ ediff          C-c ESC : abort
+    _Y_ rel symlink    _G_ chgrp        _E_xtension mark   _s_ort             _=_ pdiff
+    _S_ymlink          ^ ^              _F_ind marked      _._ toggle hydra   \\ flyspell
+    _r_sync            ^ ^              ^ ^                ^ ^                _?_ summary
+    _z_ compress-file  _A_ find regexp
+    _Z_ compress       _Q_ repl regexp
+
+    T - tag prefix
+    "
+      ("\\" dired-do-ispell)
+      ("(" dired-hide-details-mode)
+      (")" dired-omit-mode)
+      ("+" dired-create-directory)
+      ("=" diredp-ediff)         ;; smart diff
+      ("?" dired-summary)
+      ("$" diredp-hide-subdir-nomove)
+      ("A" dired-do-find-regexp)
+      ("C" dired-do-copy)        ;; Copy all marked files
+      ("D" dired-do-delete)
+      ("E" dired-mark-extension)
+      ("e" dired-ediff-files)
+      ("F" dired-do-find-marked-files)
+      ("G" dired-do-chgrp)
+      ("g" revert-buffer)        ;; read all directories again (refresh)
+      ("i" dired-maybe-insert-subdir)
+      ("l" dired-do-redisplay)   ;; relist the marked or singel directory
+      ("M" dired-do-chmod)
+      ("m" dired-mark)
+      ("O" dired-display-file)
+      ("o" dired-find-file-other-window)
+      ("Q" dired-do-find-regexp-and-replace)
+      ("R" dired-do-rename)
+      ("r" dired-do-rsynch)
+      ("S" dired-do-symlink)
+      ("s" dired-sort-toggle-or-edit)
+      ("t" dired-toggle-marks)
+      ("U" dired-unmark-all-marks)
+      ("u" dired-unmark)
+      ("v" dired-view-file)      ;; q to exit, s to search, = gets line #
+      ("w" dired-kill-subdir)
+      ("Y" dired-do-relsymlink)
+      ("z" diredp-compress-this-file)
+      ("Z" dired-do-compress)
+      ("q" nil)
+      ("." nil :color blue))
+
+    ;; FIXME
+    (general-define-key :keymaps 'dired-mode-map "." 'hydra-dired/body))
+
+  (use-package major-mode-hydra
+    :ensure t
+    :after hydra
+    :bind
+    ("C-M-<return>" . major-mode-hydra)
+    :config
+    (major-mode-hydra-define emacs-lisp-mode nil
+      ("Eval"
+       (("b" eval-buffer "buffer")
+        ("e" eval-defun "defun")
+        ("r" eval-region "region")))))
+
+  (use-package use-package-hydra 
+    :ensure t
+    :after use-package hydra)
+
+  (elpaca-wait)
 #+END_SRC
 
 ** TODO evil
@@ -585,128 +609,127 @@
 * Complete
 ** vertico
 #+BEGIN_SRC emacs-lisp
-(use-package vertico
-  :demand
-  ;; :general
-  ;; (:keymaps 'vertico-map
-  ;;           "C-j" #'vertico-next
-  ;;           "C-k" #'vertico-previous)
-  :config
-  (vertico-mode))
+  (use-package vertico
+    :demand
+    ;; :hook (minibuffer-setup . vertico-repeat-save)
+    :config
+    (vertico-mode)
+    (setq vertico-scroll-margin 0
+          vertico-resize t))
 
-;; Persist history over Emacs restarts. Vertico sorts by history position.
-(savehist-mode)
+  ;; Persist history over Emacs restarts. Vertico sorts by history position.
+  (savehist-mode)
 
-;; A few more useful configurations...
-(use-feature emacs
-  :init
-  ;; Add prompt indicator to `completing-read-multiple'.
-  ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
-  (defun crm-indicator (args)
-    (cons (format "[CRM%s] %s"
-                  (replace-regexp-in-string "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" "" crm-separator)
-                  (car args))
-          (cdr args)))
-  (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
+  ;; A few more useful configurations...
+  (use-feature emacs
+    :init
+    ;; Add prompt indicator to `completing-read-multiple'.
+    ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
+    (defun crm-indicator (args)
+      (cons (format "[CRM%s] %s"
+                    (replace-regexp-in-string "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" "" crm-separator)
+                    (car args))
+            (cdr args)))
+    (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
 
-  ;; Do not allow the cursor in the minibuffer prompt
-  (setq display-line-numbers-type 'relative)
-  (setq minibuffer-prompt-properties '(read-only t cursor-intangible t face minibuffer-prompt))
-  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+    ;; Do not allow the cursor in the minibuffer prompt
+    (setq display-line-numbers-type 'relative)
+    (setq minibuffer-prompt-properties '(read-only t cursor-intangible t face minibuffer-prompt))
+    (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
 
-  ;; Enable recursive minibuffers
-  (setq enable-recursive-minibuffers t))
+    ;; Enable recursive minibuffers
+    (setq enable-recursive-minibuffers t))
 
-;; support Pinyin first character match for orderless, avy etc.
-(use-package pinyinlib :ensure t)
+  ;; support Pinyin first character match for orderless, avy etc.
+  (use-package pinyinlib :ensure t)
 
-(use-package orderless
-  :ensure t
-  :init
-  (setq completion-styles '(orderless partial-completion basic))
-  (setq orderless-component-separator "[ &]") ; & is for company because space will break completion
-  (setq completion-category-defaults nil)
-  (setq completion-category-overrides nil)
-  :config
-  (defun completion--regex-pinyin (str) (orderless-regexp (pinyinlib-build-regexp-string str)))
-  (add-to-list 'orderless-matching-styles 'completion--regex-pinyin))
+  (use-package orderless
+    :ensure t
+    :init
+    (setq completion-styles '(orderless partial-completion basic))
+    (setq orderless-component-separator "[ &]") ; & is for company because space will break completion
+    (setq completion-category-defaults nil)
+    (setq completion-category-overrides nil)
+    :config
+    (defun completion--regex-pinyin (str) (orderless-regexp (pinyinlib-build-regexp-string str)))
+    (add-to-list 'orderless-matching-styles 'completion--regex-pinyin))
 
-;; minibuffer helpful annotations
-(use-package marginalia
-  :ensure t
-  :hook (elpaca-after-init . marginalia-mode)
-  :custom
-  (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
+  ;; minibuffer helpful annotations
+  (use-package marginalia
+    :ensure t
+    :hook (elpaca-after-init . marginalia-mode)
+    :custom
+    (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
 
-(use-package consult
-  :ensure t
-  :after org
-  :bind (([remap goto-line]                     . consult-goto-line)
-         ([remap isearch-forward]               . consult-line-symbol-at-point) ; my-consult-ripgrep-or-line
-         ([remap switch-to-buffer]              . consult-buffer)
-         ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
-         ([remap switch-to-buffer-other-frame]  . consult-buffer-other-frame)
-         ([remap yank-pop]                      . consult-yank-pop)
-         ([remap apropos]                       . consult-apropos)
-         ([remap bookmark-jump]                 . consult-bookmark)
-         ([remap goto-line]                     . consult-goto-line)
-         ([remap imenu]                         . consult-imenu)
-         ([remap multi-occur]                   . consult-multi-occur)
-         ([remap recentf-open-files]            . consult-recent-file)
-         ("C-x j"                               . consult-mark)
-         ("C-c g"                               . consult-ripgrep)
-         ("C-c f"                               . consult-find)
-         ("\e\ef"                               . consult-locate) ; need to enable locate first
-         ("C-c n h"                             . my/consult-find-org-headings)
-         :map org-mode-map
-         ("C-c C-j"                             . consult-org-heading)
-         :map minibuffer-local-map
-         ("C-r"                                 . consult-history)
-         :map isearch-mode-map
-         ("C-;"                                 . consult-line)
-         :map prog-mode-map
-         ("C-c C-j"                             . consult-outline))
-  :hook (completion-list-mode . consult-preview-at-point-mode)
-  :init
-  ;; Optionally configure the register formatting. This improves the register
-  ;; preview for `consult-register', `consult-register-load',
-  ;; `consult-register-store' and the Emacs built-ins.
-  (setq register-preview-delay 0
-        register-preview-function #'consult-register-format)
+  (use-package consult
+    :ensure t
+    :after org
+    :bind (([remap goto-line]                     . consult-goto-line)
+           ([remap isearch-forward]               . consult-line-symbol-at-point) ; my-consult-ripgrep-or-line
+           ([remap switch-to-buffer]              . consult-buffer)
+           ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
+           ([remap switch-to-buffer-other-frame]  . consult-buffer-other-frame)
+           ([remap yank-pop]                      . consult-yank-pop)
+           ([remap apropos]                       . consult-apropos)
+           ([remap bookmark-jump]                 . consult-bookmark)
+           ([remap goto-line]                     . consult-goto-line)
+           ([remap imenu]                         . consult-imenu)
+           ([remap multi-occur]                   . consult-multi-occur)
+           ([remap recentf-open-files]            . consult-recent-file)
+           ("C-x j"                               . consult-mark)
+           ("C-c g"                               . consult-ripgrep)
+           ("C-c f"                               . consult-find)
+           ("\e\ef"                               . consult-locate) ; need to enable locate first
+           ("C-c n h"                             . my/consult-find-org-headings)
+           :map org-mode-map
+           ("C-c C-j"                             . consult-org-heading)
+           :map minibuffer-local-map
+           ("C-r"                                 . consult-history)
+           :map isearch-mode-map
+           ("C-;"                                 . consult-line)
+           :map prog-mode-map
+           ("C-c C-j"                             . consult-outline))
+    :hook (completion-list-mode . consult-preview-at-point-mode)
+    :init
+    ;; Optionally configure the register formatting. This improves the register
+    ;; preview for `consult-register', `consult-register-load',
+    ;; `consult-register-store' and the Emacs built-ins.
+    (setq register-preview-delay 0
+          register-preview-function #'consult-register-format)
 
-  ;; Optionally tweak the register preview window.
-  ;; This adds thin lines, sorting and hides the mode line of the window.
-  (advice-add #'register-preview :override #'consult-register-window)
+    ;; Optionally tweak the register preview window.
+    ;; This adds thin lines, sorting and hides the mode line of the window.
+    (advice-add #'register-preview :override #'consult-register-window)
 
-  ;; Use Consult to select xref locations with preview
-  (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
+    ;; Use Consult to select xref locations with preview
+    (setq xref-show-xrefs-function #'consult-xref
+          xref-show-definitions-function #'consult-xref)
 
-  ;; MacOS locate doesn't support `--ignore-case --existing' args.
-  (setq consult-locate-args (pcase system-type
-                              ('gnu/linux "locate --ignore-case --existing --regex")
-                              ('darwin "mdfind -name")))
-  :config
-  (consult-customize
-    consult-theme
-    :preview-key '(:debounce 0.2 any)
-    consult-ripgrep consult-git-grep consult-grep
-    consult-bookmark consult-recent-file consult-xref
-    consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
-    :preview-key (kbd "M-."))
+    ;; MacOS locate doesn't support `--ignore-case --existing' args.
+    (setq consult-locate-args (pcase system-type
+                                ('gnu/linux "locate --ignore-case --existing --regex")
+                                ('darwin "mdfind -name")))
+    :config
+    (consult-customize
+      consult-theme
+      :preview-key '(:debounce 0.2 any)
+      consult-ripgrep consult-git-grep consult-grep
+      consult-bookmark consult-recent-file consult-xref
+      consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
+      :preview-key (kbd "M-."))
 
-  ;; Optionally configure the narrowing key.
-  ;; Both < and C-+ work reasonably well.
-  (setq consult-narrow-key "<") ;; (kbd "C-+")
+    ;; Optionally configure the narrowing key.
+    ;; Both < and C-+ work reasonably well.
+    (setq consult-narrow-key "<") ;; (kbd "C-+")
 
-  (autoload 'projectile-project-root "projectile")
-  (setq consult-project-root-function #'projectile-project-root)
+    (autoload 'projectile-project-root "projectile")
+    (setq consult-project-root-function #'projectile-project-root)
 
-  ;; Use `consult-ripgrep' instead of `consult-line' in large buffers
-  (defun consult-line-symbol-at-point ()
-    "Consult line the synbol where the point is"
-    (interactive)
-    (consult-line (thing-at-point 'symbol))))
+    ;; Use `consult-ripgrep' instead of `consult-line' in large buffers
+    (defun consult-line-symbol-at-point ()
+      "Consult line the synbol where the point is"
+      (interactive)
+      (consult-line (thing-at-point 'symbol))))
 #+END_SRC
 
 ** embark
@@ -795,10 +818,6 @@
     (global-corfu-mode))
 #+END_SRC
 
-** vertico
-#+BEGIN_SRC emacs-lisp
-#+END_SRC
-
 * UI
 禁止展示菜单栏、工具栏和纵向滚动条
 禁止菜单栏、工具栏、滚动条模式，禁止启动屏幕和文件对话框
@@ -820,7 +839,7 @@
 (setq comp-deferred-compilation nil)
 #+END_SRC
 
-** Default
+** default
 #+BEGIN_SRC emacs-lisp
 ;; 禁用一些GUI特性
 (setq use-dialog-box nil)               ; 鼠标操作不使用对话框
@@ -940,7 +959,7 @@
 ;; (modify-coding-system-alist 'process "*" 'utf-8)
 ;; (when (display-graphic-p) (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 #+END_SRC
-** Treemacs
+** treemacs
 #+BEGIN_SRC emacs-lisp
 (use-package treemacs
   :ensure t
@@ -1038,7 +1057,7 @@
   :ensure t
   :config (treemacs-set-scope-type 'Tabs))
 #+END_SRC
-** Font
+** font
 #+BEGIN_SRC emacs-lisp
 (defun fonts-installed (&rest font-list) (reverse (cl-intersection font-list (font-family-list) :test #'equal)))
 
@@ -1095,7 +1114,7 @@
 (use-package fontify-face)
 #+END_SRC
 
-** Icon
+** icon
 #+BEGIN_SRC emacs-lisp
   (use-package nerd-icons
     :custom
@@ -1115,79 +1134,85 @@
   (use-package treemacs-nerd-icons :config (treemacs-load-theme "nerd-icons"))
 #+END_SRC
 
-** Modeline
-#+BEGIN_SRC emacs-lisp
-
-(use-package doom-modeline
-  :ensure t
-  :hook (elpaca-after-init . doom-modeline-mode)
-  :custom
-  (doom-modeline-irc nil)
-  (doom-modeline-mu4e nil)
-  (doom-modeline-gnus nil)
-  (doom-modeline-github nil)
-  (doom-modeline-buffer-file-name-style 'truncate-upto-root) ; : auto
-  (doom-modeline-persp-name t)
-  (doom-modeline-unicode-fallback t)
-  (doom-modeline-enable-word-count t))
-
-;; [[https://github.com/tarsius/minions][minions]] 插件能让模式栏变得清爽，将次要模式隐藏起来。
-(use-package minions
-  :ensure t
-  :hook (elpaca-after-init . minions-mode))
-
-(use-package keycast
-  :ensure t
-  :hook (elpaca-after-init . keycast-mode)
-  ;; :custom-face
-  ;; (keycast-key ((t (:background "#0030b4" :weight bold))))
-  ;; (keycast-command ((t (:foreground "#0030b4" :weight bold))))
-  :config
-  ;; set for doom-modeline support
-  ;; With the latest change 72d9add, mode-line-keycast needs to be modified to keycast-mode-line.
-  (define-minor-mode keycast-mode
-    "Show current command and its key binding in the mode line (fix for use with doom-mode-line)."
-    :global t
-    (if keycast-mode
-      (progn
-        (add-hook 'pre-command-hook 'keycast--update t)
-        (add-to-list 'global-mode-string '("" keycast-mode-line "  ")))
-      (remove-hook 'pre-command-hook 'keycast--update)
-      (setq global-mode-string (delete '("" keycast-mode-line "  ") global-mode-string))))
-
-  (dolist (input '(self-insert-command org-self-insert-command))
-    (add-to-list 'keycast-substitute-alist `(,input "." "Typing…")))
-
-  (dolist (event '(mouse-event-p mouse-movement-p mwheel-scroll))
-    (add-to-list 'keycast-substitute-alist `(,event nil)))
-
-  (setq keycast-log-format "%-20K%C\n")
-  (setq keycast-log-frame-alist '((minibuffer . nil)))
-  (setq keycast-log-newest-first t))
-
-(use-package anzu
-    :config
-    (global-anzu-mode +1))
-
-(use-package evil-anzu :after evil)
-#+END_SRC
-
-** Dashboard
-#+BEGIN_SRC emacs-lisp
-(use-package dashboard
-  :hook
-  (elpaca-after-init . (lambda () (dashboard-open)))
-  :config
-  ;; FIXME
-  ;(dashboard-setup-startup-hook)
-  (setq dashboard-center-content t)
-  (setq dashboard-set-file-icons t)
-  (setq dashboard-set-heading-icons t)
-  (setq dashboard-projects-backend 'projectile))
-#+END_SRC
-** Terminal
+** dired
 #+begin_src emacs-lisp
+  (use-package diredfl
+    :ensure t
+    :hook (dired-mode . diredfl-mode))
 
+  (when (executable-find "fd")
+    (use-package fd-dired))
+#+end_src
+** modeline
+#+BEGIN_SRC emacs-lisp
+  (use-package doom-modeline
+    :ensure t
+    :hook (elpaca-after-init . doom-modeline-mode)
+    :custom
+    (doom-modeline-irc nil)
+    (doom-modeline-mu4e nil)
+    (doom-modeline-gnus nil)
+    (doom-modeline-github nil)
+    (doom-modeline-persp-name t)
+    (doom-modeline-unicode-fallback t)
+    (doom-modeline-enable-word-count t)
+    (doom-modeline-buffer-file-name-style 'truncate-upto-root)) ; : auto
+
+  ;; [[https://github.com/tarsius/minions][minions]] 插件能让模式栏变得清爽，将次要模式隐藏起来。
+  (use-package minions
+    :ensure t
+    :hook (elpaca-after-init . minions-mode))
+
+  (use-package keycast
+    :ensure t
+    :hook (elpaca-after-init . keycast-mode)
+    ;; :custom-face
+    ;; (keycast-key ((t (:background "#0030b4" :weight bold))))
+    ;; (keycast-command ((t (:foreground "#0030b4" :weight bold))))
+    :config
+    ;; set for doom-modeline support
+    ;; With the latest change 72d9add, mode-line-keycast needs to be modified to keycast-mode-line.
+    (define-minor-mode keycast-mode
+      "Show current command and its key binding in the mode line (fix for use with doom-mode-line)."
+      :global t
+      (if keycast-mode
+        (progn
+          (add-hook 'pre-command-hook 'keycast--update t)
+          (add-to-list 'global-mode-string '("" keycast-mode-line "  ")))
+        (remove-hook 'pre-command-hook 'keycast--update)
+        (setq global-mode-string (delete '("" keycast-mode-line "  ") global-mode-string))))
+
+    (dolist (input '(self-insert-command org-self-insert-command))
+      (add-to-list 'keycast-substitute-alist `(,input "." "Typing…")))
+
+    (dolist (event '(mouse-event-p mouse-movement-p mwheel-scroll))
+      (add-to-list 'keycast-substitute-alist `(,event nil)))
+
+    (setq keycast-log-format "%-20K%C\n")
+    (setq keycast-log-frame-alist '((minibuffer . nil)))
+    (setq keycast-log-newest-first t))
+
+  (use-package anzu
+      :config
+      (global-anzu-mode +1))
+
+  (use-package evil-anzu :after evil)
+#+END_SRC
+
+** dashboard
+#+BEGIN_SRC emacs-lisp
+  (use-package dashboard
+    :hook 
+    (elpaca-after-init . (lambda () (dashboard-open)))
+    ;; :init  (dashboard-setup-startup-hook)
+    :config
+    (setq dashboard-center-content t
+          dashboard-set-file-icons t
+          dashboard-set-heading-icons t
+          dashboard-projects-backend 'projectile))
+#+END_SRC
+** terminal
+#+begin_src emacs-lisp
 (use-package eshell
   :elpaca nil
   :ensure nil
@@ -1286,47 +1311,73 @@ current directory."
 
 (use-package vterm :unless windows?)
 #+end_src
-** Theme
-#+begin_src emacs-lisp
-
-(use-package ef-themes
-  :ensure t
-  :bind ("C-c t" . ef-themes-toggle)
-  :init
-  ;; set two specific themes and switch between them
-  (setq ef-themes-to-toggle '(ef-summer ef-winter))
-  ;; set org headings and function syntax
-  (setq ef-themes-headings ; read the manual's entry or the doc string
-      '((0 . (variable-pitch light 1.2))
-        (1 . (variable-pitch light 1.1))
-        (2 . (variable-pitch regular 1.0))
-        (3 . (variable-pitch regular 1.0))
-        (4 . (variable-pitch regular 1.0))
-        (5 . (variable-pitch 1.0)) ; absence of weight means `bold'
-        (6 . (variable-pitch 1.0))
-        (7 . (variable-pitch 1.0))
-        (t . (variable-pitch 1.0))))
-  (setq ef-themes-region '(intense no-extend neutral))
-  ;; Disable all other themes to avoid awkward blending:
-  (mapc #'disable-theme custom-enabled-themes)
-  (ef-themes-load-random 'dark)
-
-  :config
-  ;; auto change theme, aligning with system themes.
-  (defun my/apply-theme (appearance)
-    "Load theme, taking current system APPEARANCE into consideration."
+** theme
+*** TODO ef-themes
+#+begin_src emacs-lisp :tangle no
+  (use-package ef-themes
+    :ensure t
+    :bind ("C-c t" . ef-themes-toggle)
+    :init
+    ;; set two specific themes and switch between them
+    (setq ef-themes-to-toggle '(ef-summer ef-winter))
+    ;; set org headings and function syntax
+    (setq ef-themes-headings ; read the manual's entry or the doc string
+        '((0 . (variable-pitch light 1.2))
+          (1 . (variable-pitch light 1.1))
+          (2 . (variable-pitch regular 1.0))
+          (3 . (variable-pitch regular 1.0))
+          (4 . (variable-pitch regular 1.0))
+          (5 . (variable-pitch 1.0)) ; absence of weight means `bold'
+          (6 . (variable-pitch 1.0))
+          (7 . (variable-pitch 1.0))
+          (t . (variable-pitch 1.0))))
+    (setq ef-themes-region '(intense no-extend neutral))
+    ;; Disable all other themes to avoid awkward blending:
     (mapc #'disable-theme custom-enabled-themes)
-    (pcase appearance
-      ('light (if (display-graphic-p) (ef-themes-load-random 'light) (ef-themes-load-random 'dark)))
-      ('dark (ef-themes-load-random 'dark))))
+    (ef-themes-load-random 'dark)
 
-  (when macos? (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)))
+    :config
+    ;; auto change theme, aligning with system themes.
+    (defun my/apply-theme (appearance)
+      "Load theme, taking current system APPEARANCE into consideration."
+      (mapc #'disable-theme custom-enabled-themes)
+      (pcase appearance
+        ('light (if (display-graphic-p) (ef-themes-load-random 'light) (ef-themes-load-random 'dark)))
+        ('dark (ef-themes-load-random 'dark))))
+
+    (when macos? (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)))
 
 #+end_src
-** Misc
-#+begin_src emacs-lisp
-    (use-package undo-fu)
+*** TODO doom-themes
+#+begin_src emacs-lisp :tangle no
+  (use-package doom-themes
+    :ensure t
+    :config
+    ;; Global settings (defaults)
+    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+          doom-themes-enable-italic t) ; if nil, italics is universally disabled
+    (load-theme 'doom-one t)
 
+    ;; Enable flashing mode-line on errors
+    (doom-themes-visual-bell-config)
+    ;; Enable custom neotree theme (all-the-icons must be installed!)
+    (doom-themes-neotree-config)
+    ;; or for treemacs users
+    (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+    (doom-themes-treemacs-config)
+    ;; Corrects (and improves) org-mode's native fontification.
+    (doom-themes-org-config))
+#+end_src
+
+*** TODO zenburn
+#+begin_src emacs-lisp
+  (use-package zenburn-theme
+    :config
+    (load-theme 'zenburn t))
+#+end_src
+
+** window
+#+begin_src emacs-lisp
   (use-package ace-window :hook (elpaca-after-init . winner-mode))
 
   (use-package transpose-frame
@@ -1387,114 +1438,118 @@ current directory."
 
     ;; use `shackle.el' to control popup
     (setq popper-display-control nil))
+#+end_src
 
-(use-package rime
-  :defer t
-  :custom
-  (default-input-method "rime")
-  (rime-show-candidate 'posframe)
-  (rime-user-data-dir "~/Dotfiles/config/rime")
-  (rime-disable-predicates '(rime-predicate-after-alphabet-char-p ;; 在英文字符串之后（必须为以字母开头的英文字符串）
-                             ;; rime-predicate-after-ascii-char-p ;; 任意英文字符后
-                             rime-predicate-prog-in-code-p ;; 在 prog-mode 和 conf-mode 中除了注释和引号内字符串之外的区域
-                             rime-predicate-in-code-string-p ;; 在代码的字符串中，不含注释的字符串。
-                             rime-predicate-evil-mode-p ;; 在 evil-mode 的非编辑状态下
-                             rime-predicate-hydra-p ;; 如果激活了一个 hydra keymap
-                             ;; rime-predicate-ace-window-p ;; 激活 ace-window-mode
-                             ;; rime-predicate-current-input-punctuation-p ;; 当要输入的是符号时
-                             rime-predicate-punctuation-after-space-cc-p ;; 当要在中文字符且有空格之后输入符号时
-                             rime-predicate-punctuation-after-ascii-p ;; 当要在任意英文字符之后输入符号时
-                             rime-predicate-punctuation-line-begin-p ;; 在行首要输入符号时
-                             rime-predicate-space-after-ascii-p ;; 在任意英文字符且有空格之后
-                             rime-predicate-space-after-cc-p ;; 在中文字符且有空格之后
-                             rime-predicate-current-uppercase-letter-p ;; 将要输入的为大写字母时
-                             rime-predicate-tex-math-or-command-p));; 在 (La)TeX 数学环境中或者输入 (La)TeX 命令时
-  :bind
-  (:map rime-mode-map ("C-," . 'rime-force-enable)))
+** misc
+#+begin_src emacs-lisp
+  (use-package undo-fu)
+#+end_src
+
+** input
+*** rime :rime:input:
+#+begin_src emacs-lisp
+  (use-package rime
+    :defer t
+    :custom
+    (default-input-method "rime")
+    (rime-show-candidate 'posframe)
+    (rime-user-data-dir "~/Dotfiles/config/rime")
+    (rime-disable-predicates '(rime-predicate-after-alphabet-char-p ;; 在英文字符串之后（必须为以字母开头的英文字符串）
+                               ;; rime-predicate-after-ascii-char-p ;; 任意英文字符后
+                               rime-predicate-prog-in-code-p ;; 在 prog-mode 和 conf-mode 中除了注释和引号内字符串之外的区域
+                               rime-predicate-in-code-string-p ;; 在代码的字符串中，不含注释的字符串。
+                               rime-predicate-evil-mode-p ;; 在 evil-mode 的非编辑状态下
+                               rime-predicate-hydra-p ;; 如果激活了一个 hydra keymap
+                               ;; rime-predicate-ace-window-p ;; 激活 ace-window-mode
+                               ;; rime-predicate-current-input-punctuation-p ;; 当要输入的是符号时
+                               rime-predicate-punctuation-after-space-cc-p ;; 当要在中文字符且有空格之后输入符号时
+                               rime-predicate-punctuation-after-ascii-p ;; 当要在任意英文字符之后输入符号时
+                               rime-predicate-punctuation-line-begin-p ;; 在行首要输入符号时
+                               rime-predicate-space-after-ascii-p ;; 在任意英文字符且有空格之后
+                               rime-predicate-space-after-cc-p ;; 在中文字符且有空格之后
+                               rime-predicate-current-uppercase-letter-p ;; 将要输入的为大写字母时
+                               rime-predicate-tex-math-or-command-p));; 在 (La)TeX 数学环境中或者输入 (La)TeX 命令时
+    :bind
+    (:map rime-mode-map ("C-," . 'rime-force-enable)))
 #+end_src
 
 * IDE
 #+begin_src emacs-lisp
+  ;; (use-package beacon :config (beacon-mode 1))
+  (use-package lentic :config (global-lentic-mode))
+  (use-package apheleia :config (apheleia-global-mode 1))
+  (use-package editorconfig :config (editorconfig-mode 1))
 
-(use-package beacon :config (beacon-mode 1))
-(use-package lentic :config (global-lentic-mode))
-(use-package apheleia :config (apheleia-global-mode 1))
-(use-package editorconfig :config (editorconfig-mode 1))
+  (use-package dap-mode
+    :defer t
+    :config
+    (setq dap-auto-configure-features '(sessions locals controls tooltip))
+    (dap-mode 1)
+    (require 'dap-python)
+    (setq dap-python-debugger 'debugpy)
+    (require 'dap-node)
 
-(use-package dap-mode
-  :defer t
-  :config
-  (setq dap-auto-configure-features '(sessions locals controls tooltip))
-  (dap-mode 1)
-  (require 'dap-python)
-  (setq dap-python-debugger 'debugpy)
-  (require 'dap-node)
-
-  (dap-register-debug-template
-    "Node::Attach"
-    (list :type "node"
-          :request "attach"
-          :port 9229
-          :name "Node::Attach")))
+    (dap-register-debug-template
+      "Node::Attach"
+      (list :type "node"
+            :request "attach"
+            :port 9229
+            :name "Node::Attach")))
 #+end_src
 
-** Treesit
+** treesit
 #+begin_src emacs-lisp
+  (setq treesit-language-source-alist
+        '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
+          (c . ("https://github.com/tree-sitter/tree-sitter-c"))
+          (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+          (css . ("https://github.com/tree-sitter/tree-sitter-css"))
+          (cmake . ("https://github.com/uyha/tree-sitter-cmake"))
+          (csharp     . ("https://github.com/tree-sitter/tree-sitter-c-sharp.git"))
+          (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
+          (elisp . ("https://github.com/Wilfred/tree-sitter-elisp"))
+          (go . ("https://github.com/tree-sitter/tree-sitter-go"))
+          (gomod      . ("https://github.com/camdencheek/tree-sitter-go-mod.git"))
+          (html . ("https://github.com/tree-sitter/tree-sitter-html"))
+          (java       . ("https://github.com/tree-sitter/tree-sitter-java.git"))
+          (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+          (json . ("https://github.com/tree-sitter/tree-sitter-json"))
+          (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
+          (make . ("https://github.com/alemuller/tree-sitter-make"))
+          (markdown . ("https://github.com/MDeiml/tree-sitter-markdown" nil "tree-sitter-markdown/src"))
+          (ocaml . ("https://github.com/tree-sitter/tree-sitter-ocaml" nil "ocaml/src"))
+          (org . ("https://github.com/milisims/tree-sitter-org"))
+          (python . ("https://github.com/tree-sitter/tree-sitter-python"))
+          (php . ("https://github.com/tree-sitter/tree-sitter-php"))
+          (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "typescript/src"))
+          (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "tsx/src"))
+          (ruby . ("https://github.com/tree-sitter/tree-sitter-ruby"))
+          (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
+          (sql . ("https://github.com/m-novikov/tree-sitter-sql"))
+          (vue . ("https://github.com/merico-dev/tree-sitter-vue"))
+          (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))
+          (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
+          (zig . ("https://github.com/GrayJack/tree-sitter-zig"))))
 
-(setq treesit-language-source-alist
-      '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
-        (c . ("https://github.com/tree-sitter/tree-sitter-c"))
-        (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
-        (css . ("https://github.com/tree-sitter/tree-sitter-css"))
-        (cmake . ("https://github.com/uyha/tree-sitter-cmake"))
-        (csharp     . ("https://github.com/tree-sitter/tree-sitter-c-sharp.git"))
-        (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
-        (elisp . ("https://github.com/Wilfred/tree-sitter-elisp"))
-        (go . ("https://github.com/tree-sitter/tree-sitter-go"))
-        (gomod      . ("https://github.com/camdencheek/tree-sitter-go-mod.git"))
-        (html . ("https://github.com/tree-sitter/tree-sitter-html"))
-        (java       . ("https://github.com/tree-sitter/tree-sitter-java.git"))
-        (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
-        (json . ("https://github.com/tree-sitter/tree-sitter-json"))
-        (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
-        (make . ("https://github.com/alemuller/tree-sitter-make"))
-        (markdown . ("https://github.com/MDeiml/tree-sitter-markdown" nil "tree-sitter-markdown/src"))
-        (ocaml . ("https://github.com/tree-sitter/tree-sitter-ocaml" nil "ocaml/src"))
-        (org . ("https://github.com/milisims/tree-sitter-org"))
-        (python . ("https://github.com/tree-sitter/tree-sitter-python"))
-        (php . ("https://github.com/tree-sitter/tree-sitter-php"))
-        (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "typescript/src"))
-        (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "tsx/src"))
-        (ruby . ("https://github.com/tree-sitter/tree-sitter-ruby"))
-        (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
-        (sql . ("https://github.com/m-novikov/tree-sitter-sql"))
-        (vue . ("https://github.com/merico-dev/tree-sitter-vue"))
-        (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))
-        (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
-        (zig . ("https://github.com/GrayJack/tree-sitter-zig"))))
+  (setq major-mode-remap-alist
+        '((c-mode          . c-ts-mode)
+          (c++-mode        . c++-ts-mode)
+          (cmake-mode      . cmake-ts-mode)
+          (conf-toml-mode  . toml-ts-mode)
+          (css-mode        . css-ts-mode)
+          (js-mode         . js-ts-mode)
+          (js-json-mode    . json-ts-mode)
+          (python-mode     . python-ts-mode)
+          (sh-mode         . bash-ts-mode)
+          (typescript-mode . typescript-ts-mode)))
 
-(setq major-mode-remap-alist
-      '((c-mode          . c-ts-mode)
-        (c++-mode        . c++-ts-mode)
-        (cmake-mode      . cmake-ts-mode)
-        (conf-toml-mode  . toml-ts-mode)
-        (css-mode        . css-ts-mode)
-        (js-mode         . js-ts-mode)
-        (js-json-mode    . json-ts-mode)
-        (python-mode     . python-ts-mode)
-        (sh-mode         . bash-ts-mode)
-        (typescript-mode . typescript-ts-mode)))
+  (add-hook 'emacs-lisp-mode-hook #'(lambda () (treesit-parser-create 'elisp)))
+  (setq treesit-extra-load-path (list (expand-file-name "var/treesit" user-emacs-directory)))
 
-(add-hook 'emacs-lisp-mode-hook #'(lambda () (treesit-parser-create 'elisp)))
-(setq treesit-extra-load-path (list (expand-file-name "var/treesit" user-emacs-directory)))
-
-(use-package treesit-auto
-  :config
-  (global-treesit-auto-mode))
-
+  (use-package treesit-auto  :config (global-treesit-auto-mode))
 #+end_src
 
-** Lisp
+** lisp
 #+begin_src emacs-lisp
 (use-package cider)
 
@@ -1511,7 +1566,7 @@ current directory."
   (electric-pair-mode -1))
 #+end_src
 
-** Web
+** web
 #+begin_src emacs-lisp
 (use-package css-mode :elpaca nil :init (setq css-indent-offset 2))
 ;; (use-package scss-mode :init (setq scss-compile-at-save nil))
@@ -1551,7 +1606,7 @@ current directory."
     :hook (restclient-mode . restclient-test-mode)))
 #+end_src
 
-** Misc
+** misc
 #+BEGIN_SRC emacs-lisp
 (use-package rainbow-mode)
 (use-package highlight-indent-guides
@@ -1563,167 +1618,149 @@ current directory."
 #+END_SRC
 
 * Org Mode
+** default
 #+begin_src emacs-lisp
-  (use-package org-roam
-  :after org
-  :init
-  (setq org-roam-directory org-directory
-        org-roam-v2-ack t)
-  :config
-  (org-roam-setup)
-  (add-to-list 'display-buffer-alist
-               '(("*org-roam*"
-                  (display-buffer-in-direcion)
-                  (direction . right)
-                  (window-width . 0.33)
-                  (window-height . fit-window-to-buffer))))
-  :general
-  (tyrant-def
-    "n" (cons "Notes" (make-sparse-keymap))
-    "n b" 'org-roam-buffer-toggle
-    "n f" 'org-roam-node-find
-    "n g" 'org-roam-graph
-    "n i" 'org-roam-node-insert
-    "n c" 'org-roam-capture
-    "n t" 'org-roam-tag-add
-    "n r" 'org-roam-ref-add
-    "n a" 'org-roam-alias-add))
+  (setq org-directory  "~/Notes"
+        org-archive-location (concat org-directory "/archive/%s::")
+        org-contacts-files (list (concat org-directory "/archive/contacts.org"))
+        org-agenda-files (list org-directory)
+        deft-directory org-directory
+        org-roam-directory org-directory
+        org-brain-path org-directory
+        org-roam-file-exclude-regexp ".*/bak/.*"
+        org-brain-visualize-default-choices 'all
+        rmh-elfeed-org-files (list (concat org-directory "/feeds.org")))
 
-(use-package org-roam-ui)
+  (setq org-fontify-whole-heading-line t
+        org-fontify-quote-and-verse-blocks t
+        org-hide-macro-markers t
+        org-startup-indented t
+        org-adapt-indentation t
+        org-startup-with-inline-images t
+        org-startup-with-latex-preview t)
+#+end_src
 
-(setq org-directory  "~/Notes"
-      org-archive-location (concat org-directory "/archive/%s::")
-      org-contacts-files (list (concat org-directory "/archive/contacts.org"))
-      org-agenda-files (list org-directory)
-      deft-directory org-directory
-      org-roam-directory org-directory
-      org-brain-path org-directory
-      org-roam-file-exclude-regexp ".*/bak/.*"
-      org-brain-visualize-default-choices 'all
-      rmh-elfeed-org-files (list (concat org-directory "/feeds.org")))
+** note
+#+begin_src emacs-lisp
+    (use-package org-roam
+    :after org
+    :init
+    (setq org-roam-directory org-directory
+          org-roam-v2-ack t)
+    :config
+    (org-roam-setup)
+    (add-to-list 'display-buffer-alist
+                 '(("*org-roam*"
+                    (display-buffer-in-direcion)
+                    (direction . right)
+                    (window-width . 0.33)
+                    (window-height . fit-window-to-buffer))))
+    :general
+    (tyrant-def
+      "n" (cons "Notes" (make-sparse-keymap))
+      "n b" 'org-roam-buffer-toggle
+      "n f" 'org-roam-node-find
+      "n g" 'org-roam-graph
+      "n i" 'org-roam-node-insert
+      "n c" 'org-roam-capture
+      "n t" 'org-roam-tag-add
+      "n r" 'org-roam-ref-add
+      "n a" 'org-roam-alias-add))
 
-(setq org-fontify-whole-heading-line t
-      org-fontify-quote-and-verse-blocks t
-      org-hide-macro-markers t
-      org-startup-indented t
-      org-adapt-indentation t
-      org-startup-with-inline-images t
-      org-startup-with-latex-preview t)
+  (use-package org-roam-ui)
 
-(setq deft-recursive t
-      deft-recursive-ignore-dir-regexp (rx (or "." ".." "logseq") eol))
 
-(setq org-agenda-archives-mode t)
-(setq org-export-select-tags '("Publish" "Public" "export")
-      org-publish-project-alist
-      '(("content"
-         :base-directory "~/Notes/content"
-         :publishing-directory "~/Notes/publish"
-         ;; :publishing-function (org-org-publish-to-org org-md-publish-to-md)
-         :publishing-function org-org-publish-to-org
-         :select-tags ("Publish" "Public" "Export" "export" "publish" "public")
-         :exclude-tags ("Private" "Secret" "noexport")
-         :recursive t
-         :with-broken-links t
-         :with-toc nil)))
+  (setq deft-recursive t
+        deft-recursive-ignore-dir-regexp (rx (or "." ".." "logseq") eol))
 
-(setq org-log-done 'time)
-;; (setq org-priority-lowest ?E)
-(setq org-contacts-icon-use-gravatar nil)
-(setq org-superstar-headline-bullets-list '("☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷"))
-(setq org-todo-keywords
-      '((sequence "NEXT(n)" "TODO(t)" "PEND(p)" "WILL(w@/!)" "|" "DONE(d)" "QUIT(q@)")
-        (sequence "[-](N)" "[ ](T)" "[:](P)" "[?](W)" "|" "[X](D)" "[Q](Q)")))
-(setq org-todo-keyword-faces
-      '(("TODO" :foreground "orange"       :weight bold)
-        ("[ ]"  :foreground "orange"       :weight bold)
-        ("NEXT" :foreground "yellow"       :weight bold)
-        ("[-]"  :foreground "yellow"       :weight bold)
-        ("PEND" :foreground "pink"         :weight bold)
-        ("[:]"  :foreground "pink"         :weight bold)
-        ("WILL" :foreground "purple"       :weight bold)
-        ("[?]"  :foreground "purple"       :weight bold)
-        ("DONE" :foreground "forest green" :weight bold)
-        ("[X]"  :foreground "forest green" :weight bold)
-        ("QUIT" :foreground "grey"         :weight bold)
-        ("[Q]"  :foreground "grey"         :weight bold)))
+  (setq org-agenda-archives-mode t)
+  (setq org-export-select-tags '("Publish" "Public" "export")
+        org-publish-project-alist
+        '(("content"
+           :base-directory "~/Notes/content"
+           :publishing-directory "~/Notes/publish"
+           ;; :publishing-function (org-org-publish-to-org org-md-publish-to-md)
+           :publishing-function org-org-publish-to-org
+           :select-tags ("Publish" "Public" "Export" "export" "publish" "public")
+           :exclude-tags ("Private" "Secret" "noexport")
+           :recursive t
+           :with-broken-links t
+           :with-toc nil)))
 
-(use-package org-contrib)
+  (setq org-log-done 'time)
+  ;; (setq org-priority-lowest ?E)
+  (setq org-contacts-icon-use-gravatar nil)
+  (setq org-superstar-headline-bullets-list '("☯", "☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷"))
+  (setq org-todo-keywords
+        '((sequence "NEXT(n)" "TODO(t)" "PEND(p)" "WILL(w@/!)" "|" "DONE(d)" "QUIT(q@)")
+          (sequence "[-](N)" "[ ](T)" "[:](P)" "[?](W)" "|" "[X](D)" "[Q](Q)")))
+  (setq org-todo-keyword-faces
+        '(("TODO" :foreground "orange"       :weight bold)
+          ("[ ]"  :foreground "orange"       :weight bold)
+          ("NEXT" :foreground "yellow"       :weight bold)
+          ("[-]"  :foreground "yellow"       :weight bold)
+          ("PEND" :foreground "pink"         :weight bold)
+          ("[:]"  :foreground "pink"         :weight bold)
+          ("WILL" :foreground "purple"       :weight bold)
+          ("[?]"  :foreground "purple"       :weight bold)
+          ("DONE" :foreground "forest green" :weight bold)
+          ("[X]"  :foreground "forest green" :weight bold)
+          ("QUIT" :foreground "grey"         :weight bold)
+          ("[Q]"  :foreground "grey"         :weight bold)))
 
-(use-package org-modern
-  :ensure t
-  :hook (elpaca-after-init . (lambda () (setq org-modern-hide-stars 'leading) (global-org-modern-mode t)))
-  :config
-  ;; 标题行型号字符
-  (setq org-modern-star ["☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷"])
-  ;; 额外的行间距，0.1表示10%，1表示1px
-  (setq-default line-spacing 0.1)
-  ;; tag边框宽度，还可以设置为 `auto' 即自动计算
-  (setq org-modern-label-border 1)
-  ;; 设置表格竖线宽度，默认为3
-  (setq org-modern-table-vertical 2)
-  ;; 设置表格横线为0，默认为0.1
-  (setq org-modern-table-horizontal 0)
-  ;; 复选框美化
-  (setq org-modern-checkbox
-        '((?X . #("▢✓" 0 2 (composition ((2)))))
-          (?- . #("▢–" 0 2 (composition ((2)))))
-          (?\s . #("▢" 0 1 (composition ((1)))))))
-  ;; 列表符号美化
-  (setq org-modern-list
-        '((?- . "•")
-          (?+ . "◦")
-          (?* . "▹")))
-  ;; 代码块左边加上一条竖边线（需要Org mode顶头，如果启用了 `visual-fill-column-mode' 会很难看）
-  (setq org-modern-block-fringe t)
-  ;; 代码块类型美化，我们使用了 `prettify-symbols-mode'
-  (setq org-modern-block-name nil)
-  ;; #+关键字美化，我们使用了 `prettify-symbols-mode'
-  (setq org-modern-keyword nil))
+  (use-package org-contrib)
 
-(use-package org-appear
- :ensure t
- :hook (org-mode . org-appear-mode)
- :config
- (setq org-appear-autolinks t)
- (setq org-appear-autosubmarkers t)
- (setq org-appear-autoentities t)
- (setq org-appear-autokeywords t)
- (setq org-appear-inside-latex t))
+  (use-package org-appear
+   :ensure t
+   :hook (org-mode . org-appear-mode)
+   :config
+   (setq org-appear-autolinks t)
+   (setq org-appear-autosubmarkers t)
+   (setq org-appear-autoentities t)
+   (setq org-appear-autokeywords t)
+   (setq org-appear-inside-latex t))
 
+  (use-package org-fragtog :hook (org-mode . org-fragtog-mode))
+
+  ;; (use-package tex :elpaca auctex)
+
+  (use-package mpvi 
+    :elpaca (mpvi :repo "https://github.com/lorniu/mpvi")
+    :general
+    (tyrant-def))
+#+end_src
+
+** pretty
+*** TODO [[https://github.com/minad/org-modern][org-modern]]
+#+begin_src emacs-lisp :tangle no
+  (use-package org-modern
+    :ensure t
+    :config
+    (setq org-modern-star '("☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷") ;; "☯"
+          org-pretty-entities t
+          org-modern-hide-stars nil
+          org-hide-emphasis-markers t)
+    (global-org-modern-mode))
+#+end_src
+
+** elfeed
+#+begin_src emacs-lisp
 (use-package elfeed)
 
 (use-package elfeed-org
   :config
   (setq rmh-elfeed-org-files (list "~/Notes/feeds.org"))
   (elfeed-org))
-
-(use-package org-fragtog :hook (org-mode . org-fragtog-mode))
-
-;; (use-package tex :elpaca auctex)
-
-(use-package mpvi :elpaca (mpvi :repo "https://github.com/lorniu/mpvi")
-  :general
-  (tyrant-def))
 #+end_src
+
 * Optimize
 设置垃圾回收参数
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
 (setq gc-cons-threshold most-positive-fixnum)
 (setq gc-cons-percentage 0.6)
 #+END_SRC
-** Override
+** override
 #+BEGIN_SRC emacs-lisp
-(use-package no-littering
-  :demand
-  :config
-  (setq custom-file (no-littering-expand-etc-file-name "custom.el")
-        whisper-install-directory (no-littering-expand-var-file-name "whisper")
-        parinfer-rust-library-directory (no-littering-expand-var-file-name "parinfer-rust/"))
-  (with-eval-after-load 'recentf
-    (add-to-list 'recentf-exclude no-littering-var-directory)
-    (add-to-list 'recentf-exclude no-littering-etc-directory)))
-
 (use-package gcmh
   :demand
   :config
@@ -1746,7 +1783,7 @@ current directory."
 #+END_SRC
 
 * Other
-** TODO Develop
+** TODO develop
 :PROPERTIES:
 :HEADER-ARGS: :tangle init-dev.el
 :END:
@@ -1770,8 +1807,71 @@ Cleaner to keep this in a separate file rather than a long single line at the to
   (provide 'init-dev)
   ;;; init-dev.el ends here
 #+END_SRC
+** TODO eaf                                                         :lazycat:
+#+begin_src emacs-lisp :tangle no
+  (use-package eaf :elpaca (eaf :host github :repo "emacs-eaf/emacs-application-framework" :files ("*") :post-build (shell-command "python install-eaf.py --install-core-deps")))
 
-** TODO Misc
+  (defconst eaf-apps
+    '(eaf-jupyter
+      eaf-browser
+      eaf-airshare
+      eaf-file-browser
+      eaf-file-manager
+      eaf-file-sender
+      eaf-music-player
+      eaf-system-monitor
+      eaf-mindmap
+      eaf-org-previewer
+      eaf-terminal
+      eaf-netease-cloud-music
+      eaf-video-player
+      eaf-image-viewer
+      eaf-demo
+      eaf-vue-demo
+      eaf-pdf-viewer
+      eaf-markdown-previewer
+      eaf-camera))
+
+  (defun +emacy/install-eaf-app-deps (app-dir)
+    "Install deps from dependencies.json."
+    (let* ((dep-file (expand-file-name "dependencies.json" app-dir))
+           (deps-dict (with-temp-buffer
+                        (if (file-exists-p dep-file)
+                          (insert-file-contents dep-file)
+                          (insert "{}"))
+                        (json-parse-string (buffer-string))))
+           (pip-deps (gethash (if IS-LINUX "linux" "darwin")
+                              (or (gethash "pip" deps-dict)
+                                  (make-hash-table))))
+           (vue-install (gethash "vue_install" deps-dict))
+           (npm-install (gethash "npm_install" deps-dict))
+           (npm-rebuild (gethash "npm_rebuild" deps-dict)))
+      (when pip-deps
+        (dolist (pkg (append pip-deps nil))
+          (message "%s" (shell-command-to-string (format "pip install %s" pkg)))))
+      (when vue-install
+        (let ((default-directory app-dir))
+          (message "%s" (shell-command-to-string "npm install"))
+          (message "%s" (shell-command-to-string "npm run build"))))
+      (when npm-install
+        (let ((default-directory app-dir))
+          (message "%s" (shell-command-to-string "npm install"))))
+      (when npm-rebuild
+        (let ((default-directory app-dir))
+          (message "%s" (shell-command-to-string "npm rebuild"))))))
+
+  (defmacro add-eaf-apps (apps)
+    `(progn ,@(mapcar (lambda (app) `(use-package ,app
+                                       :elpaca (,app :host github
+                                                     :repo ,(concat "emacs-eaf/" (symbol-name app))
+                                                     :files ("*")
+                                                     :post-build (+emacy/install-eaf-app-deps ,(concat elpaca-builds-directory "/" (symbol-name app))))))
+                      (if (symbolp apps) (eval apps) apps))))
+
+  (add-eaf-apps eaf-apps)
+#+end_src
+
+** TODO misc
 #+BEGIN_SRC emacs-lisp
   (use-package whisper :elpaca (whisper :host github :repo "natrys/whisper.el")
     :general
@@ -1783,68 +1883,6 @@ Cleaner to keep this in a separate file rather than a long single line at the to
     (setq whisper-model "base"
           whisper-language "cn"
           whisper-translate nil))
-
-
-  ;; (use-package eaf :elpaca (eaf :host github :repo "emacs-eaf/emacs-application-framework" :files ("*") :post-build (shell-command "python install-eaf.py --install-core-deps")))
-
-  ;; (defconst eaf-apps
-  ;;   '(eaf-jupyter
-  ;;     eaf-browser
-  ;;     eaf-airshare
-  ;;     eaf-file-browser
-  ;;     eaf-file-manager
-  ;;     eaf-file-sender
-  ;;     eaf-music-player
-  ;;     eaf-system-monitor
-  ;;     eaf-mindmap
-  ;;     eaf-org-previewer
-  ;;     eaf-terminal
-  ;;     eaf-netease-cloud-music
-  ;;     eaf-video-player
-  ;;     eaf-image-viewer
-  ;;     eaf-demo
-  ;;     eaf-vue-demo
-  ;;     eaf-pdf-viewer
-  ;;     eaf-markdown-previewer
-  ;;     eaf-camera))
-
-  ;; (defun +emacy/install-eaf-app-deps (app-dir)
-  ;;   "Install deps from dependencies.json."
-  ;;   (let* ((dep-file (expand-file-name "dependencies.json" app-dir))
-  ;;          (deps-dict (with-temp-buffer
-  ;;                       (if (file-exists-p dep-file)
-  ;;                         (insert-file-contents dep-file)
-  ;;                         (insert "{}"))
-  ;;                       (json-parse-string (buffer-string))))
-  ;;          (pip-deps (gethash (if IS-LINUX "linux" "darwin")
-  ;;                             (or (gethash "pip" deps-dict)
-  ;;                                 (make-hash-table))))
-  ;;          (vue-install (gethash "vue_install" deps-dict))
-  ;;          (npm-install (gethash "npm_install" deps-dict))
-  ;;          (npm-rebuild (gethash "npm_rebuild" deps-dict)))
-  ;;     (when pip-deps
-  ;;       (dolist (pkg (append pip-deps nil))
-  ;;         (message "%s" (shell-command-to-string (format "pip install %s" pkg)))))
-  ;;     (when vue-install
-  ;;       (let ((default-directory app-dir))
-  ;;         (message "%s" (shell-command-to-string "npm install"))
-  ;;         (message "%s" (shell-command-to-string "npm run build"))))
-  ;;     (when npm-install
-  ;;       (let ((default-directory app-dir))
-  ;;         (message "%s" (shell-command-to-string "npm install"))))
-  ;;     (when npm-rebuild
-  ;;       (let ((default-directory app-dir))
-  ;;         (message "%s" (shell-command-to-string "npm rebuild"))))))
-
-  ;; (defmacro add-eaf-apps (apps)
-  ;;   `(progn ,@(mapcar (lambda (app) `(use-package ,app
-  ;;                                      :elpaca (,app :host github
-  ;;                                                    :repo ,(concat "emacs-eaf/" (symbol-name app))
-  ;;                                                    :files ("*")
-  ;;                                                    :post-build (+emacy/install-eaf-app-deps ,(concat elpaca-builds-directory "/" (symbol-name app))))))
-  ;;                     (if (symbolp apps) (eval apps) apps))))
-
-  ;; (add-eaf-apps eaf-apps)
 
   (use-package yasnippet
     :config
