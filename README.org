@@ -2,8 +2,7 @@
 #+TITLE: My Emacs Config
 #+AUTHOR: Li Shuzhi
 #+STARTUP: content
-#+FILETAGS: :Emacy:Config:Emacs:EmacsLisp:
-#+PROPERTY: emacs config emacy
+#+FILETAGS: :emacy:config:emacs:emacs-lisp:
 #+PROPERTY: header-args :tangle init.el :noweb yes :session init
 
 * Inbox
@@ -1446,7 +1445,7 @@ current directory."
 #+end_src
 
 ** input
-*** rime :rime:input:
+*** rime                                                  :input:rime:
 #+begin_src emacs-lisp
   (use-package rime
     :defer t
@@ -1471,6 +1470,28 @@ current directory."
                                rime-predicate-tex-math-or-command-p));; 在 (La)TeX 数学环境中或者输入 (La)TeX 命令时
     :bind
     (:map rime-mode-map ("C-," . 'rime-force-enable)))
+#+end_src
+** workspace
+#+begin_src emacs-lisp
+  (use-package tabspaces
+    :hook (elpaca-after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup. 
+    :commands (tabspaces-switch-or-create-workspace tabspaces-open-or-create-project-and-workspace)
+
+    :custom
+    (tab-bar-show nil)
+    (tabspaces-use-filtered-buffers-as-default t)
+    (tabspaces-default-tab "Default")
+    (tabspaces-remove-to-default t)
+    (tabspaces-include-buffers '("*scratch*"))
+    (tabspaces-initialize-project-with-todo t)
+    (tabspaces-todo-file-name "todo.org")
+    ;; sessions
+    (tabspaces-session t)
+    (tabspaces-session-auto-restore t)
+
+    :general
+    (tyrant-def
+      "TAB TAB" 'tabspaces-switch-or-create-workspace))
 #+end_src
 
 * IDE
