@@ -392,20 +392,6 @@
 
   (use-package evil-traces :after evil :config (evil-traces-use-diff-faces) (evil-traces-mode))
 
-  (use-package evil-goggles
-    :after evil
-    :demand
-    :init
-    (setq evil-goggles-duration 0.05)
-    :config
-    (push '(evil-operator-eval
-            :face evil-goggles-yank-face
-            :switch evil-goggles-enable-yank
-            :advice evil-goggles--generic-async-advice)
-          evil-goggles--commands)
-    (evil-goggles-mode)
-    (evil-goggles-use-diff-faces))
-
   (use-package evil-snipe
     :after evil
     :demand
@@ -420,6 +406,23 @@
       "s e" '(evil-iedit-state/iedit-mode :wk "iedit")
       "s q" '(evil-iedit-state/quit-iedit-mode :wk "quit iedit")))
 #+END_SRC
+*** TODO evil-googles
+#+begin_src emacs-lisp
+  ;; FIXME
+  (use-package evil-goggles
+    :ensure t
+    :after evil
+    :init
+    (setq evil-goggles-duration 0.05)
+    :config
+    (evil-goggles-mode)
+
+    ;; optionally use diff-mode's faces; as a result, deleted text
+    ;; will be highlighed with `diff-removed` face which is typically
+    ;; some red color (as defined by the color theme)
+    ;; other faces such as `diff-added` will be used for other actions
+    (evil-goggles-use-diff-faces))
+#+end_src
 
 ** bindings
 *** application
@@ -1484,7 +1487,24 @@
 
 ** misc
 #+begin_src emacs-lisp
+#+end_src
+
+** undo
+*** undo-fu
+#+begin_src emacs-lisp
   (use-package undo-fu)
+#+end_src
+
+*** undo-fu-session
+#+begin_src emacs-lisp
+  (use-package undo-fu-session
+    :config
+    (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
+    (undo-fu-session-global-mode))
+#+end_src
+
+*** [[https://github.com/emacsmirror/undo-tree/blob/master/undo-tree.el][undo-tree]]
+#+begin_src emacs-lisp
 #+end_src
 
 ** input
