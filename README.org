@@ -834,8 +834,8 @@
     (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify))
 #+END_SRC
 
-** corfu
-#+BEGIN_SRC emacs-lisp
+** TODO corfu
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package corfu
     :custom
     (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
@@ -1515,7 +1515,8 @@
     (:map rime-mode-map ("C-," . 'rime-force-enable)))
 #+end_src
 ** workspace
-#+begin_src emacs-lisp
+*** TODO tabspaces
+#+begin_src emacs-lisp :tangle no
   (use-package tabspaces
     :hook (elpaca-after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup. 
     :commands (tabspaces-switch-or-create-workspace tabspaces-open-or-create-project-and-workspace)
@@ -1537,6 +1538,17 @@
       "TAB TAB" 'tabspaces-switch-or-create-workspace))
 #+end_src
 
+*** perspective
+#+begin_src emacs-lisp
+  (use-package perspective
+    :custom
+    (persp-mode-prefix-key (kbd "SPC TAB"))
+    :init 
+    (persp-mode)
+    :general
+    (tyrant-def
+      "TAB"     (cons "layouts" perspective-map)))
+#+end_src
 * IDE
 #+begin_src emacs-lisp
   ;; (use-package beacon :config (beacon-mode 1))
