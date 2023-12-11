@@ -1562,7 +1562,7 @@
 #+begin_src emacs-lisp
   (use-package perspective
     :custom
-    (persp-mode-prefix-key (kbd "SPC TAB"))
+    (persp-mode-prefix-key (kbd "C-c TAB"))
     :init 
     (persp-mode)
     :general
