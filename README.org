@@ -1,5 +1,5 @@
 # ;-*- eval: (load-file "./init-dev.el");   -*-
-#+TITLE: My Emacs Config
+#+TITLE: Emacs Config
 #+AUTHOR: Li Shuzhi
 #+STARTUP: content
 #+STARTUP: noindent
@@ -756,12 +756,11 @@
                                 ('darwin "mdfind -name")))
     :config
     (consult-customize
-      consult-theme
-      :preview-key '(:debounce 0.2 any)
+      consult-theme :preview-key '(:debounce 0.2 any)
       consult-ripgrep consult-git-grep consult-grep
       consult-bookmark consult-recent-file consult-xref
-      consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
-      :preview-key (kbd "M-."))
+      consult--source-recent-file consult--source-project-recent-file consult--source-bookmark)
+      ;; :preview-key (kbd "M-."))
 
     ;; Optionally configure the narrowing key.
     ;; Both < and C-+ work reasonably well.
@@ -1830,7 +1829,7 @@
 
 ** pretty
 *** TODO [[https://github.com/minad/org-modern][org-modern]]
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp 
   (use-package org-modern
     :ensure t
     :config
@@ -1997,6 +1996,13 @@ Cleaner to keep this in a separate file rather than a long single line at the to
     (global-lsp-bridge-mode)
     (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs))
 #+END_SRC
+** NEXT jira
+#+begin_src emacs-lisp
+  (use-package org-jira
+    :custom
+    (org-jira-working-dir "~/Notes/jira/")
+    (jiralib-url "http://10.25.7.12:8080"))
+#+end_src
 * Footer
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (provide 'early-init)
