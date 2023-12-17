@@ -2,9 +2,14 @@
 __pycache__
 *ipynb_checkpoints
 
+/libs
 /libraries
 /history
 /library
+
+/init.el
+/init-dev.el
+/early-init.el
 
 tmp
 var
@@ -13,3 +18,8 @@ local
 eln-cache
 tree-sitter
 auto-save-list
+parinfer-rust
+
+*.egg-info
+.pdm-python
+.venv

@@ -1,0 +1,25 @@
+[project]
+name = "emacy"
+version = "0.0.1"
+description = ""
+authors = [
+    {name = "liszt21", email = "liszt21@qq.com"},
+]
+dependencies = [
+    "epc>=0.0.5",
+    "sexpdata @ git+https://github.com/Liszt21/sexpdata.git@main",
+    "orjson>=3.9.10",
+    "six>=1.16.0",
+    "paramiko>=3.3.1",
+    "rapidfuzz>=3.5.2",
+]
+requires-python = ">=3.8"
+readme = """emacy"""
+license = {text = "MIT"}
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {""  = "python/src"}
