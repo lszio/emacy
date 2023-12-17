@@ -19,3 +19,7 @@ eln-cache
 tree-sitter
 auto-save-list
 parinfer-rust
+
+*.egg-info
+.pdm-python
+.venv
