@@ -1,4 +1,4 @@
-# ;-*- eval: (load-file "./init-dev.el");   -*-
+;-*- eval: (load-file "./init-dev.el");   -*-
 #+TITLE: Emacs Config
 #+AUTHOR: Li Shuzhi
 #+STARTUP: content
@@ -1737,6 +1737,13 @@
   (setf lsp-bridge-python-command "~/.emacs.d/.venv/bin/python3")
 #+end_src
 
+** git
+#+begin_src emacs-lisp
+  (use-package magit
+   :general
+   (tyrant-def
+     "g g" 'magit))
+#+end_src
 ** misc
 #+BEGIN_SRC emacs-lisp
 (use-package rainbow-mode)
@@ -1886,6 +1893,12 @@
   (elfeed-org))
 #+end_src
 
+** misc
+#+begin_src emacs-lisp
+  (use-package org-auto-tangle
+    :hook
+    (org-mode . org-auto-tangle-mode))
+#+end_src
 * Optimize
 设置垃圾回收参数
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
@@ -1924,11 +1937,13 @@ Evaluated when loading init file.
 Cleaner to keep this in a separate file rather than a long single line at the top of init.org
 #+BEGIN_SRC emacs-lisp
   ;;; init-dev.el --- development settings for init file  -*- lexical-binding: t; -*-
-  (defcustom emacy-library-directory (concat user-emacs-directory "libs/"))
+  ;;; Code:
+  (defcustom emacy-library-directory (concat user-emacs-directory "libs/") "Libraries for Emacs.")
 
-  (add-to-list 'load-path (concat emacy-library-directory "org-auto-tangle"))
+  (add-to-list 'load-path (concat emacy-library-directory "org-auto-tangle/"))
 
   (setq-local org-confirm-babel-evaluate nil)
+
   (require 'org-auto-tangle)
   (org-auto-tangle-mode)
   (add-hook 'org-auto-tangle-before-tangle-hook #'check-parens)
@@ -2035,7 +2050,7 @@ Cleaner to keep this in a separate file rather than a long single line at the to
   ;;; init.el ends here
 #+END_SRC
 
-* TODO Reference
+* Reference
 ** configs
 https://remacs.cc/
 https://github.com/Ethanlinyf/General-Pure-Emacs
