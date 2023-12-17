@@ -495,6 +495,13 @@
     "hPk"     'profiler-stop
     "hPr"     'profiler-report)
 #+end_src
+*** jump
+#+begin_src emacs-lisp
+  (tyrant-def
+    "j"       (cons "jump" (make-sparse-keymap))
+    "ji"      'imenu
+    "jg"      'avy-goto-char-2)
+#+end_src
 *** file
 #+begin_src emacs-lisp
   (tyrant-def
@@ -530,12 +537,27 @@
     ;; "fvf"     'add-file-local-variable
     ;; "fvp"     'add-file-local-variable-prop-line
 #+end_src
-*** jump
+*** frame
 #+begin_src emacs-lisp
   (tyrant-def
-    "j"       (cons "jump" (make-sparse-keymap))
-    "ji"      'imenu
-    "jg"      'avy-goto-char-2)
+    "F"       (cons "frame" (make-sparse-keymap))
+    "Fd"      'delete-frame
+    "FD"      'delete-other-frames
+    "Fn"      'make-frame
+    "Fo"      'other-frame
+    "FD" 'delete-other-frames
+    "FF" 'select-frame-by-name
+    "FO" 'other-frame-prefix
+    "Fc" '(:ingore t :which-key "color")
+    "Fcb" 'set-background-color
+    "Fcc" 'set-cursor-color
+    "Fcf" 'set-foreground-color
+    "Ff" 'set-frame-font
+    "Fm" 'make-frame-on-monitor
+    "Fn" 'next-window-any-frame
+    "Fo" 'other-frame
+    "Fp" 'previous-window-any-frame
+    "Fr" 'set-frame-name)
 #+end_src
 *** window
 #+begin_src emacs-lisp
@@ -578,28 +600,6 @@
     "wU"      'winner-redo
     "wv"      'split-window-horizontally
     "wV"      'split-window-horizontally-and-focus)
-#+end_src
-*** frame
-#+begin_src emacs-lisp
-  (tyrant-def
-    "F"       (cons "frame" (make-sparse-keymap))
-    "Fd"      'delete-frame
-    "FD"      'delete-other-frames
-    "Fn"      'make-frame
-    "Fo"      'other-frame
-    "FD" 'delete-other-frames
-    "FF" 'select-frame-by-name
-    "FO" 'other-frame-prefix
-    "Fc" '(:ingore t :which-key "color")
-    "Fcb" 'set-background-color
-    "Fcc" 'set-cursor-color
-    "Fcf" 'set-foreground-color
-    "Ff" 'set-frame-font
-    "Fm" 'make-frame-on-monitor
-    "Fn" 'next-window-any-frame
-    "Fo" 'other-frame
-    "Fp" 'previous-window-any-frame
-    "Fr" 'set-frame-name)
 #+end_src
 *** project
 #+begin_src emacs-lisp
@@ -990,18 +990,18 @@
 
   ;; 配置所有的编码为UTF-8，参考：
   ;; https://thraxys.wordpress.com/2016/01/13/utf-8-in-emacs-everywhere-forever/
-  ;; (setq locale-coding-system 'utf-8)
-  ;; (set-terminal-coding-system 'utf-8)
-  ;; (set-keyboard-coding-system 'utf-8)
-  ;; (set-selection-coding-system 'utf-8)
-  ;; (set-default-coding-systems 'utf-8)
-  ;; (set-language-environment 'utf-8)
-  ;; (set-clipboard-coding-system 'utf-8)
-  ;; (set-file-name-coding-system 'utf-8)
-  ;; (set-buffer-file-coding-system 'utf-8)
-  ;; (prefer-coding-system 'utf-8)
-  ;; (modify-coding-system-alist 'process "*" 'utf-8)
-  ;; (when (display-graphic-p) (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+  (setq locale-coding-system 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (set-selection-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (set-language-environment 'utf-8)
+  (set-clipboard-coding-system 'utf-8)
+  (set-file-name-coding-system 'utf-8)
+  (set-buffer-file-coding-system 'utf-8)
+  (prefer-coding-system 'utf-8)
+  (modify-coding-system-alist 'process "*" 'utf-8)
+  (when (display-graphic-p) (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 #+END_SRC
 ** treemacs
 #+BEGIN_SRC emacs-lisp
@@ -1562,7 +1562,7 @@
   (use-package perspective
     :custom
     (persp-mode-prefix-key (kbd "C-c TAB"))
-    :init 
+    :init
     (persp-mode)
     :general
     (tyrant-def
@@ -1591,7 +1591,38 @@
             :port 9229
             :name "Node::Attach")))
 #+end_src
+** check 
+*** flycheck
+#+begin_src emacs-lisp
+  (use-package flycheck
+   :ensure t
+   ;; :init (global-flycheck-mode))
+   :config
+   (setq truncate-lines nil)
+   :hook
+   (prog-mode . flycheck-mode))
+#+end_src
+** language-sercer-protocol                                             :lsp:
+*** lsp-bridge
+#+begin_src emacs-lisp
+  (use-package yasnippet
+    :config
+    (yas-global-mode 1))
 
+  (use-package yasnippet-snippets)
+
+  (use-package lsp-bridge
+    :elpaca (lsp-bridge
+             :host github
+             :repo "manateelazycat/lsp-bridge"
+             :files ("*" (:exclude ".git")))
+    :config
+    (global-lsp-bridge-mode)
+    (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs))
+#+end_src
+*** TODO elgot
+#+begin_src emacs-lisp
+#+end_src
 ** treesit
 #+begin_src emacs-lisp
   (setq treesit-language-source-alist
@@ -1699,6 +1730,11 @@
   (use-package restclient-test
     :diminish
     :hook (restclient-mode . restclient-test-mode)))
+#+end_src
+
+** python
+#+begin_src emacs-lisp
+  (setf lsp-bridge-python-command "~/.emacs.d/.venv/bin/python3")
 #+end_src
 
 ** misc
@@ -1829,7 +1865,7 @@
 
 ** pretty
 *** TODO [[https://github.com/minad/org-modern][org-modern]]
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp :tangle no
   (use-package org-modern
     :ensure t
     :config
@@ -1980,21 +2016,6 @@ Cleaner to keep this in a separate file rather than a long single line at the to
     (setq whisper-model "base"
           whisper-language "cn"
           whisper-translate nil))
-
-  (use-package yasnippet
-    :config
-    (yas-global-mode 1))
-
-  (use-package yasnippet-snippets)
-
-  (use-package lsp-bridge
-    :elpaca (lsp-bridge
-             :host github
-             :repo "manateelazycat/lsp-bridge"
-             :files ("*" (:exclude ".git")))
-    :config
-    (global-lsp-bridge-mode)
-    (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs))
 #+END_SRC
 ** NEXT jira
 #+begin_src emacs-lisp
