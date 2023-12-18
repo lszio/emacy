@@ -1490,6 +1490,12 @@
 #+end_src
 
 ** undo
+** highlight
+#+begin_src emacs-lisp
+  (use-package hl-todo :config (global-hl-todo-mode))
+
+  (use-package consult-todo)
+#+end_src
 *** undo-fu
 #+begin_src emacs-lisp
   (use-package undo-fu)
@@ -1591,6 +1597,8 @@
             :request "attach"
             :port 9229
             :name "Node::Attach")))
+
+  (add-hook 'prog-mode-hook 'electric-pair-mode)
 #+end_src
 ** check 
 *** flycheck
@@ -1678,19 +1686,18 @@
 
 ** lisp
 #+begin_src emacs-lisp
-(use-package cider)
+  (use-package cider)
 
-(use-package slime
-  :general
-  (:keymaps 'slime-mode-map
-            "C-<return>" 'slime-eval-last-expression)
-  :config
-  (setq inferior-lisp-program "ros run"))
+  (use-package slime
+    :general
+    (:keymaps 'slime-mode-map
+              "C-<return>" 'slime-eval-last-expression)
+    :config
+    (setq inferior-lisp-program "ros run"))
 
-(use-package parinfer-rust-mode
-  :hook '(emacs-lisp-mode lisp-mode)
-  :config
-  (electric-pair-mode -1))
+  (use-package parinfer-rust-mode
+    :hook ((emacs-lisp-mode lisp-mode) . parinfer-rust-mode)
+    :hook ((emacs-lisp-mode lisp-mode) . (lambda () (electric-pair-mode -1))))
 #+end_src
 
 ** web
