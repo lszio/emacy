@@ -1,7 +1,7 @@
 [project]
 name = "emacy"
 version = "0.0.1"
-description = ""
+description = "python environment for emacy"
 authors = [
     {name = "liszt21", email = "liszt21@qq.com"},
 ]
@@ -20,6 +20,3 @@ license = {text = "MIT"}
 [build-system]
 requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-package-dir = {""  = "python/src"}

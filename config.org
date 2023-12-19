@@ -116,15 +116,19 @@
 
 * Custom
 #+begin_src emacs-lisp
-(use-package no-littering
-  :demand
-  :config
-  (setq custom-file (no-littering-expand-var-file-name "custom.el")
-        whisper-install-directory (no-littering-expand-var-file-name "whisper")
-        parinfer-rust-library-directory (no-littering-expand-var-file-name "parinfer-rust/"))
-  (with-eval-after-load 'recentf
-    (add-to-list 'recentf-exclude no-littering-var-directory)
-    (add-to-list 'recentf-exclude no-littering-etc-directory)))
+  (use-package no-littering
+    :demand
+    :config
+    (setq custom-file (no-littering-expand-var-file-name "custom.el")
+          whisper-install-directory (no-littering-expand-var-file-name "whisper")
+          parinfer-rust-library-directory (no-littering-expand-var-file-name "parinfer-rust/"))
+    (with-eval-after-load 'recentf
+      (add-to-list 'recentf-exclude no-littering-var-directory)
+      (add-to-list 'recentf-exclude no-littering-etc-directory)))
+#+end_src
+** exec-path
+#+begin_src emacs-lisp
+  (setq exec-path (append '("~/.emacs.d/python/.venv/bin" "~/.emacs.d/node/node_modules/.bin") exec-path))
 #+end_src
 * Keybind
 ** which-key
@@ -607,7 +611,7 @@
     "p"       (cons "projects" project-prefix-map)
     "pt"      'project-open-in-tab)
 #+end_src
-*** toogle
+*** toggle
 #+begin_src emacs-lisp
   (tyrant-def
     "T"       (cons "toggles" (make-sparse-keymap))
@@ -663,8 +667,7 @@
           vertico-resize t))
 
   ;; Persist history over Emacs restarts. Vertico sorts by history position.
-  ;; FIXME:
-  ;; (savehist-mode)
+  (savehist-mode)
 
   ;; A few more useful configurations...
   (use-feature emacs
@@ -989,6 +992,7 @@
   ;; 在模式栏上显示当前光标的列号
   (column-number-mode t)
 
+
   ;; 配置所有的编码为UTF-8，参考：
   ;; https://thraxys.wordpress.com/2016/01/13/utf-8-in-emacs-everywhere-forever/
   (setq locale-coding-system 'utf-8)
@@ -1249,9 +1253,15 @@
   (use-package dashboard
     :hook 
     (elpaca-after-init . (lambda () (dashboard-open)))
-    ;; :init  (dashboard-setup-startup-hook)
+    ;; (elpaca-after-init . #'dashboard-insert-startupify-lists)
+    ;; (elpaca-after-init . #'dashboard-initialize)
     :config
+    ;; (dashboard-setup-startup-hook)
     (setq dashboard-center-content t
+          dashboard-items '((recents . 5)
+                            (bookmarks . 6)
+                            (projects . 3)
+                            (agenda . 6))
           dashboard-set-file-icons t
           dashboard-set-heading-icons t
           dashboard-projects-backend 'projectile))
@@ -1745,7 +1755,7 @@
 
 ** python
 #+begin_src emacs-lisp
-  (setf lsp-bridge-python-command "~/.emacs.d/.venv/bin/python3")
+  ;; (setf lsp-bridge-python-command "~/.emacs.d/.venv/bin/python3")
 #+end_src
 
 ** git
@@ -1918,25 +1928,26 @@
 #+END_SRC
 ** override
 #+BEGIN_SRC emacs-lisp
-(use-package gcmh
-  :demand
-  :config
-  (gcmh-mode 1))
+  (use-package gcmh
+    :demand
+    :config
+    (gcmh-mode 1))
 
-(use-package helpful
-  :after evil
-  :init
-  (setq evil-lookup-func #'helpful-at-point)
-  :bind
-  ([remap describe-key] . helpful-key)
-  ([remap describe-command] . helpful-command)
-  ([remap describe-function] . helpful-callable)
-  ([remap describe-variable] . helpful-variable))
+  (use-package helpful
+    :after evil
+    :init
+    (setq evil-lookup-func #'helpful-at-point)
+    :bind
+    ([remap describe-key] . helpful-key)
+    ([remap describe-command] . helpful-command)
+    ([remap describe-function] . helpful-callable)
+    ([remap describe-variable] . helpful-variable))
 
-(use-package exec-path-from-shell
-  :when (not windows?)
-  :config
-  (exec-path-from-shell-initialize))
+  (use-package exec-path-from-shell
+    :when (not windows?)
+    :config
+    (exec-path-from-shell-initialize)
+    (setq exec-path (append '("~/.emacs.d/python/.venv/bin" "~/.emacs.d/node/node_modules/.bin") exec-path)))
 #+END_SRC
 
 * Other
