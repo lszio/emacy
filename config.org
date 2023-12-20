@@ -1764,6 +1764,8 @@
    :general
    (tyrant-def
      "g g" 'magit))
+
+  (use-package git-timemachine)
 #+end_src
 ** misc
 #+BEGIN_SRC emacs-lisp
