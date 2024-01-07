@@ -411,6 +411,16 @@
       "s e" '(evil-iedit-state/iedit-mode :wk "iedit")
       "s q" '(evil-iedit-state/quit-iedit-mode :wk "quit iedit")))
 #+END_SRC
+
+*** vimish-fold
+#+begin_src emacs-lisp
+  (use-package vimish-fold
+    :after evil)
+
+  (use-package evil-vimish-fold
+    :after vimish-fold
+    :hook ((prog-mode conf-mode text-mode) . evil-vimish-fold-mode))
+#+end_src
 *** TODO evil-googles
 #+begin_src emacs-lisp
   ;; FIXME
@@ -1501,12 +1511,6 @@
 #+end_src
 
 ** undo
-** highlight
-#+begin_src emacs-lisp
-  (use-package hl-todo :config (global-hl-todo-mode))
-
-  (use-package consult-todo)
-#+end_src
 *** undo-fu
 #+begin_src emacs-lisp
   (use-package undo-fu)
@@ -1524,6 +1528,25 @@
 #+begin_src emacs-lisp
 #+end_src
 
+** fold
+*** QUIT [[https://github.com/emacs-tree-sitter/ts-fold][ts-fold]] :tree-sitter:fold:
+    #+begin_src emacs-lisp :tangle no
+      (use-package ts-fold
+        :elpaca 
+        (ts-fold :host github
+                 :repo "emacs-tree-sitter/ts-fold") 
+
+        :config 
+        (global-ts-fold-mode)
+        (global-ts-fold-indicators-mode))
+    #+end_src
+** highlight
+#+begin_src emacs-lisp
+  (use-package hl-todo :config (global-hl-todo-mode))
+
+  (use-package consult-todo)
+#+end_src
+*** TODO diff-hl
 ** input
 *** rime                                                  :input:rime:
 #+begin_src emacs-lisp
