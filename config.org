@@ -5,6 +5,7 @@
 #+STARTUP: noindent
 #+FILETAGS: :emacy:config:emacs:emacs-lisp:
 #+PROPERTY: header-args :tangle init.el :noweb yes :session init
+#+AUTO_TANGLE: t
 
 * Inbox
 ** TODO Refactor
