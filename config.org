@@ -31,6 +31,7 @@
 
 * Variable
 #+BEGIN_SRC emacs-lisp
+  (defvar user-local-directory "~/.config/emacs/" "User's local directory, ~/.config/emacs/")
   (defvar elpaca-directory (expand-file-name "var" (if wsl? user-local-directory user-emacs-directory)))
   (defvar elpaca-cache-directory (expand-file-name "menus" elpaca-directory))
   (defvar elpaca-builds-directory (expand-file-name "builds" elpaca-directory))
@@ -107,10 +108,7 @@
     "Like `use-package' but accounting for asynchronous installation.
     NAME and ARGS are in `use-package'."
     (declare (indent defun))
-    `(use-package ,name
-       :elpaca nil
-       :ensure nil
-       ,@args))
+    `(use-package ,name :elpaca nil :ensure nil ,@args))
 
   (elpaca-wait)
 #+END_SRC
@@ -1645,7 +1643,7 @@
    :hook
    (prog-mode . flycheck-mode))
 #+end_src
-** language-sercer-protocol                                             :lsp:
+** language-server-protocol                                             :lsp:
 *** lsp-bridge
 #+begin_src emacs-lisp
   (use-package yasnippet
@@ -1653,6 +1651,8 @@
     (yas-global-mode 1))
 
   (use-package yasnippet-snippets)
+
+  (use-package markdown-mode)
 
   (use-package lsp-bridge
     :elpaca (lsp-bridge
@@ -1666,6 +1666,7 @@
 *** TODO elgot
 #+begin_src emacs-lisp
 #+end_src
+*** TODO lsp-mode
 ** treesit
 #+begin_src emacs-lisp
   (setq treesit-language-source-alist
@@ -1805,16 +1806,16 @@
 * Org Mode
 ** default
 #+begin_src emacs-lisp
-  (setq org-directory  "~/Notes"
+  (setq org-directory  "~/Notes/"
         org-archive-location (concat org-directory "/archive/%s::")
         org-contacts-files (list (concat org-directory "/archive/contacts.org"))
-        org-agenda-files (list org-directory)
+        org-agenda-files (list org-directory (concat org-directory "work/"))
         deft-directory org-directory
         org-roam-directory org-directory
         org-brain-path org-directory
         org-roam-file-exclude-regexp ".*/bak/.*"
         org-brain-visualize-default-choices 'all
-        rmh-elfeed-org-files (list (concat org-directory "/feeds.org")))
+        rmh-elfeed-org-files (list (concat org-directory "content/feeds.org")))
 
   (setq org-fontify-whole-heading-line t
         org-fontify-quote-and-verse-blocks t
@@ -1823,8 +1824,6 @@
         org-adapt-indentation t
         org-startup-with-inline-images t
         org-startup-with-latex-preview t)
-
-  ;; (org-indent-mode -1)
 #+end_src
 
 ** note
@@ -1864,8 +1863,8 @@
   (setq org-export-select-tags '("Publish" "Public" "export")
         org-publish-project-alist
         '(("content"
-           :base-directory "~/Notes/content"
-           :publishing-directory "~/Notes/publish"
+           :base-directory "~/Notes/content/"
+           :publishing-directory "~/Notes/publish/"
            ;; :publishing-function (org-org-publish-to-org org-md-publish-to-md)
            :publishing-function org-org-publish-to-org
            :select-tags ("Publish" "Public" "Export" "export" "publish" "public")
@@ -1919,14 +1918,15 @@
 
 ** pretty
 *** TODO [[https://github.com/minad/org-modern][org-modern]]
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
   (use-package org-modern
     :ensure t
     :config
     (setq org-modern-star '("☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷") ;; "☯"
           org-pretty-entities t
           org-modern-hide-stars nil
-          org-hide-emphasis-markers t)
+          org-hide-emphasis-markers t
+          org-modern-todo-faces org-todo-keyword-faces)
     (global-org-modern-mode))
 #+end_src
 
