@@ -1,0 +1,38 @@
+#+TITLE: Emacy
+#+AUTHOR: Li Shuzhi
+
+* Framework
+- lisp
+- envs
+- libs
+- etc
+- var
+
+- init.el
+- early-init.el
+
+* Reference
+** configs
+https://remacs.cc/
+https://github.com/Ethanlinyf/General-Pure-Emacs
+https://github.com/HerculeWu/HubbleEmacs/blob/main/Emacs.org
+https://github.com/Eason0210/.emacs.d
+https://github.com/MatthewZMD/.emacs.d
+https://github.com/willbchang/ward-emacs
+https://github.com/redguardtoo/emacs.d
+https://github.com/condy0919/.emacs.d
+https://github.com/seagle0128/.emacs.d
+https://github.com/nowislewis/nowisemacs/blob/master/init.org
+https://github.com/purcell/emacs.d/tree/master
+https://github.com/nasyxx/emacs.d
+
+** tips
+https://swsnr.de/emacs-script-pitfalls
+
+** collections
+https://github.com/lujun9972/emacs-document
+https://github.com/caisah/emacs.dz
+
+** query
+https://github.com/search?utf8=%E2%9C%93&q=emacs+configuration&type=repositories&p=1
+
