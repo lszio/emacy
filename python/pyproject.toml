@@ -7,11 +7,21 @@ authors = [
 ]
 dependencies = [
     "epc>=0.0.5",
-    "sexpdata @ git+https://github.com/Liszt21/sexpdata.git@main",
+    "sexpdata==1.0.0",
     "orjson>=3.9.10",
     "six>=1.16.0",
     "paramiko>=3.3.1",
     "rapidfuzz>=3.5.2",
+    "tld>=0.13",
+    "lxml>=5.0.0",
+    "pygetwindow>=0.0.9; sys_platform == 'win32'",
+    "mac-app-frontmost>=2020.12.3; sys_platform == 'darwin'",
+    "PyQt6>=6.6.1",
+    "PyQt6-Qt6>=6.6.1",
+    "PyQt6-sip>=13.6.0",
+    "PyQt6-WebEngine>=6.6.0",
+    "PyQt6-WebEngine-Qt6>=6.6.1",
+    "pysocks>=1.7.1",
 ]
 requires-python = ">=3.8"
 readme = """emacy"""
