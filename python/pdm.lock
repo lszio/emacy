@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:99af56cd08cd578bd22308f116da6ab6216120061282a8b8f5c502050eca3f53"
+content_hash = "sha256:0f814b40142a4753ae233b492b0c56ffea1d93fef18a623c0877e6eb33cfc255"
 
 [[package]]
 name = "bcrypt"
@@ -151,6 +151,83 @@ files = [
 ]
 
 [[package]]
+name = "lxml"
+version = "5.0.0"
+requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, != 3.4.*"
+summary = "Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API."
+files = [
+    {file = "lxml-5.0.0-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:9b59c429e1a2246da86ae237ffc3565efcdc71c281cd38ca8b44d5fb6a3b993a"},
+    {file = "lxml-5.0.0-cp310-cp310-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_24_i686.whl", hash = "sha256:3ffa066db40b0347e48334bd4465de768e295a3525b9a59831228b5f4f93162d"},
+    {file = "lxml-5.0.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.manylinux_2_24_aarch64.whl", hash = "sha256:8ce8b468ab50f9e944719d1134709ec11fe0d2840891a6cae369e22141b1094c"},
+    {file = "lxml-5.0.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:583c0e15ae06adc81035346ae2abb2e748f0b5197e7740d8af31222db41bbf7b"},
+    {file = "lxml-5.0.0-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:904d36165848b59c4e04ae5b969072e602bd987485076fca8ec42c6cd7a7aedc"},
+    {file = "lxml-5.0.0-cp310-cp310-musllinux_1_1_aarch64.whl", hash = "sha256:ac21aace6712472e77ea9dfc38329f53830c4259ece54c786107105ebb069053"},
+    {file = "lxml-5.0.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:f92d73faa0b1a76d1932429d684b7ce95829e93c3eef3715ec9b98ab192c9d31"},
+    {file = "lxml-5.0.0-cp310-cp310-win32.whl", hash = "sha256:03290e2f714f2e7431c8430c08b48167f657da7bc689c6248e828ff3c66d5b1b"},
+    {file = "lxml-5.0.0-cp310-cp310-win_amd64.whl", hash = "sha256:3e6cbb68bf70081f036bfc018649cf4b46c4e7eaf7860a277cae92dee2a57f69"},
+    {file = "lxml-5.0.0-cp311-cp311-macosx_11_0_universal2.whl", hash = "sha256:5382612ba2424cea5d2c89e2c29077023d8de88f8d60d5ceff5f76334516df9e"},
+    {file = "lxml-5.0.0-cp311-cp311-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_24_i686.whl", hash = "sha256:07a900735bad9af7be3085480bf384f68ed5580ba465b39a098e6a882c060d6b"},
+    {file = "lxml-5.0.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.manylinux_2_24_aarch64.whl", hash = "sha256:980ba47c8db4b9d870014c7040edb230825b79017a6a27aa54cdb6fcc02d8cc0"},
+    {file = "lxml-5.0.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:6507c58431dbd95b50654b3313c5ad54f90e54e5f2cdacf733de61eae478eec5"},
+    {file = "lxml-5.0.0-cp311-cp311-manylinux_2_28_aarch64.whl", hash = "sha256:4a45a278518e4308865c1e9dbb2c42ce84fb154efb03adeb16fdae3c1687c7c9"},
+    {file = "lxml-5.0.0-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:59cea9ba1c675fbd6867ca1078fc717a113e7f5b7644943b74137b7cc55abebf"},
+    {file = "lxml-5.0.0-cp311-cp311-musllinux_1_1_aarch64.whl", hash = "sha256:dd39ef87fd1f7bb5c4aa53454936e6135cbfe03fe3744e8218be193f9e4fef16"},
+    {file = "lxml-5.0.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:e6bb39d91bf932e7520cb5718ae3c2f498052aca53294d5d59fdd9068fe1a7f2"},
+    {file = "lxml-5.0.0-cp311-cp311-win32.whl", hash = "sha256:21af2c3862db6f4f486cddf73ec1157b40d5828876c47cd880edcbad8240ea1b"},
+    {file = "lxml-5.0.0-cp311-cp311-win_amd64.whl", hash = "sha256:c1249aa4eaced30b59ecf8b8cae0b1ccede04583c74ca7d10b6f8bbead908b2c"},
+    {file = "lxml-5.0.0-cp312-cp312-macosx_11_0_universal2.whl", hash = "sha256:f30e697b6215e759d0824768b2c5b0618d2dc19abe6c67eeed2b0460f52470d1"},
+    {file = "lxml-5.0.0-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:d1bb64646480c36a4aa1b6a44a5b6e33d0fcbeab9f53f1b39072cd3bb2c6243a"},
+    {file = "lxml-5.0.0-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:4e69c36c8618707a90ed3fb6f48a6cc9254ffcdbf7b259e439a5ae5fbf9c5206"},
+    {file = "lxml-5.0.0-cp312-cp312-musllinux_1_1_aarch64.whl", hash = "sha256:9ca498f8554a09fbc3a2f8fc4b23261e07bc27bef99b3df98e2570688033f6fc"},
+    {file = "lxml-5.0.0-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:0326e9b8176ea77269fb39e7af4010906e73e9496a9f8eaf06d253b1b1231ceb"},
+    {file = "lxml-5.0.0-cp312-cp312-win32.whl", hash = "sha256:5fb988e15378d6e905ca8f60813950a0c56da9469d0e8e5d8fe785b282684ec5"},
+    {file = "lxml-5.0.0-cp312-cp312-win_amd64.whl", hash = "sha256:bb58e8f4b2cfe012cd312239b8d5139995fe8f5945c7c26d5fbbbb1ddb9acd47"},
+    {file = "lxml-5.0.0-cp38-cp38-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_24_i686.whl", hash = "sha256:3f908afd0477cace17f941d1b9cfa10b769fe1464770abe4cfb3d9f35378d0f8"},
+    {file = "lxml-5.0.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.manylinux_2_24_aarch64.whl", hash = "sha256:52a9ab31853d3808e7cf0183b3a5f7e8ffd622ea4aee1deb5252dbeaefd5b40d"},
+    {file = "lxml-5.0.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:c7fe19abb3d3c55a9e65d289b12ad73b3a31a3f0bda3c539a890329ae9973bd6"},
+    {file = "lxml-5.0.0-cp38-cp38-manylinux_2_28_x86_64.whl", hash = "sha256:1ef0793e1e2dd221fce7c142177008725680f7b9e4a184ab108d90d5d3ab69b7"},
+    {file = "lxml-5.0.0-cp38-cp38-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:581a78f299a9f5448b2c3aea904bfcd17c59bf83016d221d7f93f83633bb2ab2"},
+    {file = "lxml-5.0.0-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:affdd833f82334fdb10fc9a1c7b35cdb5a86d0b672b4e14dd542e1fe7bcea894"},
+    {file = "lxml-5.0.0-cp38-cp38-musllinux_1_1_aarch64.whl", hash = "sha256:6bba06d8982be0f0f6432d289a8d104417a0ab9ed04114446c4ceb6d4a40c65d"},
+    {file = "lxml-5.0.0-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:80209b31dd3908bc5b014f540fd192c97ea52ab179713a730456c5baf7ce80c1"},
+    {file = "lxml-5.0.0-cp38-cp38-win32.whl", hash = "sha256:dac2733fe4e159b0aae0439db6813b7b1d23ff96d0b34c0107b87faf79208c4e"},
+    {file = "lxml-5.0.0-cp38-cp38-win_amd64.whl", hash = "sha256:ee60f33456ff34b2dd1d048a740a2572798356208e4c494301c931de3a0ab3a2"},
+    {file = "lxml-5.0.0-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:5eff173f0ff408bfa578cbdafd35a7e0ca94d1a9ffe09a8a48e0572d0904d486"},
+    {file = "lxml-5.0.0-cp39-cp39-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_24_i686.whl", hash = "sha256:78d6d8e5b54ed89dc0f0901eaaa579c384ad8d59fa43cc7fb06e9bb89115f8f4"},
+    {file = "lxml-5.0.0-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.manylinux_2_24_aarch64.whl", hash = "sha256:71a7cee869578bc17b18050532bb2f0bc682a7b97dda77041741a1bd2febe6c7"},
+    {file = "lxml-5.0.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:7df433d08d4587dc3932f7fcfc3194519a6824824104854e76441fd3bc000d29"},
+    {file = "lxml-5.0.0-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:793be9b4945c2dfd69828fb5948d7d9569b78e0599e4a2e88d92affeb0ff3aa3"},
+    {file = "lxml-5.0.0-cp39-cp39-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:c7cfb6af73602c8d288581df8a225989d7e9d5aab0a174be0e19fcfa800b6797"},
+    {file = "lxml-5.0.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:bfdc4668ac56687a89ca3eca44231144a2e9d02ba3b877558db74ba20e2bd9fa"},
+    {file = "lxml-5.0.0-cp39-cp39-musllinux_1_1_aarch64.whl", hash = "sha256:2992591e2294bb07faf7f5f6d5cb60710c046404f4bfce09fb488b85d2a8f58f"},
+    {file = "lxml-5.0.0-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:4786b0af7511ea614fd86407a52a7bc161aa5772d311d97df2591ed2351de768"},
+    {file = "lxml-5.0.0-cp39-cp39-win32.whl", hash = "sha256:016de3b29a262655fc3d2075dc1b2611f84f4c3d97a71d579c883d45e201eee4"},
+    {file = "lxml-5.0.0-cp39-cp39-win_amd64.whl", hash = "sha256:52c0acc2f29b0a204efc11a5ed911a74f50a25eb7d7d5069c2b1fd3b3346ce11"},
+    {file = "lxml-5.0.0-pp310-pypy310_pp73-macosx_11_0_x86_64.whl", hash = "sha256:96095bfc0c02072fc89afa67626013a253596ea5118b8a7f4daaae049dafa096"},
+    {file = "lxml-5.0.0-pp310-pypy310_pp73-manylinux_2_28_x86_64.whl", hash = "sha256:992029258ed719f130d5a9c443d142c32843046f1263f2c492862b2a853be570"},
+    {file = "lxml-5.0.0-pp310-pypy310_pp73-win_amd64.whl", hash = "sha256:db40e85cffd22f7d65dcce30e85af565a66401a6ed22fc0c56ed342cfa4ffc43"},
+    {file = "lxml-5.0.0-pp38-pypy38_pp73-macosx_11_0_x86_64.whl", hash = "sha256:cfa8a4cdc3765574b7fd0c7cfa5fbd1e2108014c9dfd299c679e5152bea9a55e"},
+    {file = "lxml-5.0.0-pp38-pypy38_pp73-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_24_i686.whl", hash = "sha256:049fef98d02513c34f5babd07569fc1cf1ed14c0f2fbff18fe72597f977ef3c2"},
+    {file = "lxml-5.0.0-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:a85136d0ee18a41c91cc3e2844c683be0e72e6dda4cb58da9e15fcaef3726af7"},
+    {file = "lxml-5.0.0-pp38-pypy38_pp73-manylinux_2_28_x86_64.whl", hash = "sha256:766868f729f3ab84125350f1a0ea2594d8b1628a608a574542a5aff7355b9941"},
+    {file = "lxml-5.0.0-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:99cad5c912f359e59e921689c04e54662cdd80835d80eeaa931e22612f515df7"},
+    {file = "lxml-5.0.0-pp39-pypy39_pp73-macosx_11_0_x86_64.whl", hash = "sha256:c90c593aa8dd57d5dab0ef6d7d64af894008971d98e6a41b320fdd75258fbc6e"},
+    {file = "lxml-5.0.0-pp39-pypy39_pp73-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_24_i686.whl", hash = "sha256:8134d5441d1ed6a682e3de3d7a98717a328dce619ee9c4c8b3b91f0cb0eb3e28"},
+    {file = "lxml-5.0.0-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:f298ac9149037d6a3d5c74991bded39ac46292520b9c7c182cb102486cc87677"},
+    {file = "lxml-5.0.0-pp39-pypy39_pp73-manylinux_2_28_x86_64.whl", hash = "sha256:894c5f71186b410679aaab5774543fcb9cbabe8893f0b31d11cf28a0740e80be"},
+    {file = "lxml-5.0.0-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:9cd3d6c2c67d4fdcd795e4945e2ba5434909c96640b4cc09453bd0dc7e8e1bac"},
+    {file = "lxml-5.0.0.zip", hash = "sha256:2219cbf790e701acf9a21a31ead75f983e73daf0eceb9da6990212e4d20ebefe"},
+]
+
+[[package]]
+name = "mac-app-frontmost"
+version = "2020.12.3"
+summary = ""
+files = [
+    {file = "mac-app-frontmost-2020.12.3.tar.gz", hash = "sha256:b63050a524f1b4cdde666e83ae45094cd573e43cef9ab9fa5484a8e5f91fd1bf"},
+]
+
+[[package]]
 name = "orjson"
 version = "3.9.10"
 requires_python = ">=3.8"
@@ -234,6 +311,17 @@ files = [
 ]
 
 [[package]]
+name = "pygetwindow"
+version = "0.0.9"
+summary = "A simple, cross-platform module for obtaining GUI information on application's windows."
+dependencies = [
+    "pyrect",
+]
+files = [
+    {file = "PyGetWindow-0.0.9.tar.gz", hash = "sha256:17894355e7d2b305cd832d717708384017c1698a90ce24f6f7fbf0242dd0a688"},
+]
+
+[[package]]
 name = "pynacl"
 version = "1.5.0"
 requires_python = ">=3.6"
@@ -252,6 +340,108 @@ files = [
     {file = "PyNaCl-1.5.0-cp36-abi3-win32.whl", hash = "sha256:e46dae94e34b085175f8abb3b0aaa7da40767865ac82c928eeb9e57e1ea8a543"},
     {file = "PyNaCl-1.5.0-cp36-abi3-win_amd64.whl", hash = "sha256:20f42270d27e1b6a29f54032090b972d97f0a1b0948cc52392041ef7831fee93"},
     {file = "PyNaCl-1.5.0.tar.gz", hash = "sha256:8ac7448f09ab85811607bdd21ec2464495ac8b7c66d146bf545b0f08fb9220ba"},
+]
+
+[[package]]
+name = "pyqt6"
+version = "6.6.1"
+requires_python = ">=3.6.1"
+summary = "Python bindings for the Qt cross platform application toolkit"
+dependencies = [
+    "PyQt6-Qt6>=6.6.0",
+    "PyQt6-sip<14,>=13.6",
+]
+files = [
+    {file = "PyQt6-6.6.1-cp38-abi3-macosx_10_14_universal2.whl", hash = "sha256:6b43878d0bbbcf8b7de165d305ec0cb87113c8930c92de748a11c473a6db5085"},
+    {file = "PyQt6-6.6.1-cp38-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:5aa0e833cb5a79b93813f8181d9f145517dd5a46f4374544bcd1e93a8beec537"},
+    {file = "PyQt6-6.6.1-cp38-abi3-win_amd64.whl", hash = "sha256:03a656d5dc5ac31b6a9ad200f7f4f7ef49fa00ad7ce7a991b9bb691617141d12"},
+    {file = "PyQt6-6.6.1.tar.gz", hash = "sha256:9f158aa29d205142c56f0f35d07784b8df0be28378d20a97bcda8bd64ffd0379"},
+]
+
+[[package]]
+name = "pyqt6-qt6"
+version = "6.6.1"
+summary = "The subset of a Qt installation needed by PyQt6."
+files = [
+    {file = "PyQt6_Qt6-6.6.1-py3-none-macosx_10_14_x86_64.whl", hash = "sha256:0409aa09b8dae90d5f00ba2d9761e671dfbc54ab169cff8f4cdfecd7f664fd0f"},
+    {file = "PyQt6_Qt6-6.6.1-py3-none-macosx_11_0_arm64.whl", hash = "sha256:8dcac0bd9df13d63deafb6a61969b832c34467da4a28d2b7abf78066bfce22e6"},
+    {file = "PyQt6_Qt6-6.6.1-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:e7df8851c93886412d890d0ecc62b39f42521861ee7a80982136d65903e1f2c5"},
+    {file = "PyQt6_Qt6-6.6.1-py3-none-win_amd64.whl", hash = "sha256:41f1ed3eadc00540c205a0e897ae0e0fffc21b896e575214f7c5b9c86d2037d1"},
+]
+
+[[package]]
+name = "pyqt6-sip"
+version = "13.6.0"
+requires_python = ">=3.7"
+summary = "The sip module support for PyQt6"
+files = [
+    {file = "PyQt6_sip-13.6.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:d6b5f699aaed0ac1fcd23e8fbca70d8a77965831b7c1ce474b81b1678817a49d"},
+    {file = "PyQt6_sip-13.6.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:8c282062125eea5baf830c6998587d98c50be7c3a817a057fb95fef647184012"},
+    {file = "PyQt6_sip-13.6.0-cp310-cp310-win32.whl", hash = "sha256:fa759b6339ff7e25f9afe2a6b651b775f0a36bcb3f5fa85e81a90d3b033c83f4"},
+    {file = "PyQt6_sip-13.6.0-cp310-cp310-win_amd64.whl", hash = "sha256:8f9df9f7ccd8a9f0f1d36948c686f03ce1a1281543a3e636b7b7d5e086e1a436"},
+    {file = "PyQt6_sip-13.6.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:5b9c6b6f9cfccb48cbb78a59603145a698fb4ffd176764d7083e5bf47631d8df"},
+    {file = "PyQt6_sip-13.6.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:86a7b67c64436e32bffa9c28c9f21bf14a9faa54991520b12c3f6f435f24df7f"},
+    {file = "PyQt6_sip-13.6.0-cp311-cp311-win32.whl", hash = "sha256:58f68a48400e0b3d1ccb18090090299bad26e3aed7ccb7057c65887b79b8aeea"},
+    {file = "PyQt6_sip-13.6.0-cp311-cp311-win_amd64.whl", hash = "sha256:0dfd22cfedd87e96f9d51e0778ca2ba3dc0be83e424e9e0f98f6994d8d9c90f0"},
+    {file = "PyQt6_sip-13.6.0-cp312-cp312-macosx_10_9_universal2.whl", hash = "sha256:3bf03e130fbfd75c9c06e687b86ba375410c7a9e835e4e03285889e61dd4b0c4"},
+    {file = "PyQt6_sip-13.6.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:43fb8551796030aae3d66d6e35e277494071ec6172cd182c9569ab7db268a2f5"},
+    {file = "PyQt6_sip-13.6.0-cp312-cp312-win32.whl", hash = "sha256:13885361ca2cb2f5085d50359ba61b3fabd41b139fb58f37332acbe631ef2357"},
+    {file = "PyQt6_sip-13.6.0-cp312-cp312-win_amd64.whl", hash = "sha256:24441032a29791e82beb7dfd76878339058def0e97fdb7c1cea517f3a0e6e96b"},
+    {file = "PyQt6_sip-13.6.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:3075d8b325382750829e6cde6971c943352309d35768a4d4da0587459606d562"},
+    {file = "PyQt6_sip-13.6.0-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:a6ce80bc24618d8a41be8ca51ad9f10e8bc4296dd90ab2809573df30a23ae0e5"},
+    {file = "PyQt6_sip-13.6.0-cp38-cp38-win32.whl", hash = "sha256:fa7b10af7488efc5e53b41dd42c0f421bde6c2865a107af7ae259aff9d841da9"},
+    {file = "PyQt6_sip-13.6.0-cp38-cp38-win_amd64.whl", hash = "sha256:9adf672f9114687533a74d5c2d4c03a9a929ad5ad9c3e88098a7da1a440ab916"},
+    {file = "PyQt6_sip-13.6.0-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:98bf954103b087162fa63b3a78f30b0b63da22fd6450b610ec1b851dbb798228"},
+    {file = "PyQt6_sip-13.6.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:39854dba35f8e5a4288da26ecb5f40b4c5ec1932efffb3f49d5ea435a7f37fb3"},
+    {file = "PyQt6_sip-13.6.0-cp39-cp39-win32.whl", hash = "sha256:747f6ca44af81777a2c696bd501bc4815a53ec6fc94d4e25830e10bc1391f8ab"},
+    {file = "PyQt6_sip-13.6.0-cp39-cp39-win_amd64.whl", hash = "sha256:33ea771fe777eb0d1a2c3ef35bcc3f7a286eb3ff09cd5b2fdd3d87d1f392d7e8"},
+    {file = "PyQt6_sip-13.6.0.tar.gz", hash = "sha256:2486e1588071943d4f6657ba09096dc9fffd2322ad2c30041e78ea3f037b5778"},
+]
+
+[[package]]
+name = "pyqt6-webengine"
+version = "6.6.0"
+requires_python = ">=3.7"
+summary = "Python bindings for the Qt WebEngine framework"
+dependencies = [
+    "PyQt6-WebEngine-Qt6>=6.6.0",
+    "PyQt6-sip<14,>=13.4",
+    "PyQt6>=6.2.0",
+]
+files = [
+    {file = "PyQt6_WebEngine-6.6.0-cp37-abi3-macosx_10_14_universal2.whl", hash = "sha256:cb7793f06525ca054fcc6039afd93e23b82228b880d0b1301ce635f7f3ed2edf"},
+    {file = "PyQt6_WebEngine-6.6.0-cp37-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:fded35fba636c4916fec84aa7c6840ad2e75d211462feb3e966f9545a59d56e6"},
+    {file = "PyQt6_WebEngine-6.6.0-cp37-abi3-win_amd64.whl", hash = "sha256:9d542738ed6e11c1978ce59035c07627def7c63eef0f59581d327f01209141bc"},
+    {file = "PyQt6_WebEngine-6.6.0.tar.gz", hash = "sha256:d50b984c3f85e409e692b156132721522d4e8cf9b6c25e0cf927eea2dfb39487"},
+]
+
+[[package]]
+name = "pyqt6-webengine-qt6"
+version = "6.6.1"
+summary = "The subset of a Qt installation needed by PyQt6-WebEngine."
+files = [
+    {file = "PyQt6_WebEngine_Qt6-6.6.1-py3-none-macosx_10_14_x86_64.whl", hash = "sha256:4981e36adb15ea6c1508562128caf7d21c7e5c48039b60eabfb44adc00fd25d0"},
+    {file = "PyQt6_WebEngine_Qt6-6.6.1-py3-none-macosx_11_0_arm64.whl", hash = "sha256:185bd984a094d827d0a1abaf6a17247f87152c335dedbf2ecc4f838e6e2d7656"},
+    {file = "PyQt6_WebEngine_Qt6-6.6.1-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:605e0f2168f95f9d0903239b28e42a6ba96a48427bda4dad44b192f5e64d63a9"},
+    {file = "PyQt6_WebEngine_Qt6-6.6.1-py3-none-win_amd64.whl", hash = "sha256:43c75191822823e86164aa5f4299d3a4092af061c27d29b28e75134cfd7b2673"},
+]
+
+[[package]]
+name = "pyrect"
+version = "0.2.0"
+summary = "PyRect is a simple module with a Rect class for Pygame-like rectangular areas."
+files = [
+    {file = "PyRect-0.2.0.tar.gz", hash = "sha256:f65155f6df9b929b67caffbd57c0947c5ae5449d3b580d178074bffb47a09b78"},
+]
+
+[[package]]
+name = "pysocks"
+version = "1.7.1"
+requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+summary = "A Python SOCKS client module. See https://github.com/Anorov/PySocks for more information."
+files = [
+    {file = "PySocks-1.7.1-py3-none-any.whl", hash = "sha256:2725bd0a9925919b9b51739eea5f9e2bae91e83288108a9ad338b2e3a4435ee5"},
+    {file = "PySocks-1.7.1.tar.gz", hash = "sha256:3f8804571ebe159c380ac6de37643bb4685970655d3bba243530d6558b799aa0"},
 ]
 
 [[package]]
@@ -354,12 +544,11 @@ files = [
 
 [[package]]
 name = "sexpdata"
-version = "1.0.1"
-requires_python = ">=3.7"
-git = "https://github.com/Liszt21/sexpdata.git"
-ref = "main"
-revision = "97638def18db85d25229b865e5ea6106e499019a"
+version = "1.0.0"
 summary = "S-expression parser for Python"
+files = [
+    {file = "sexpdata-1.0.0.tar.gz", hash = "sha256:e8d5f75c378a07c6d1cc61fad9611b451c9383c0253052e16198a852e1620705"},
+]
 
 [[package]]
 name = "six"
@@ -369,4 +558,14 @@ summary = "Python 2 and 3 compatibility utilities"
 files = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
+]
+
+[[package]]
+name = "tld"
+version = "0.13"
+requires_python = ">=3.7, <4"
+summary = "Extract the top-level domain (TLD) from the URL given."
+files = [
+    {file = "tld-0.13-py2.py3-none-any.whl", hash = "sha256:f75b2be080f767ed17c2338a339eaa4fab5792586319ca819119da252f9f3749"},
+    {file = "tld-0.13.tar.gz", hash = "sha256:93dde5e1c04bdf1844976eae440706379d21f4ab235b73c05d7483e074fb5629"},
 ]
