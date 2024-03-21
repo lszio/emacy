@@ -43,12 +43,12 @@
 ** [[https://github.com/progfolio/elpaca][elpaca]]
 *** introduce
 #+BEGIN_SRC emacs-lisp
-(defvar elpaca-installer-version 0.6)
+(defvar elpaca-installer-version 0.7)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil
+                              :ref nil :depth 1
                               :files (:defaults "elpaca-test.el" (:exclude "extensions"))
                               :build (:not elpaca--activate-package)))
 (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
@@ -61,8 +61,10 @@
     (when (< emacs-major-version 28) (require 'subr-x))
     (condition-case-unless-debug err
         (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                 ((zerop (call-process "git" nil buffer t "clone"
-                                       (plist-get order :repo) repo)))
+                 ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                 ,@(when-let ((depth (plist-get order :depth)))
+                                                     (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                 ,(plist-get order :repo) ,repo))))
                  ((zerop (call-process "git" nil buffer t "checkout"
                                        (or (plist-get order :ref) "--"))))
                  (emacs (concat invocation-directory invocation-name))
@@ -97,7 +99,7 @@
     "Like `use-package' but accounting for asynchronous installation.
     NAME and ARGS are in `use-package'."
     (declare (indent defun))
-    `(use-package ,name :elpaca nil :ensure nil ,@args))
+    `(use-package ,name :ensure nil ,@args))
 
   (elpaca-wait)
 #+END_SRC
@@ -361,7 +363,7 @@
      :states '(normal visual) "gc" 'evilnc-comment-operator))
 
   (use-package evil-matchit :config (global-evil-matchit-mode 1))
-  (use-package evil-lion :elpaca (evil-lion :host github :repo "edkolev/evil-lion" :files ("*" (:exclude ".git"))) :config (evil-lion-mode))
+  (use-package evil-lion :ensure (evil-lion :host github :repo "edkolev/evil-lion" :files ("*" (:exclude ".git"))) :config (evil-lion-mode))
 
   (use-package evil-surround :config (global-evil-surround-mode 1))
   (use-package evil-embrace
@@ -391,7 +393,7 @@
     (evil-snipe-override-mode +1))
 
   (use-package evil-iedit-state
-    :elpaca (evil-iedit-state :repo "kassick/evil-iedit-state")
+    :ensure (evil-iedit-state :repo "kassick/evil-iedit-state")
     :general
     (tyrant-def
       "s e" '(evil-iedit-state/iedit-mode :wk "iedit")
@@ -1309,7 +1311,6 @@ modes
 ** terminal
 #+begin_src emacs-lisp
   (use-package eshell
-    :elpaca nil
     :ensure nil
     :functions eshell/alias
     :hook ((eshell-mode . (lambda () (term-mode-common-init) (visual-line-mode 1))))
@@ -1375,7 +1376,6 @@ modes
 
 
   (use-package em-hist
-    :elpaca nil
     :ensure nil
     :defer t
     :custom
@@ -1384,12 +1384,10 @@ modes
     (eshell-save-history-on-exit t))
 
   (use-package em-rebind
-    :elpaca nil
     :ensure nil
     :commands eshell-delchar-or-maybe-eof)
 
   (use-package esh-mode
-    :elpaca nil
     :ensure nil
     :bind (:map eshell-mode-map
                 ("C-d" . eshell-delchar-or-maybe-eof)
@@ -1557,7 +1555,7 @@ modes
 *** QUIT [[https://github.com/emacs-tree-sitter/ts-fold][ts-fold]] :tree-sitter:fold:
     #+begin_src emacs-lisp :tangle no
       (use-package ts-fold
-        :elpaca 
+        :ensure
         (ts-fold :host github
                  :repo "emacs-tree-sitter/ts-fold") 
 
@@ -1682,7 +1680,7 @@ modes
   (use-package markdown-mode)
 
   (use-package lsp-bridge
-    :elpaca (lsp-bridge
+    :ensure (lsp-bridge
              :host github
              :repo "manateelazycat/lsp-bridge"
              :files ("*" (:exclude ".git")))
@@ -1764,7 +1762,7 @@ modes
 
 ** web
 #+begin_src emacs-lisp
-  (use-package css-mode :elpaca nil :init (setq css-indent-offset 2))
+  (use-package css-mode :ensure nil :init (setq css-indent-offset 2))
   ;; (use-package scss-mode :init (setq scss-compile-at-save nil))
   ;; (use-package less-css-mode)
   (use-package json-mode)
@@ -1795,7 +1793,7 @@ modes
   (use-package add-node-modules-path :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
 
   (use-package jsdoc
-    :elpaca (jsdoc :host github :repo "isamert/jsdoc.el"))
+    :ensure (jsdoc :host github :repo "isamert/jsdoc.el"))
 
   (use-package restclient
     :mode ("\\.http\\'" . restclient-mode)
@@ -1937,7 +1935,7 @@ modes
   ;; (use-package tex :elpaca auctex)
 
   (use-package mpvi 
-    :elpaca (mpvi :repo "https://github.com/lorniu/mpvi")
+    :ensure (mpvi :repo "https://github.com/lorniu/mpvi")
     :general
     (tyrant-def))
 #+end_src
@@ -2000,8 +1998,8 @@ Cleaner to keep this in a separate file rather than a long single line at the to
   ;;; init-dev.el ends here
 #+END_SRC
 ** TODO eaf                                                         :lazycat:
-#+begin_src emacs-lisp :tangle no
-  (use-package eaf :elpaca (eaf :host github :repo "emacs-eaf/emacs-application-framework" :files ("*") :post-build (shell-command "python install-eaf.py --install-core-deps")))
+#+begin_src emacs-lisp
+  (use-package eaf :ensure (eaf :host github :repo "emacs-eaf/emacs-application-framework" :files ("*") :post-build (shell-command "python install-eaf.py --install-core-deps")))
 
   (defconst eaf-apps
     '(eaf-jupyter
@@ -2054,7 +2052,7 @@ Cleaner to keep this in a separate file rather than a long single line at the to
 
   (defmacro add-eaf-apps (apps)
     `(progn ,@(mapcar (lambda (app) `(use-package ,app
-                                       :elpaca (,app :host github
+                                       :ensure (,app :host github
                                                      :repo ,(concat "emacs-eaf/" (symbol-name app))
                                                      :files ("*")
                                                      :post-build (+emacy/install-eaf-app-deps ,(concat elpaca-builds-directory "/" (symbol-name app))))))
@@ -2062,10 +2060,13 @@ Cleaner to keep this in a separate file rather than a long single line at the to
 
   (add-eaf-apps eaf-apps)
 #+end_src
-
+** TODO trekker
+   #+begin_src emacs-lisp :tangle no
+  (use-package trekker :ensure (trekker :host github :repo "manateelazycat/trekker" :files ("*" (:exclude ".git"))))
+   #+end_src
 ** TODO misc
 #+BEGIN_SRC emacs-lisp
-  (use-package whisper :elpaca (whisper :host github :repo "natrys/whisper.el")
+  (use-package whisper :ensure (whisper :host github :repo "natrys/whisper.el")
     :general
     (tyrant-def
       "aw" (cons "whisper" (make-sparse-keymap))
