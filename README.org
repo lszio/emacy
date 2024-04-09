@@ -7,21 +7,21 @@
 #+PROPERTY: header-args :tangle init.el :noweb yes :session init
 #+AUTO_TANGLE: t
 
-* Header
 ☯ ⚋ ⚊ ⚌ ⚍ ⚎ ⚏
-** early-init.el
+* Header
+** early-init.el :early-init:
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
 ;;; early-init.el --- emacs init file  -*- lexical-binding: t; -*-
 #+END_SRC
 
 ** init.el
 #+BEGIN_SRC emacs-lisp
-;;; init.el --- emacs init file  -*- lexical-binding: t; -*-
-(require 'cl-lib)
+  ;;; init.el --- emacs init file  -*- lexical-binding: t; -*-
+  (require 'cl-lib)
 #+END_SRC
 
 * Preset
-** Constant
+** Constant :early-init:
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (defconst windows? (memq system-type '(cygwin windows-nt ms-dos)) "are we on windows")
   (defconst macos? (eq system-type 'darwin) "are we on macos")
@@ -32,59 +32,59 @@
 
 ** Variable
 #+BEGIN_SRC emacs-lisp
-  (defvar user-local-directory "~/.config/emacs/" "User's local directory, ~/.config/emacs/")
-  (defvar elpaca-directory (expand-file-name "var" (if wsl? user-local-directory user-emacs-directory)))
-  (defvar elpaca-cache-directory (expand-file-name "menus" elpaca-directory))
-  (defvar elpaca-builds-directory (expand-file-name "builds" elpaca-directory))
+  (defvar user-local-directory "~/.local/emacs/" "User's local directory for emacs, ~/.local/emacs/")
+  (defvar elpaca-directory (expand-file-name "var" user-emacs-directory))
   (defvar elpaca-repos-directory (expand-file-name "libs" user-emacs-directory))
+  (defvar elpaca-cache-directory (expand-file-name "menus" elpaca-directory))
+  (defvar elpaca-builds-directory (expand-file-name "builds" user-local-directory))
 #+END_SRC
 
 * Basic
 ** [[https://github.com/progfolio/elpaca][elpaca]]
 *** introduce
 #+BEGIN_SRC emacs-lisp
-(defvar elpaca-installer-version 0.7)
-(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
-(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
-(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil :depth 1
-                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-                              :build (:not elpaca--activate-package)))
-(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-       (build (expand-file-name "elpaca/" elpaca-builds-directory))
-       (order (cdr elpaca-order))
-       (default-directory repo))
-  (add-to-list 'load-path (if (file-exists-p build) build repo))
-  (unless (file-exists-p repo)
-    (make-directory repo t)
-    (when (< emacs-major-version 28) (require 'subr-x))
-    (condition-case-unless-debug err
-        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                 ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
-                                                 ,@(when-let ((depth (plist-get order :depth)))
-                                                     (list (format "--depth=%d" depth) "--no-single-branch"))
-                                                 ,(plist-get order :repo) ,repo))))
-                 ((zerop (call-process "git" nil buffer t "checkout"
-                                       (or (plist-get order :ref) "--"))))
-                 (emacs (concat invocation-directory invocation-name))
-                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-                 ((require 'elpaca))
-                 ((elpaca-generate-autoloads "elpaca" repo)))
-            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-          (error "%s" (with-current-buffer buffer (buffer-string))))
-      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
-  (unless (require 'elpaca-autoloads nil t)
-    (require 'elpaca)
-    (elpaca-generate-autoloads "elpaca" repo)
-    (load "./elpaca-autoloads")))
-(add-hook 'after-init-hook #'elpaca-process-queues)
-(elpaca `(,@elpaca-order))
+  (defvar elpaca-installer-version 0.7)
+  (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+  (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+  (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+  (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                                :ref nil :depth 1
+                                :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                                :build (:not elpaca--activate-package)))
+  (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+         (build (expand-file-name "elpaca/" elpaca-builds-directory))
+         (order (cdr elpaca-order))
+         (default-directory repo))
+    (add-to-list 'load-path (if (file-exists-p build) build repo))
+    (unless (file-exists-p repo)
+      (make-directory repo t)
+      (when (< emacs-major-version 28) (require 'subr-x))
+      (condition-case-unless-debug err
+          (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                   ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                   ,@(when-let ((depth (plist-get order :depth)))
+                                                       (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                   ,(plist-get order :repo) ,repo))))
+                   ((zerop (call-process "git" nil buffer t "checkout"
+                                         (or (plist-get order :ref) "--"))))
+                   (emacs (concat invocation-directory invocation-name))
+                   ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                         "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                   ((require 'elpaca))
+                   ((elpaca-generate-autoloads "elpaca" repo)))
+              (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+            (error "%s" (with-current-buffer buffer (buffer-string))))
+        ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+    (unless (require 'elpaca-autoloads nil t)
+      (require 'elpaca)
+      (elpaca-generate-autoloads "elpaca" repo)
+      (load "./elpaca-autoloads")))
+  (add-hook 'after-init-hook #'elpaca-process-queues)
+  (elpaca `(,@elpaca-order))
 #+END_SRC
 *** default
 #+begin_src emacs-lisp :tangle early-init.el
-(setq package-enable-at-startup nil)
+  (setq package-enable-at-startup nil)
 #+end_src
 *** config
 #+BEGIN_SRC emacs-lisp
@@ -1098,8 +1098,8 @@ modes
 ** gcmh
 设置垃圾回收参数
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
-(setq gc-cons-threshold most-positive-fixnum)
-(setq gc-cons-percentage 0.6)
+  (setq gc-cons-threshold most-positive-fixnum)
+  (setq gc-cons-percentage 0.6)
 #+END_SRC
 #+BEGIN_SRC emacs-lisp
   (use-package gcmh
@@ -1819,13 +1819,13 @@ modes
 #+end_src
 ** misc
 #+BEGIN_SRC emacs-lisp
-(use-package rainbow-mode)
-(use-package highlight-indent-guides
-  :hook (prog-mode . highlight-indent-guides-mode)
-  :custom
-  (highlight-indent-guides-method 'fill))
+  (use-package rainbow-mode)
+  (use-package highlight-indent-guides
+    :hook (prog-mode . highlight-indent-guides-mode)
+    :custom
+    (highlight-indent-guides-method 'fill))
 
-(use-package rainbow-delimiters :hook (prog-mode . rainbow-delimiters-mode))
+  (use-package rainbow-delimiters :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
 
 * Note
@@ -1956,12 +1956,12 @@ modes
 
 ** elfeed
 #+begin_src emacs-lisp
-(use-package elfeed)
+  (use-package elfeed)
 
-(use-package elfeed-org
-  :config
-  (setq rmh-elfeed-org-files (list "~/Notes/feeds.org"))
-  (elfeed-org))
+  (use-package elfeed-org
+    :config
+    (setq rmh-elfeed-org-files (list "~/Notes/feeds.org"))
+    (elfeed-org))
 #+end_src
 
 ** misc
@@ -1998,7 +1998,7 @@ Cleaner to keep this in a separate file rather than a long single line at the to
   ;;; init-dev.el ends here
 #+END_SRC
 ** TODO eaf                                                         :lazycat:
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package eaf :ensure (eaf :host github :repo "emacs-eaf/emacs-application-framework" :files ("*") :post-build (shell-command "python install-eaf.py --install-core-deps")))
 
   (defconst eaf-apps
@@ -2065,7 +2065,7 @@ Cleaner to keep this in a separate file rather than a long single line at the to
   (use-package trekker :ensure (trekker :host github :repo "manateelazycat/trekker" :files ("*" (:exclude ".git"))))
    #+end_src
 ** TODO misc
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package whisper :ensure (whisper :host github :repo "natrys/whisper.el")
     :general
     (tyrant-def

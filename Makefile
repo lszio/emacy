@@ -1,2 +1,2 @@
 tangle:
-	emacs --batch config.org --eval "(org-babel-tangle)"
+	emacs --batch README.org --eval "(org-babel-tangle)"
