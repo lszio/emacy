@@ -32,11 +32,11 @@
 
 ** Variable
 #+BEGIN_SRC emacs-lisp
-  (defvar user-local-directory "~/.local/emacs/" "User's local directory for emacs, ~/.local/emacs/")
-  (defvar elpaca-directory (expand-file-name "var" user-emacs-directory))
-  (defvar elpaca-repos-directory (expand-file-name "libs" user-emacs-directory))
+  (defvar local-emacs-directory "~/.local/emacs/" "User's local directory for emacs, ~/.local/emacs/")
+  (defvar elpaca-directory local-emacs-directory)
+  (defvar elpaca-repos-directory (expand-file-name "lib" user-emacs-directory))
   (defvar elpaca-cache-directory (expand-file-name "menus" elpaca-directory))
-  (defvar elpaca-builds-directory (expand-file-name "builds" user-local-directory))
+  (defvar elpaca-builds-directory (expand-file-name "builds" elpaca-directory))
 #+END_SRC
 
 * Basic
