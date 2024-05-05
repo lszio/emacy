@@ -1,4 +1,4 @@
-;-*- eval: (load-file "./init-dev.el");   -*-
+;-*- eval: (load-file "./lisp/emacy-config-debug.el");   -*-
 #+TITLE: Emacs Config
 #+AUTHOR: Li Shuzhi
 #+STARTUP: show2levels
@@ -32,7 +32,7 @@
 
 ** Variable
 #+BEGIN_SRC emacs-lisp
-  (defvar local-emacs-directory "~/.local/emacs/" "User's local directory for emacs, ~/.local/emacs/")
+  (defvar local-emacs-directory "~/.local/share/emacs/" "User's local directory for emacs, ~/.local/emacs/")
   (defvar elpaca-directory local-emacs-directory)
   (defvar elpaca-repos-directory (expand-file-name "lib" user-emacs-directory))
   (defvar elpaca-cache-directory (expand-file-name "menus" elpaca-directory))
@@ -363,9 +363,11 @@
      :states '(normal visual) "gc" 'evilnc-comment-operator))
 
   (use-package evil-matchit :config (global-evil-matchit-mode 1))
+
   (use-package evil-lion :ensure (evil-lion :host github :repo "edkolev/evil-lion" :files ("*" (:exclude ".git"))) :config (evil-lion-mode))
 
   (use-package evil-surround :config (global-evil-surround-mode 1))
+
   (use-package evil-embrace
     :commands embrace-add-pair embrace-add-pair-regexp
     :after evil-surround
@@ -1942,7 +1944,7 @@ modes
 
 ** pretty
 *** TODO [[https://github.com/minad/org-modern][org-modern]]
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package org-modern
     :ensure t
     :config
@@ -1971,32 +1973,6 @@ modes
     (org-mode . org-auto-tangle-mode))
 #+end_src
 * Other
-** develop
-:PROPERTIES:
-:HEADER-ARGS: :tangle init-dev.el
-:END:
-Evaluated when loading init file.
-Cleaner to keep this in a separate file rather than a long single line at the top of init.org
-#+BEGIN_SRC emacs-lisp
-  ;;; init-dev.el --- development settings for init file  -*- lexical-binding: t; -*-
-  ;;; Code:
-  (defcustom emacy-library-directory (concat user-emacs-directory "libs/") "Libraries for Emacs.")
-
-  (add-to-list 'load-path (concat emacy-library-directory "org-auto-tangle/"))
-
-  (setq-local org-confirm-babel-evaluate nil)
-
-  (require 'org-auto-tangle)
-  (org-auto-tangle-mode)
-  (add-hook 'org-auto-tangle-before-tangle-hook #'check-parens)
-  (add-hook 'org-auto-tangle-after-tangle-hook
-            (lambda () (load-file (concat user-emacs-directory "init.el"))
-              (when-let ((forms (elpaca-q<-forms (car elpaca--queues))))
-                (eval `(progn ,@(apply #'append (mapcar #'cdr (reverse forms)))) t))))
-  (eldoc-mode)
-  (provide 'init-dev)
-  ;;; init-dev.el ends here
-#+END_SRC
 ** TODO eaf                                                         :lazycat:
 #+begin_src emacs-lisp :tangle no
   (use-package eaf :ensure (eaf :host github :repo "emacs-eaf/emacs-application-framework" :files ("*") :post-build (shell-command "python install-eaf.py --install-core-deps")))

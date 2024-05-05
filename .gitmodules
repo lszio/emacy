@@ -1,0 +1,6 @@
+[submodule "lib/general"]
+	path = lib/general
+	url = https://github.com/noctuid/general.el
+[submodule "lib/org-auto-tangle"]
+	path = lib/org-auto-tangle
+	url = https://github.com/yilkalargaw/org-auto-tangle

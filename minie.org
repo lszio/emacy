@@ -1,8 +1,9 @@
-#+TITLE: Emacs Config
+;-*- eval: (load-file "./lisp/emacy-config-debug.el");   -*-
+#+TITLE: Emacs Minimal Config
 #+AUTHOR: Li Shuzhi
 #+STARTUP: show2levels
 #+STARTUP: noindent
-#+FILETAGS: :emacy:config:emacs:emacs-lisp:
+#+FILETAGS: :minie:config:emacs:emacs-lisp:
 #+PROPERTY: header-args :tangle init.el :noweb yes :session init
 #+AUTO_TANGLE: t
 
@@ -28,19 +29,6 @@
   (defconst wsl? (and linux? (string-match-p "microsoft" operating-system-release)) "are we on wsl")
 #+END_SRC
 
-** variable
-#+BEGIN_SRC emacs-lisp
-  (defvar user-local-directory "~/.local/emacs/" "User's local directory for emacs, ~/.local/emacs/")
-  (defvar elpaca-directory (expand-file-name "var" user-emacs-directory))
-  (defvar elpaca-repos-directory (expand-file-name "libs" user-emacs-directory))
-  (defvar elpaca-cache-directory (expand-file-name "menus" elpaca-directory))
-  (defvar elpaca-builds-directory (expand-file-name "builds" user-local-directory))
-#+END_SRC
-
-** exec-path
-#+begin_src emacs-lisp
-  (setq exec-path (append '("~/.emacs.d/python/.venv/bin" "~/.emacs.d/node/node_modules/.bin") exec-path))
-#+end_src
 * Footer
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (provide 'early-init)
@@ -51,4 +39,3 @@
   (provide 'init)
   ;;; init.el ends here
 #+END_SRC
-
