@@ -1,6 +1,6 @@
-;;; init-dev.el --- development settings for init file  -*- lexical-binding: t; -*-
+;;; emacy-config-debug.el --- development settings for emacs config -*- lexical-binding: t; -*-
 ;;; Code:
-(defcustom emacy-library-directory (concat user-emacs-directory "libs/") "Libraries for Emacs.")
+(defcustom emacy-library-directory (concat user-emacs-directory "lib/") "Libraries for Emacs.")
 
 (add-to-list 'load-path (concat emacy-library-directory "org-auto-tangle/"))
 
@@ -16,4 +16,4 @@
 
 (eldoc-mode)
 (provide 'emacy-config-debug)
-;; init-dev.el ends here
+;; emacy-config-debug.el ends here
