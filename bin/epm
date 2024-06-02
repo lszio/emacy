@@ -1,0 +1,42 @@
+#!/usr/bin/env -S nu --stdin
+
+let melpa = "~/.local/share/emacs/melpa/" | path expand
+let recipe = "~/Sync/recipes.json" | path expand
+
+def recipes [] {
+    if (not ($recipe | path exists)) {
+        main sync
+    }
+
+    open $recipe | transpose | get column0
+}
+
+def "main" [] {
+    echo "EPM"
+}
+
+def "main use" [package?: string@recipes] {
+    # let package = if ($package | str) {
+    #     $package
+    # }else {
+    #     recipes | input list --fuzzy
+    # }
+    echo `epm use ($package)`
+}
+
+def "main sync" [
+] {
+    if ($melpa | path exists) {
+        echo ("Melpa exists, pull...")
+        git -C $melpa pull 
+    } else {
+        echo ("Clone melpa from " ++ $melpa)
+        git clone http://github.com/melpa/melpa $melpa
+    }
+
+    cd $melpa
+    make json
+    cp html/recipes.json $recipe
+
+    cd $env.OLDPWD
+}
