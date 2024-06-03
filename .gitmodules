@@ -4,3 +4,15 @@
 [submodule "lib/org-auto-tangle"]
 	path = lib/org-auto-tangle
 	url = https://github.com/yilkalargaw/org-auto-tangle
+[submodule "lib/vertico"]
+	path = lib/vertico
+	url = https://github.com/minad/vertico
+[submodule "lib/no-littering"]
+	path = lib/no-littering
+	url = https://github.com/emacscollective/no-littering
+[submodule "lib/compat"]
+	path = lib/compat
+	url = https://github.com/emacs-compat/compat
+[submodule "lib/which-key"]
+	path = lib/which-key
+	url = https://github.com/justbur/emacs-which-key

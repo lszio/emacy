@@ -1,42 +1,81 @@
 #!/usr/bin/env -S nu --stdin
 
+let emacs = "~/.emacs.d" | path expand
 let melpa = "~/.local/share/emacs/melpa/" | path expand
 let recipe = "~/Sync/recipes.json" | path expand
 
 def recipes [] {
-    if (not ($recipe | path exists)) {
-        main sync
-    }
+	if (not ($recipe | path exists)) {
+		main sync
+	}
 
-    open $recipe | transpose | get column0
+	open $recipe | transpose key value | get key
+}
+
+def use_package [
+	package: string,
+	path?: string
+] {
+	let path = if ($path | is-empty) {
+		let record = open $recipe | get $package
+		match ($record | get fetcher) {
+			"github" => ("https://github.com/" ++ ($record | get repo))
+			_ => null
+		}
+	} else {
+		($path)
+	}
+
+	if ($path == null) {
+		error make {msg: "not impl"}
+	}
+
+	if (not (git -C $emacs submodule | lines | find ($package ++ " ") | is-empty)) {
+		error make {msg: "module already exists"}
+	}
+
+	print ("repo path " ++ $path)
+	git -C $emacs submodule add $path ("lib/" ++ $package)
 }
 
 def "main" [] {
-    echo "EPM"
+	echo "EPM"
 }
 
-def "main use" [package?: string@recipes] {
-    # let package = if ($package | str) {
-    #     $package
-    # }else {
-    #     recipes | input list --fuzzy
-    # }
-    echo `epm use ($package)`
+def "main use" [
+	package?: string # package name
+	path?: string # pacakge path
+	] {
+	let package = if (
+		($package | is-empty) or (($path | is-empty) and (
+			recipes | transpose key value | where key == $package | is-empty
+		))
+	) {
+		(recipes | input list --fuzzy "Please input package name")
+	} else {
+		$package
+	}
+	use_package $package $path
+
+	echo epm use ($package)
 }
 
-def "main sync" [
-] {
-    if ($melpa | path exists) {
-        echo ("Melpa exists, pull...")
-        git -C $melpa pull 
-    } else {
-        echo ("Clone melpa from " ++ $melpa)
-        git clone http://github.com/melpa/melpa $melpa
-    }
+def "main recipes" [] {
+	recipes
+}
 
-    cd $melpa
-    make json
-    cp html/recipes.json $recipe
+def "main sync" [ ] {
+	if ($melpa | path exists) {
+		echo ("Melpa exists, pull...")
+		git -C $melpa pull 
+	} else {
+		echo ("Clone melpa from " ++ $melpa)
+		git clone http://github.com/melpa/melpa $melpa
+	}
 
-    cd $env.OLDPWD
+	cd $melpa
+	make json
+	cp html/recipes.json $recipe
+
+	cd $env.OLDPWD
 }
