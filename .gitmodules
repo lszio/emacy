@@ -55,3 +55,6 @@
 [submodule "lib/keycast"]
 	path = lib/keycast
 	url = https://github.com/tarsius/keycast
+[submodule "lib/fontaine"]
+	path = lib/fontaine
+	url = https://github.com/protesilaos/fontaine.git

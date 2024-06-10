@@ -274,7 +274,98 @@
 
   ;; 在模式栏上显示当前光标的列号
   (column-number-mode t)
+#+END_SRC
 
+** fonts
+*** fontaine
+#+BEGIN_SRC emacs-lisp
+(use-package fontaine
+  :when (display-graphic-p)
+  ;; :hook (kill-emacs . fontaine-store-latest-preset)
+  :config
+  (setq fontaine-latest-state-file
+        (locate-user-emacs-file "etc/fontaine-latest-state.eld"))
+  (setq fontaine-presets
+        '((regular
+           :default-height 140
+           :default-weight regular
+           :fixed-pitch-height 1.0
+           :variable-pitch-height 1.0
+           )
+          (large
+           :default-height 180
+           :default-weight normal
+           :fixed-pitch-height 1.0
+           :variable-pitch-height 1.05
+           )
+          (t
+           :default-family "Source Code Pro"
+           :fixed-pitch-family "Source Code Pro"
+           :variable-pitch-family "Source Code Pro"
+           :italic-family "Source Code Pro"
+           :variable-pitch-weight normal
+           :bold-weight normal
+           :italic-slant italic
+           :line-spacing 0.1)
+          ))
+  ;; (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
+  (fontaine-set-preset 'regular)
+
+  ;; set emoji font
+  (set-fontset-font
+   t
+   (if (version< emacs-version "28.1")
+       '(#x1f300 . #x1fad0)
+     'emoji)
+   (cond
+    ((member "Noto Emoji" (font-family-list)) "Noto Emoji")
+    ((member "Symbola" (font-family-list)) "Symbola")
+    ((member "Apple Color Emoji" (font-family-list)) "Apple Color Emoji")
+    ((member "Noto Color Emoji" (font-family-list)) "Noto Color Emoji")
+    ((member "Segoe UI Emoji" (font-family-list)) "Segoe UI Emoji")
+    ))
+
+  ;; set Chinese font
+  (dolist (charset '(kana han symbol cjk-misc bopomofo))
+    (set-fontset-font
+     (frame-parameter nil 'font)
+     charset
+     (font-spec :family
+                (cond
+                 ((eq system-type 'darwin)
+                  (cond
+                   ((member "Sarasa Mono SC Nerd" (font-family-list)) "Sarasa Mono SC Nerd")
+                   ((member "PingFang SC" (font-family-list)) "PingFang SC")
+                   ((member "WenQuanYi Zen Hei" (font-family-list)) "WenQuanYi Zen Hei")
+                   ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")
+                   ))
+                 ((eq system-type 'gnu/linux)
+                  (cond
+                   ((member "Sarasa Mono SC Nerd" (font-family-list)) "Sarasa Mono SC Nerd")
+                   ((member "WenQuanYi Micro Hei" (font-family-list)) "WenQuanYi Micro Hei")
+                   ((member "WenQuanYi Zen Hei" (font-family-list)) "WenQuanYi Zen Hei")
+                   ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")
+                   ))
+                 (t
+                  (cond
+                   ((member "Sarasa Mono SC Nerd" (font-family-list)) "Sarasa Mono SC Nerd")
+                   ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")
+                   )))
+                )))
+
+  ;; set Chinese font scale
+  (setq face-font-rescale-alist `(
+                                  ("Symbola"             . 1.3)
+                                  ("Microsoft YaHei"     . 1.2)
+                                  ("WenQuanYi Zen Hei"   . 1.2)
+                                  ("Sarasa Mono SC Nerd" . 1.2)
+                                  ("PingFang SC"         . 1.16)
+                                  ("Lantinghei SC"       . 1.16)
+                                  ("Kaiti SC"            . 1.16)
+                                  ("Yuanti SC"           . 1.16)
+                                  ("Apple Color Emoji"   . 0.91)
+                                  ))
+  )
 #+END_SRC
 
 ** modeline
