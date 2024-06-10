@@ -98,7 +98,58 @@
     :diminish which-key-mode)
 #+END_SRC
 
-* Theme
+** functions
+#+BEGIN_SRC emacs-lisp
+  (defmacro use-feature (name &rest args)
+    "Like `use-package' but accounting for asynchronous installation.
+    NAME and ARGS are in `use-package'."
+    (declare (indent defun))
+    `(use-package ,name :ensure nil ,@args))
+#+END_SRC
+** helpful
+#+BEGIN_SRC emacs-lisp
+  (use-package helpful
+    ;;:after evil
+    :init
+    (setq evil-lookup-func #'helpful-at-point)
+    :bind
+    ([remap describe-key] . helpful-key)
+    ([remap describe-command] . helpful-command)
+    ([remap describe-function] . helpful-callable)
+    ([remap describe-variable] . helpful-variable))
+#+END_SRC
+
+** encoding
+#+BEGIN_SRC emacs-lisp
+  ;; 配置所有的编码为UTF-8，参考：
+  ;; https://thraxys.wordpress.com/2016/01/13/utf-8-in-emacs-everywhere-forever/
+  (setq locale-coding-system 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (set-selection-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (set-language-environment 'utf-8)
+  (set-clipboard-coding-system 'utf-8)
+  (set-file-name-coding-system 'utf-8)
+  (set-buffer-file-coding-system 'utf-8)
+  (prefer-coding-system 'utf-8)
+  (modify-coding-system-alist 'process "*" 'utf-8)
+  (when (display-graphic-p) (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+#+END_SRC
+
+** modes
+#+BEGIN_SRC emacs-lisp
+  (display-time-mode)
+  (toggle-frame-maximized)
+  (global-auto-revert-mode)
+  (global-display-line-numbers-mode)
+  (toggle-word-wrap)
+  (global-word-wrap-whitespace-mode 1)
+
+  (tab-bar-mode -1)
+#+END_SRC
+
+* UI
 ** default
   禁止展示菜单栏、工具栏和纵向滚动条
   禁止菜单栏、工具栏、滚动条模式，禁止启动屏幕和文件对话框
@@ -219,41 +270,73 @@
   (xterm-mouse-mode 1)
 
   ;; 退出Emacs时进行确认
-  (setq confirm-kill-emacs 'y-or-n-p)
+  ;; (setq confirm-kill-emacs 'y-or-n-p)
 
   ;; 在模式栏上显示当前光标的列号
   (column-number-mode t)
 
-  ;; 配置所有的编码为UTF-8，参考：
-  ;; https://thraxys.wordpress.com/2016/01/13/utf-8-in-emacs-everywhere-forever/
-  (setq locale-coding-system 'utf-8)
-  (set-terminal-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
-  (set-selection-coding-system 'utf-8)
-  (set-default-coding-systems 'utf-8)
-  (set-language-environment 'utf-8)
-  (set-clipboard-coding-system 'utf-8)
-  (set-file-name-coding-system 'utf-8)
-  (set-buffer-file-coding-system 'utf-8)
-  (prefer-coding-system 'utf-8)
-  (modify-coding-system-alist 'process "*" 'utf-8)
-  (when (display-graphic-p) (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 #+END_SRC
 
-** modes
+** modeline
 #+BEGIN_SRC emacs-lisp
-  (display-time-mode)
-  (toggle-frame-maximized)
-  (global-auto-revert-mode)
-  (global-display-line-numbers-mode)
-  (toggle-word-wrap)
-  (global-word-wrap-whitespace-mode 1)
+  (use-package doom-modeline
+    :hook (after-init . doom-modeline-mode)
+    :custom
+    (doom-modeline-irc nil)
+    (doom-modeline-mu4e nil)
+    (doom-modeline-gnus nil)
+    (doom-modeline-github nil)
+    (doom-modeline-buffer-file-name-style 'truncate-upto-root) ; : auto
+    (doom-modeline-persp-name nil)
+    (doom-modeline-unicode-fallback t)
+    (doom-modeline-enable-word-count nil))
 
-  (tab-bar-mode -1)
+  (use-package minions :hook (after-init . minions-mode))
+
+  (use-package keycast
+    :hook (after-init . keycast-mode)
+    :config
+    ;; set for doom-modeline support
+    ;; With the latest change 72d9add, mode-line-keycast needs to be modified to keycast-mode-line.
+    (define-minor-mode keycast-mode
+      "Show current command and its key binding in the mode line (fix for use with doom-mode-line)."
+      :global t
+      (if keycast-mode
+          (progn
+            (add-hook 'pre-command-hook 'keycast--update t)
+            (add-to-list 'global-mode-string '("" keycast-mode-line "  ")))
+        (remove-hook 'pre-command-hook 'keycast--update)
+        (setq global-mode-string (delete '("" keycast-mode-line "  ") global-mode-string))
+        ))
+
+    (dolist (input '(self-insert-command
+                    org-self-insert-command))
+      (add-to-list 'keycast-substitute-alist `(,input "." "Typing…")))
+
+    (dolist (event '(mouse-event-p
+                    mouse-movement-p
+                    mwheel-scroll))
+      (add-to-list 'keycast-substitute-alist `(,event nil)))
+
+    (setq keycast-log-format "%-20K%C\n")
+    (setq keycast-log-frame-alist
+          '((minibuffer . nil)))
+    (setq keycast-log-newest-first t))
 #+END_SRC
 
 * Complete
 ** vertico
+#+BEGIN_SRC emacs-lisp
+  (use-package vertico
+    :demand
+    :config
+    (vertico-mode)
+    (setq vertico-scroll-margin 0
+          vertico-resize t))
+
+  ;; Persist history over Emacs restarts. Vertico sorts by history position.
+  (savehist-mode)
+#+END_SRC
 
 * Footer
 #+BEGIN_SRC emacs-lisp :tangle early-init.el

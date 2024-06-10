@@ -20,17 +20,20 @@ def use_package [
 		let record = open $recipe | get $package
 		match ($record | get fetcher) {
 			"github" => ("https://github.com/" ++ ($record | get repo))
-			_ => null
+			"gitlab" => ("https://gitlab.com/" ++ ($record | get repo))
+			_ => {
+				error make { msg: ("cannot resolve fetcher " ++ ($record | get fetcher))}
+			}
 		}
 	} else {
 		($path)
 	}
 
 	if ($path == null) {
-		error make {msg: "not impl"}
+		error make {msg: "cannot resolve path"}
 	}
 
-	if (not (git -C $emacs submodule | lines | find ($package ++ " ") | is-empty)) {
+	if (not (git -C $emacs submodule | lines | find ("lib/" ++ $package ++ " ") | is-empty)) {
 		error make {msg: "module already exists"}
 	}
 
@@ -48,7 +51,7 @@ def "main use" [
 	] {
 	let package = if (
 		($package | is-empty) or (($path | is-empty) and (
-			recipes | transpose key value | where key == $package | is-empty
+			recipes | where $it == $package | is-empty
 		))
 	) {
 		(recipes | input list --fuzzy "Please input package name")

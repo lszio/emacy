@@ -16,3 +16,42 @@
 [submodule "lib/which-key"]
 	path = lib/which-key
 	url = https://github.com/justbur/emacs-which-key
+[submodule "lib/orderless"]
+	path = lib/orderless
+	url = https://github.com/oantolin/orderless
+[submodule "lib/marginalia"]
+	path = lib/marginalia
+	url = https://github.com/minad/marginalia
+[submodule "lib/pinyinlib"]
+	path = lib/pinyinlib
+	url = https://github.com/cute-jumper/pinyinlib.el
+[submodule "lib/helpful"]
+	path = lib/helpful
+	url = https://github.com/Wilfred/helpful
+[submodule "lib/elisp-refs"]
+	path = lib/elisp-refs
+	url = https://github.com/Wilfred/elisp-refs
+[submodule "lib/dash"]
+	path = lib/dash
+	url = https://github.com/magnars/dash.el
+[submodule "lib/s"]
+	path = lib/s
+	url = https://github.com/magnars/s.el
+[submodule "lib/f"]
+	path = lib/f
+	url = https://github.com/rejeep/f.el
+[submodule "lib/doom-modeline"]
+	path = lib/doom-modeline
+	url = https://github.com/seagle0128/doom-modeline
+[submodule "lib/nerd-icons"]
+	path = lib/nerd-icons
+	url = https://github.com/rainstormstudio/nerd-icons.el
+[submodule "lib/shrink-path"]
+	path = lib/shrink-path
+	url = https://gitlab.com/bennya/shrink-path.el
+[submodule "lib/minions"]
+	path = lib/minions
+	url = https://github.com/tarsius/minions
+[submodule "lib/keycast"]
+	path = lib/keycast
+	url = https://github.com/tarsius/keycast
