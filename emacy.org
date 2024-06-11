@@ -559,6 +559,21 @@
     (setq keycast-log-newest-first t))
 #+END_SRC
 
+** edit
+*** autorevert
+#+BEGIN_SRC emacs-lisp
+(use-package autorevert
+  :hook (after-init . global-auto-revert-mode)
+  :bind ("s-u" . revert-buffer)
+  :custom
+  (auto-revert-interval 10)
+  (auto-revert-avoid-polling t)
+  (auto-revert-verbose nil)
+  (auto-revert-remote-files t)
+  (auto-revert-check-vc-info t)
+  (global-auto-revert-non-file-buffers t))
+#+END_SRC
+
 * Complete
 ** vertico
 #+BEGIN_SRC emacs-lisp
