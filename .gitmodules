@@ -70,3 +70,45 @@
 [submodule "lib/keyfreq"]
 	path = lib/keyfreq
 	url = https://github.com/dacap/keyfreq
+[submodule "lib/evil"]
+	path = lib/evil
+	url = https://github.com/emacs-evil/evil
+[submodule "lib/evil-collection"]
+	path = lib/evil-collection
+	url = https://github.com/emacs-evil/evil-collection
+[submodule "lib/evil-nerd-commenter"]
+	path = lib/evil-nerd-commenter
+	url = https://github.com/redguardtoo/evil-nerd-commenter
+[submodule "lib/evil-matchit"]
+	path = lib/evil-matchit
+	url = https://github.com/redguardtoo/evil-matchit
+[submodule "lib/evil-surround"]
+	path = lib/evil-surround
+	url = https://github.com/emacs-evil/evil-surround
+[submodule "lib/evil-escape"]
+	path = lib/evil-escape
+	url = https://github.com/emacsorphanage/evil-escape
+[submodule "lib/evil-embrace"]
+	path = lib/evil-embrace
+	url = https://github.com/cute-jumper/evil-embrace.el
+[submodule "lib/evil-snipe"]
+	path = lib/evil-snipe
+	url = https://github.com/hlissner/evil-snipe
+[submodule "lib/evil-iedit-state"]
+	path = lib/evil-iedit-state
+	url = https://github.com/syl20bnr/evil-iedit-state
+[submodule "lib/evil-exchange"]
+	path = lib/evil-exchange
+	url = https://github.com/Dewdrops/evil-exchange
+[submodule "lib/evil-traces"]
+	path = lib/evil-traces
+	url = https://github.com/mamapanda/evil-traces
+[submodule "lib/embrace"]
+	path = lib/embrace
+	url = https://github.com/cute-jumper/embrace.el
+[submodule "lib/annalist"]
+	path = lib/annalist
+	url = https://github.com/noctuid/annalist.el
+[submodule "lib/expand-region"]
+	path = lib/expand-region
+	url = https://github.com/magnars/expand-region.el
