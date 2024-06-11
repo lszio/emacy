@@ -21,8 +21,9 @@ def use_package [
 		match ($record | get fetcher) {
 			"github" => ("https://github.com/" ++ ($record | get repo))
 			"gitlab" => ("https://gitlab.com/" ++ ($record | get repo))
+			"git" => ($record | get url)
 			_ => {
-				error make { msg: ("cannot resolve fetcher " ++ ($record | get fetcher))}
+				error make { msg: ("cannot resolve fetcher " ++ ($record | get fetcher) ++ " url: " ++ ($record | get url))}
 			}
 		}
 	} else {
@@ -39,6 +40,12 @@ def use_package [
 
 	print ("repo path " ++ $path)
 	git -C $emacs submodule add $path ("lib/" ++ $package)
+
+    gen_autoload
+}
+
+def "gen_autoload" [path?: string] {
+    emacs -Q --batch --eval "(loaddefs-generate-batch)" ~/.emacs.d/lib/local/autoload.el ~/.emacs.d/lib/*
 }
 
 def "main" [] {
