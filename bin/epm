@@ -12,7 +12,7 @@ def recipes [] {
 	open $recipe | transpose key value | get key
 }
 
-def use_package [
+def add_package [
 	package: string,
 	path?: string
 ] {
@@ -45,14 +45,15 @@ def use_package [
 }
 
 def "gen_autoload" [path?: string] {
-    emacs -Q --batch --eval "(loaddefs-generate-batch)" ~/.emacs.d/lib/local/autoload.el ~/.emacs.d/lib/*
+	mkdir ~/.emacs.d/lib/local
+    emacs -Q --batch --eval "(loaddefs-generate-batch)" ~/.emacs.d/lib/local/autoloads.el ~/.emacs.d/lib/*
 }
 
 def "main" [] {
 	echo "EPM"
 }
 
-def "main use" [
+def "main add" [
 	package?: string # package name
 	path?: string # pacakge path
 	] {
@@ -65,9 +66,28 @@ def "main use" [
 	} else {
 		$package
 	}
-	use_package $package $path
+	add_package $package $path
 
 	echo epm use ($package)
+}
+
+def "main gen defs" [] {
+	gen_autoload
+}
+
+def "main use" [
+    package?: string
+] {
+}
+
+def "main list" [] {
+    rg "\(provide '(.+)\)" lib --json | lines | find "type":"match"  | each {from json | get data.lines.text | parse --regex "provide \'(?<name>.+)\\)" | get 0.name }
+}
+
+def "main remove" [
+    package?: string
+] {
+
 }
 
 def "main recipes" [] {

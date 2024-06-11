@@ -67,3 +67,6 @@
 [submodule "lib/vundo"]
 	path = lib/vundo
 	url = https://github.com/casouri/vundo
+[submodule "lib/keyfreq"]
+	path = lib/keyfreq
+	url = https://github.com/dacap/keyfreq

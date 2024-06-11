@@ -585,6 +585,23 @@
           vertico-resize t))
 #+END_SRC
 
+* Misc
+** keyfreq
+#+BEGIN_SRC emacs-lisp
+(use-package keyfreq
+  :hook 
+  (after-init . keyfreq-mode )
+  (after-init . keyfreq-autosave-mode)
+  :init
+  (setq keyfreq-excluded-commands 
+        '(self-insert-command
+          abort-recursive-edit
+          forward-char
+          backward-char
+          previous-line
+          next-line)))
+#+END_SRC
+
 * Footer
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (provide 'early-init)
