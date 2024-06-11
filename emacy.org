@@ -79,10 +79,7 @@
     :config
     (setq custom-file (no-littering-expand-var-file-name "custom.el")
           whisper-install-directory (no-littering-expand-var-file-name "whisper")
-          parinfer-rust-library-directory (no-littering-expand-var-file-name "parinfer-rust/"))
-    (with-eval-after-load 'recentf
-      (add-to-list 'recentf-exclude no-littering-var-directory)
-      (add-to-list 'recentf-exclude no-littering-etc-directory)))
+          parinfer-rust-library-directory (no-littering-expand-var-file-name "parinfer-rust/")))
 #+END_SRC
 
 ** which-key
@@ -109,6 +106,7 @@
     (declare (indent defun))
     `(use-package ,name :ensure nil ,@args))
 #+END_SRC
+
 ** helpful
 #+BEGIN_SRC emacs-lisp
   (use-package helpful
@@ -393,8 +391,7 @@
           ("*info*"                      :select t                                                  :same t)
           (magit-status-mode             :select t   :inhibit-window-quit t                         :same t)
           (magit-log-mode                :select t   :inhibit-window-quit t                         :same t)
-          ))
-  )
+          )))
 #+END_SRC
 
 *** [[popper][https://github.com/karthink/popper]]
@@ -456,6 +453,65 @@
   )
 #+END_SRC
 
+** history
+#+BEGIN_SRC emacs-lisp
+(use-package savehist
+  :hook (after-init . savehist-mode)
+  :config
+  ;; Allow commands in minibuffers, will affect `dired-do-dired-do-find-regexp-and-replace' command:
+  (setq enable-recursive-minibuffers t)
+  (setq history-length 1000)
+  (setq savehist-additional-variables '(mark-ring
+                                        global-mark-ring
+                                        search-ring
+                                        regexp-search-ring
+                                        extended-command-history))
+  (setq savehist-autosave-interval 300))
+
+(use-package saveplace :hook (after-init . save-place-mode))
+
+(use-package recentf
+  :defines no-littering-etc-directory no-littering-var-directory
+  :hook (after-init . recentf-mode)
+  :custom
+  (recentf-max-saved-items 300)
+  (recentf-auto-cleanup 'never)
+  ;; `recentf-add-file' will apply handlers first, then call `string-prefix-p'
+  ;; to check if it can be pushed to recentf list.
+  (recentf-filename-handlers '(abbreviate-file-name))
+  (recentf-exclude `(,@(cl-loop for f in `(,package-user-dir
+                                           ,no-littering-var-directory
+                                           ,no-littering-etc-directory)
+                                collect (abbreviate-file-name f))
+                     ;; Folders on MacOS start
+                     "^/private/tmp/"
+                     "^/var/folders/"
+                     ;; Folders on MacOS end
+                     ".cache"
+                     ".cask"
+                     ".elfeed"
+                     "elfeed"
+                     "bookmarks"
+                     "cache"
+                     "ido.*"
+                     "persp-confs"
+                     "recentf"
+                     "undo-tree-hist"
+                     "url"
+                     "^/tmp/"
+                     "/ssh\\(x\\)?:"
+                     "/su\\(do\\)?:"
+                     "^/usr/include/"
+                     "/TAGS\\'"
+                     "COMMIT_EDITMSG\\'")))
+#+END_SRC
+
+** undo-redo
+*** vundo
+#+BEGIN_SRC emacs-lisp
+  (use-package vundo)
+#+END_SRC
+
 ** modeline
 #+BEGIN_SRC emacs-lisp
   (use-package doom-modeline
@@ -512,9 +568,6 @@
     (vertico-mode)
     (setq vertico-scroll-margin 0
           vertico-resize t))
-
-  ;; Persist history over Emacs restarts. Vertico sorts by history position.
-  (savehist-mode)
 #+END_SRC
 
 * Footer

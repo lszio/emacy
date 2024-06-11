@@ -64,3 +64,6 @@
 [submodule "lib/popper"]
 	path = lib/popper
 	url = https://github.com/karthink/popper
+[submodule "lib/vundo"]
+	path = lib/vundo
+	url = https://github.com/casouri/vundo
