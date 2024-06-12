@@ -1,4 +1,4 @@
-;-*- eval: (load-file "./env/lisp/emacy-config-debug.el");   -*-
+;-*- eval: (load-file "./lib/emacy/emacy-config-develop.el");   -*-
 #+TITLE: Emacs Config
 #+AUTHOR: Li Shuzhi
 #+STARTUP: show2levels
