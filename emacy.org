@@ -10,7 +10,7 @@
 * Header
 ** early-init.el :early-init:
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
-;;; early-init.el --- emacs init file  -*- lexical-binding: t; -*-
+  ;;; early-init.el --- emacs init file  -*- lexical-binding: t; -*-
 #+END_SRC
 
 ** init.el
@@ -31,40 +31,40 @@
 
 ** load-path
 #+BEGIN_SRC emacs-lisp
-(defun add-subdirs-to-load-path (search-dir)
-  (interactive)
-  (let* ((dir (file-name-as-directory search-dir)))
-    (dolist (subdir
-             ;; 过滤出不必要的目录， 提升 Emacs 启动速度
-             (cl-remove-if
-              #'(lambda (subdir)
-                  (or
-                   ;; 不是目录的都移除
-                   (not (file-directory-p (concat dir subdir)))
-                   ;; 目录匹配下面规则的都移除
-                   (member subdir '("." ".." ;Linux 当前目录和父目录
-                                    "dist" "node_modules" "__pycache__" ;语言相关的模块目录
-                                    "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ;版本控制目录
-              (directory-files dir)))
-      (let ((subdir-path (concat dir (file-name-as-directory subdir))))
-        ;; 目录下有 .el .so .dll 文件的路径才添加到 load-path 中， 提升 Emacs 启动速度
-        (when (cl-some #'(lambda (subdir-file)
-                           (and (file-regular-p (concat subdir-path subdir-file))
-                                ;; .so .dll 文件指非 Elisp 语言编写的 Emacs 动态库
-                                (member (file-name-extension subdir-file) '("el" "so" "dll"))))
-                       (directory-files subdir-path))
+  (defun add-subdirs-to-load-path (search-dir)
+    (interactive)
+    (let* ((dir (file-name-as-directory search-dir)))
+      (dolist (subdir
+               ;; 过滤出不必要的目录， 提升 Emacs 启动速度
+               (cl-remove-if
+                #'(lambda (subdir)
+                    (or
+                     ;; 不是目录的都移除
+                     (not (file-directory-p (concat dir subdir)))
+                     ;; 目录匹配下面规则的都移除
+                     (member subdir '("." ".." ;Linux 当前目录和父目录
+                                      "dist" "node_modules" "__pycache__" ;语言相关的模块目录
+                                      "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ;版本控制目录
+                (directory-files dir)))
+        (let ((subdir-path (concat dir (file-name-as-directory subdir))))
+          ;; 目录下有 .el .so .dll 文件的路径才添加到 load-path 中， 提升 Emacs 启动速度
+          (when (cl-some #'(lambda (subdir-file)
+                             (and (file-regular-p (concat subdir-path subdir-file))
+                                  ;; .so .dll 文件指非 Elisp 语言编写的 Emacs 动态库
+                                  (member (file-name-extension subdir-file) '("el" "so" "dll"))))
+                         (directory-files subdir-path))
           
-          ;; 注意： add-to-list 函数的第三个参数必须为 t ， 表示加到列表末尾
-          ;; 这样 Emacs 会从父目录到子目录的顺序搜索 Elisp 插件， 顺序反过来会导致 Emacs 无法正常启动
-          (add-to-list 'load-path subdir-path t))
+            ;; 注意： add-to-list 函数的第三个参数必须为 t ， 表示加到列表末尾
+            ;; 这样 Emacs 会从父目录到子目录的顺序搜索 Elisp 插件， 顺序反过来会导致 Emacs 无法正常启动
+            (add-to-list 'load-path subdir-path t))
 
-        ;; 继续递归搜索子目录
-        (add-subdirs-to-load-path subdir-path)))))
+          ;; 继续递归搜索子目录
+          (add-subdirs-to-load-path subdir-path)))))
 
-(add-subdirs-to-load-path "~/.emacs.d/lib")
+  (add-subdirs-to-load-path "~/.emacs.d/lib")
 
-;; autoloads
-(require 'autoloads)
+  ;; autoloads
+  (require 'autoloads)
 #+END_SRC
 
 ** exec-path
@@ -198,7 +198,7 @@
     :custom
     (evil-want-integration t) ;; This is optional since it's already set to t by default.
     (evil-want-C-i-jump t)
-    (evil-undo-system 'undo-fu)
+    (evil-undo-system 'undo-redo)
     (evil-shift-width 2 "same behavior for vim")
     (evil-complete-all-buffers nil)
     :config
@@ -267,8 +267,6 @@
       "s q" '(evil-iedit-state/quit-iedit-mode :wk "quit iedit")))
 #+END_SRC
 
-
-
 * UI
 ** default
   禁止展示菜单栏、工具栏和纵向滚动条
@@ -276,19 +274,19 @@
   禁止自动缩放窗口先
   在这个阶段不编译
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
-(menu-bar-mode -1)
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
 
-(push '(menu-bar-lines . 0) default-frame-alist)
-(push '(tool-bar-lines . 0) default-frame-alist)
-(push '(vertical-scroll-bars) default-frame-alist)
+  (push '(menu-bar-lines . 0) default-frame-alist)
+  (push '(tool-bar-lines . 0) default-frame-alist)
+  (push '(vertical-scroll-bars) default-frame-alist)
 
-(setq frame-inhibit-implied-resize t)
-(setq inhibit-splash-screen t)
-(setq use-file-dialog nil)
+  (setq frame-inhibit-implied-resize t)
+  (setq inhibit-splash-screen t)
+  (setq use-file-dialog nil)
 
-(setq comp-deferred-compilation nil)
+  (setq comp-deferred-compilation nil)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -399,230 +397,229 @@
 ** fonts
 *** fontaine
 #+BEGIN_SRC emacs-lisp
-(use-package fontaine
-  :when (display-graphic-p)
-  ;; :hook (kill-emacs . fontaine-store-latest-preset)
-  :config
-  (setq fontaine-latest-state-file
-        (locate-user-emacs-file "etc/fontaine-latest-state.eld"))
-  (setq fontaine-presets
-        '((regular
-           :default-height 140
-           :default-weight regular
-           :fixed-pitch-height 1.0
-           :variable-pitch-height 1.0
-           )
-          (large
-           :default-height 180
-           :default-weight normal
-           :fixed-pitch-height 1.0
-           :variable-pitch-height 1.05
-           )
-          (t
-           :default-family "Source Code Pro"
-           :fixed-pitch-family "Source Code Pro"
-           :variable-pitch-family "Source Code Pro"
-           :italic-family "Source Code Pro"
-           :variable-pitch-weight normal
-           :bold-weight normal
-           :italic-slant italic
-           :line-spacing 0.1)
-          ))
-  ;; (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
-  (fontaine-set-preset 'regular)
+  (use-package fontaine
+    :when (display-graphic-p)
+    ;; :hook (kill-emacs . fontaine-store-latest-preset)
+    :config
+    (setq fontaine-latest-state-file
+          (locate-user-emacs-file "etc/fontaine-latest-state.eld"))
+    (setq fontaine-presets
+          '((regular
+             :default-height 140
+             :default-weight regular
+             :fixed-pitch-height 1.0
+             :variable-pitch-height 1.0
+             )
+            (large
+             :default-height 180
+             :default-weight normal
+             :fixed-pitch-height 1.0
+             :variable-pitch-height 1.05
+             )
+            (t
+             :default-family "Source Code Pro"
+             :fixed-pitch-family "Source Code Pro"
+             :variable-pitch-family "Source Code Pro"
+             :italic-family "Source Code Pro"
+             :variable-pitch-weight normal
+             :bold-weight normal
+             :italic-slant italic
+             :line-spacing 0.1)
+            ))
+    ;; (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
+    (fontaine-set-preset 'regular)
 
-  ;; set emoji font
-  (set-fontset-font
-   t
-   (if (version< emacs-version "28.1")
-       '(#x1f300 . #x1fad0)
-     'emoji)
-   (cond
-    ((member "Noto Emoji" (font-family-list)) "Noto Emoji")
-    ((member "Symbola" (font-family-list)) "Symbola")
-    ((member "Apple Color Emoji" (font-family-list)) "Apple Color Emoji")
-    ((member "Noto Color Emoji" (font-family-list)) "Noto Color Emoji")
-    ((member "Segoe UI Emoji" (font-family-list)) "Segoe UI Emoji")
-    ))
-
-  ;; set Chinese font
-  (dolist (charset '(kana han symbol cjk-misc bopomofo))
+    ;; set emoji font
     (set-fontset-font
-     (frame-parameter nil 'font)
-     charset
-     (font-spec :family
-                (cond
-                 ((eq system-type 'darwin)
-                  (cond
-                   ((member "Sarasa Mono SC Nerd" (font-family-list)) "Sarasa Mono SC Nerd")
-                   ((member "PingFang SC" (font-family-list)) "PingFang SC")
-                   ((member "WenQuanYi Zen Hei" (font-family-list)) "WenQuanYi Zen Hei")
-                   ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")
-                   ))
-                 ((eq system-type 'gnu/linux)
-                  (cond
-                   ((member "Sarasa Mono SC Nerd" (font-family-list)) "Sarasa Mono SC Nerd")
-                   ((member "WenQuanYi Micro Hei" (font-family-list)) "WenQuanYi Micro Hei")
-                   ((member "WenQuanYi Zen Hei" (font-family-list)) "WenQuanYi Zen Hei")
-                   ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")
-                   ))
-                 (t
-                  (cond
-                   ((member "Sarasa Mono SC Nerd" (font-family-list)) "Sarasa Mono SC Nerd")
-                   ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")
-                   )))
-                )))
+     t
+     (if (version< emacs-version "28.1")
+         '(#x1f300 . #x1fad0)
+       'emoji)
+     (cond
+      ((member "Noto Emoji" (font-family-list)) "Noto Emoji")
+      ((member "Symbola" (font-family-list)) "Symbola")
+      ((member "Apple Color Emoji" (font-family-list)) "Apple Color Emoji")
+      ((member "Noto Color Emoji" (font-family-list)) "Noto Color Emoji")
+      ((member "Segoe UI Emoji" (font-family-list)) "Segoe UI Emoji")
+      ))
 
-  ;; set Chinese font scale
-  (setq face-font-rescale-alist `(
-                                  ("Symbola"             . 1.3)
-                                  ("Microsoft YaHei"     . 1.2)
-                                  ("WenQuanYi Zen Hei"   . 1.2)
-                                  ("Sarasa Mono SC Nerd" . 1.2)
-                                  ("PingFang SC"         . 1.16)
-                                  ("Lantinghei SC"       . 1.16)
-                                  ("Kaiti SC"            . 1.16)
-                                  ("Yuanti SC"           . 1.16)
-                                  ("Apple Color Emoji"   . 0.91)
-                                  ))
-  )
+    ;; set Chinese font
+    (dolist (charset '(kana han symbol cjk-misc bopomofo))
+      (set-fontset-font
+       (frame-parameter nil 'font)
+       charset
+       (font-spec :family
+                  (cond
+                   ((eq system-type 'darwin)
+                    (cond
+                     ((member "Sarasa Mono SC Nerd" (font-family-list)) "Sarasa Mono SC Nerd")
+                     ((member "PingFang SC" (font-family-list)) "PingFang SC")
+                     ((member "WenQuanYi Zen Hei" (font-family-list)) "WenQuanYi Zen Hei")
+                     ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")
+                     ))
+                   ((eq system-type 'gnu/linux)
+                    (cond
+                     ((member "Sarasa Mono SC Nerd" (font-family-list)) "Sarasa Mono SC Nerd")
+                     ((member "WenQuanYi Micro Hei" (font-family-list)) "WenQuanYi Micro Hei")
+                     ((member "WenQuanYi Zen Hei" (font-family-list)) "WenQuanYi Zen Hei")
+                     ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")
+                     ))
+                   (t
+                    (cond
+                     ((member "Sarasa Mono SC Nerd" (font-family-list)) "Sarasa Mono SC Nerd")
+                     ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")
+                     )))
+                  )))
+
+    ;; set Chinese font scale
+    (setq face-font-rescale-alist `(
+                                    ("Symbola"             . 1.3)
+                                    ("Microsoft YaHei"     . 1.2)
+                                    ("WenQuanYi Zen Hei"   . 1.2)
+                                    ("Sarasa Mono SC Nerd" . 1.2)
+                                    ("PingFang SC"         . 1.16)
+                                    ("Lantinghei SC"       . 1.16)
+                                    ("Kaiti SC"            . 1.16)
+                                    ("Yuanti SC"           . 1.16)
+                                    ("Apple Color Emoji"   . 0.91)
+                                    ))
+    )
 #+END_SRC
 
 ** window
-*** [[shackle][https://depp.brause.cc/shackle/]]
+*** [[https://depp.brause.cc/shackle/][shackle]]
 #+BEGIN_SRC emacs-lisp
-(use-package shackle
-  :hook (after-init . shackle-mode)
-  :init
-  (setq shackle-lighter "")
-  (setq shackle-select-reused-windows nil) ; default nil
-  (setq shackle-default-alignment 'below)  ; default below
-  (setq shackle-default-size 0.4)          ; default 0.5
-  (setq shackle-rules
-        ;; CONDITION(:regexp)            :select     :inhibit-window-quit   :size+:align|:other     :same|:popup
-        '((compilation-mode              :ignore t)
-          ("\\*Async Shell.*\\*" :regexp t :ignore t)
-          ("\\*corfu.*\\*"       :regexp t :ignore t)
-          ("*eshell*"                    :select t                          :size 0.4  :align t     :popup t)
-          (helpful-mode                  :select t                          :size 0.6  :align right :popup t)
-          ("*Messages*"                  :select t                          :size 0.4  :align t     :popup t)
-          ("*Calendar*"                  :select t                          :size 0.3  :align t     :popup t)
-          ("*info*"                      :select t                                                  :same t)
-          (magit-status-mode             :select t   :inhibit-window-quit t                         :same t)
-          (magit-log-mode                :select t   :inhibit-window-quit t                         :same t)
-          )))
+  (use-package shackle
+    :hook (after-init . shackle-mode)
+    :init
+    (setq shackle-lighter "")
+    (setq shackle-select-reused-windows nil) ; default nil
+    (setq shackle-default-alignment 'below)  ; default below
+    (setq shackle-default-size 0.4)          ; default 0.5
+    (setq shackle-rules
+          ;; CONDITION(:regexp)            :select     :inhibit-window-quit   :size+:align|:other     :same|:popup
+          '((compilation-mode              :ignore t)
+            ("\\*Async Shell.*\\*" :regexp t :ignore t)
+            ("\\*corfu.*\\*"       :regexp t :ignore t)
+            ("*eshell*"                    :select t                          :size 0.4  :align t     :popup t)
+            (helpful-mode                  :select t                          :size 0.6  :align right :popup t)
+            ("*Messages*"                  :select t                          :size 0.4  :align t     :popup t)
+            ("*Calendar*"                  :select t                          :size 0.3  :align t     :popup t)
+            ("*info*"                      :select t                                                  :same t)
+            (magit-status-mode             :select t   :inhibit-window-quit t                         :same t)
+            (magit-log-mode                :select t   :inhibit-window-quit t                         :same t)
+            )))
 #+END_SRC
 
-*** [[popper][https://github.com/karthink/popper]]
+*** [[https://github.com/karthink/popper][popper]]
 #+BEGIN_SRC emacs-lisp
-(use-package popper
-  :demand
-  :bind (("M-`"     . popper-toggle-latest)
-         ("M-<tab>" . popper-cycle)
-         ("M-\\"    . popper-toggle-type))
-  :hook (after-init . popper-mode)
-  ;;:hook (after-init . popper-echo-mode)
-  :init
-  (setq popper-reference-buffers
-        '("\\*Messages\\*"
-          "\\*Async Shell Command\\*"
-          help-mode
-          helpful-mode
-          occur-mode
-          pass-view-mode
-          "^\\*eshell.*\\*$" eshell-mode ;; eshell as a popup
-          "^\\*shell.*\\*$"  shell-mode  ;; shell as a popup
-          ("\\*corfu\\*" . hide)
-          (compilation-mode . hide)
-          ;; derived from `fundamental-mode' and fewer than 10 lines will be considered a popup
-          (lambda (buf) (with-current-buffer buf
-                          (and (derived-mode-p 'fundamental-mode)
-                               (< (count-lines (point-min) (point-max))
-                                  10))))
+  (use-package popper
+    :demand
+    :bind (("M-`"     . popper-toggle-latest)
+           ("M-<tab>" . popper-cycle)
+           ("M-\\"    . popper-toggle-type))
+    :hook (after-init . popper-mode)
+    ;;:hook (after-init . popper-echo-mode)
+    :init
+    (setq popper-reference-buffers
+          '("\\*Messages\\*"
+            "\\*Async Shell Command\\*"
+            help-mode
+            helpful-mode
+            occur-mode
+            pass-view-mode
+            "^\\*eshell.*\\*$" eshell-mode ;; eshell as a popup
+            "^\\*shell.*\\*$"  shell-mode  ;; shell as a popup
+            ("\\*corfu\\*" . hide)
+            (compilation-mode . hide)
+            ;; derived from `fundamental-mode' and fewer than 10 lines will be considered a popup
+            (lambda (buf) (with-current-buffer buf
+                            (and (derived-mode-p 'fundamental-mode)
+                                 (< (count-lines (point-min) (point-max))
+                                    10))))
+            )
           )
-        )
-  :config
-  ;; group by project.el, projectile, directory or perspective
-  (setq popper-group-function nil)
+    :config
+    ;; group by project.el, projectile, directory or perspective
+    (setq popper-group-function nil)
 
-  ;; pop in child frame or not
-  (setq popper-display-function #'display-buffer-in-child-frame)
+    ;; pop in child frame or not
+    (setq popper-display-function #'display-buffer-in-child-frame)
 
-  ;; use `shackle.el' to control popup
-  (setq popper-display-control nil))
+    ;; use `shackle.el' to control popup
+    (setq popper-display-control nil))
 #+END_SRC
 
 *** winner
 #+BEGIN_SRC emacs-lisp
-(use-package winner
-  :hook (after-init . winner-mode)
-  :commands (winner-undo winner-redo)
-  :config
-  (setq winner-boring-buffers
-        '("*Completions*"
-          "*Compile-Log*"
-          "*inferior-lisp*"
-          "*Fuzzy Completions*"
-          "*Apropos*"
-          "*Help*"
-          "*cvs*"
-          "*Buffer List*"
-          "*Ibuffer*"
-          "*esh command on file*"))
-  )
+  (use-package winner
+    :hook (after-init . winner-mode)
+    :commands (winner-undo winner-redo)
+    :config
+    (setq winner-boring-buffers
+          '("*Completions*"
+            "*Compile-Log*"
+            "*inferior-lisp*"
+            "*Fuzzy Completions*"
+            "*Apropos*"
+            "*Help*"
+            "*cvs*"
+            "*Buffer List*"
+            "*Ibuffer*"
+            "*esh command on file*")))
 #+END_SRC
 
 ** history
 #+BEGIN_SRC emacs-lisp
-(use-package savehist
-  :hook (after-init . savehist-mode)
-  :config
-  ;; Allow commands in minibuffers, will affect `dired-do-dired-do-find-regexp-and-replace' command:
-  (setq enable-recursive-minibuffers t)
-  (setq history-length 1000)
-  (setq savehist-additional-variables '(mark-ring
-                                        global-mark-ring
-                                        search-ring
-                                        regexp-search-ring
-                                        extended-command-history))
-  (setq savehist-autosave-interval 300))
+  (use-package savehist
+    :hook (after-init . savehist-mode)
+    :config
+    ;; Allow commands in minibuffers, will affect `dired-do-dired-do-find-regexp-and-replace' command:
+    (setq enable-recursive-minibuffers t)
+    (setq history-length 1000)
+    (setq savehist-additional-variables '(mark-ring
+                                          global-mark-ring
+                                          search-ring
+                                          regexp-search-ring
+                                          extended-command-history))
+    (setq savehist-autosave-interval 300))
 
-(use-package saveplace :hook (after-init . save-place-mode))
+  (use-package saveplace :hook (after-init . save-place-mode))
 
-(use-package recentf
-  :defines no-littering-etc-directory no-littering-var-directory
-  :hook (after-init . recentf-mode)
-  :custom
-  (recentf-max-saved-items 300)
-  (recentf-auto-cleanup 'never)
-  ;; `recentf-add-file' will apply handlers first, then call `string-prefix-p'
-  ;; to check if it can be pushed to recentf list.
-  (recentf-filename-handlers '(abbreviate-file-name))
-  (recentf-exclude `(,@(cl-loop for f in `(,package-user-dir
-                                           ,no-littering-var-directory
-                                           ,no-littering-etc-directory)
-                                collect (abbreviate-file-name f))
-                     ;; Folders on MacOS start
-                     "^/private/tmp/"
-                     "^/var/folders/"
-                     ;; Folders on MacOS end
-                     ".cache"
-                     ".cask"
-                     ".elfeed"
-                     "elfeed"
-                     "bookmarks"
-                     "cache"
-                     "ido.*"
-                     "persp-confs"
-                     "recentf"
-                     "undo-tree-hist"
-                     "url"
-                     "^/tmp/"
-                     "/ssh\\(x\\)?:"
-                     "/su\\(do\\)?:"
-                     "^/usr/include/"
-                     "/TAGS\\'"
-                     "COMMIT_EDITMSG\\'")))
+  (use-package recentf
+    :defines no-littering-etc-directory no-littering-var-directory
+    :hook (after-init . recentf-mode)
+    :custom
+    (recentf-max-saved-items 300)
+    (recentf-auto-cleanup 'never)
+    ;; `recentf-add-file' will apply handlers first, then call `string-prefix-p'
+    ;; to check if it can be pushed to recentf list.
+    (recentf-filename-handlers '(abbreviate-file-name))
+    (recentf-exclude `(,@(cl-loop for f in `(,package-user-dir
+                                             ,no-littering-var-directory
+                                             ,no-littering-etc-directory)
+                                  collect (abbreviate-file-name f))
+                       ;; Folders on MacOS start
+                       "^/private/tmp/"
+                       "^/var/folders/"
+                       ;; Folders on MacOS end
+                       ".cache"
+                       ".cask"
+                       ".elfeed"
+                       "elfeed"
+                       "bookmarks"
+                       "cache"
+                       "ido.*"
+                       "persp-confs"
+                       "recentf"
+                       "undo-tree-hist"
+                       "url"
+                       "^/tmp/"
+                       "/ssh\\(x\\)?:"
+                       "/su\\(do\\)?:"
+                       "^/usr/include/"
+                       "/TAGS\\'"
+                       "COMMIT_EDITMSG\\'")))
 #+END_SRC
 
 ** undo-redo
@@ -681,16 +678,16 @@
 ** edit
 *** autorevert
 #+BEGIN_SRC emacs-lisp
-(use-package autorevert
-  :hook (after-init . global-auto-revert-mode)
-  :bind ("s-u" . revert-buffer)
-  :custom
-  (auto-revert-interval 10)
-  (auto-revert-avoid-polling t)
-  (auto-revert-verbose nil)
-  (auto-revert-remote-files t)
-  (auto-revert-check-vc-info t)
-  (global-auto-revert-non-file-buffers t))
+  (use-package autorevert
+    :hook (after-init . global-auto-revert-mode)
+    :bind ("s-u" . revert-buffer)
+    :custom
+    (auto-revert-interval 10)
+    (auto-revert-avoid-polling t)
+    (auto-revert-verbose nil)
+    (auto-revert-remote-files t)
+    (auto-revert-check-vc-info t)
+    (global-auto-revert-non-file-buffers t))
 #+END_SRC
 
 * Complete
@@ -707,18 +704,18 @@
 * Misc
 ** keyfreq
 #+BEGIN_SRC emacs-lisp
-(use-package keyfreq
-  :hook 
-  (after-init . keyfreq-mode )
-  (after-init . keyfreq-autosave-mode)
-  :init
-  (setq keyfreq-excluded-commands 
-        '(self-insert-command
-          abort-recursive-edit
-          forward-char
-          backward-char
-          previous-line
-          next-line)))
+  (use-package keyfreq
+    :hook 
+    (after-init . keyfreq-mode )
+    (after-init . keyfreq-autosave-mode)
+    :init
+    (setq keyfreq-excluded-commands 
+          '(self-insert-command
+            abort-recursive-edit
+            forward-char
+            backward-char
+            previous-line
+            next-line)))
 #+END_SRC
 
 * Footer
