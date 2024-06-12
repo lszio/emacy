@@ -696,7 +696,7 @@
 #+end_src
 * Complete
 ** vertico
-#+BEGIN_SRC emacs-lisp
+    setRange#+BEGIN_SRC emacs-lisp
   (use-package vertico
     :demand
     :config

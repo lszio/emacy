@@ -118,3 +118,6 @@
 [submodule "lib/zenburn-theme"]
 	path = lib/zenburn-theme
 	url = https://github.com/bbatsov/zenburn-emacs
+[submodule "lib/goto-chg"]
+	path = lib/goto-chg
+	url = https://github.com/emacs-evil/goto-chg
