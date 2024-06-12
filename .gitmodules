@@ -115,3 +115,6 @@
 [submodule "lib/async"]
 	path = lib/async
 	url = https://github.com/jwiegley/emacs-async
+[submodule "lib/zenburn-theme"]
+	path = lib/zenburn-theme
+	url = https://github.com/bbatsov/zenburn-emacs

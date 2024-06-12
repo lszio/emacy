@@ -690,6 +690,10 @@
     (global-auto-revert-non-file-buffers t))
 #+END_SRC
 
+** theme
+#+begin_src emacs-lisp
+  (use-package zenburn-theme :config (load-theme 'zenburn t))
+#+end_src
 * Complete
 ** vertico
 #+BEGIN_SRC emacs-lisp
@@ -701,7 +705,7 @@
           vertico-resize t))
 #+END_SRC
 
-* Misc
+* Tool
 ** keyfreq
 #+BEGIN_SRC emacs-lisp
   (use-package keyfreq
