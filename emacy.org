@@ -692,6 +692,36 @@
 #+begin_src emacs-lisp
   (use-package zenburn-theme :config (load-theme 'zenburn t))
 #+end_src
+
+** dashboard
+#+begin_src emacs-lisp
+  (use-package dashboard
+    :demand t
+    :config
+    (dashboard-setup-startup-hook)
+    (setq dashboard-center-content t
+          dashboard-items '((recents . 5)
+                            (bookmarks . 6)
+                            (projects . 3)
+                            (agenda . 6))
+          dashboard-set-file-icons t
+          dashboard-set-heading-icons t))
+#+end_src
+*** page-break-lines
+#+begin_src emacs-lisp
+  (use-package page-break-lines-mode :hook (dashboard-mode . page-break-lines-mode))
+#+end_src
+** icons
+*** TODO [[https://github.com/rainstormstudio/nerd-icons.el][nerd-icons]]
+#+begin_src emacs-lisp
+  (use-package nerd-icons
+    :custom
+    (nerd-icons-font-family "Symbols Nerd Font Mono"))
+#+end_src
+**** ibuffer
+#+begin_src emacs-lisp
+  (use-package nerd-icons-ibuffer :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
+#+end_src
 * Complete
 ** vertico
 #+BEGIN_SRC emacs-lisp
@@ -796,7 +826,6 @@
             previous-line
             next-line)))
 #+END_SRC
-
 * Footer
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (provide 'early-init)
@@ -807,3 +836,5 @@
   (provide 'init)
   ;;; init.el ends here
 #+END_SRC
+
+

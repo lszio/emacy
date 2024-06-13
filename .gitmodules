@@ -124,3 +124,15 @@
 [submodule "lib/embark"]
 	path = lib/embark
 	url = https://github.com/oantolin/embark
+[submodule "lib/dashboard"]
+	path = lib/dashboard
+	url = https://github.com/emacs-dashboard/emacs-dashboard
+[submodule "lib/projectile"]
+	path = lib/projectile
+	url = https://github.com/bbatsov/projectile
+[submodule "lib/nerd-icons-ibuffer"]
+	path = lib/nerd-icons-ibuffer
+	url = https://github.com/seagle0128/nerd-icons-ibuffer
+[submodule "lib/page-break-lines"]
+	path = lib/page-break-lines
+	url = https://github.com/purcell/page-break-lines
