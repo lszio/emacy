@@ -748,13 +748,38 @@
 #+begin_src emacs-lisp
   ;; minibuffer helpful annotations
   (use-package marginalia
-    :ensure t
     :hook (after-init . marginalia-mode)
     :custom
     (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
 #+end_src
 ** TODO consult
 [[https://github.com/minad/consult/wiki][Wiki]]
+** embark
+#+begin_src emacs-lisp
+  (use-package embark
+    :demand t
+    :general
+    (:keymaps 'override
+     "C-;" 'embark-dwim
+     :states '(normal insert motion emacs)
+     "C-." 'embark-act)
+
+    :init
+    ;; Optionally replace the key help with a completing-read interface
+    (setq prefix-help-command #'embark-prefix-help-command)
+
+    ;; Show the Embark target at point via Eldoc.  You may adjust the Eldoc
+    ;; strategy, if you want to see the documentation from multiple providers.
+    (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+    ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+
+    :config
+    ;; Hide the mode line of the Embark live/completions buffers
+    (add-to-list 'display-buffer-alist
+                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                   nil
+                   (window-parameters (mode-line-format . none)))))
+#+end_src
 * Tool
 ** keyfreq
 #+BEGIN_SRC emacs-lisp
