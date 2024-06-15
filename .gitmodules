@@ -148,3 +148,9 @@
 [submodule "lib/diredfl"]
 	path = lib/diredfl
 	url = https://github.com/purcell/diredfl
+[submodule "lib/consult"]
+	path = lib/consult
+	url = https://github.com/minad/consult
+[submodule "lib/embark-consult"]
+	path = lib/embark-consult
+	url = https://github.com/oantolin/embark
