@@ -46,7 +46,7 @@ def add_package [
 
 def "gen_autoload" [path?: string] {
 	mkdir ~/.emacs.d/lib/local
-    emacs -Q --batch --eval "(loaddefs-generate-batch)" ~/.emacs.d/lib/local/autoloads.el ~/.emacs.d/lib/*
+    emacs -Q --batch --eval "(loaddefs-generate-batch)" ~/.emacs.d/lib/local/autoloads.el ~/.emacs.d/lib/**
 }
 
 def "main" [] {

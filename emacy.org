@@ -711,7 +711,7 @@
 #+begin_src emacs-lisp
   (use-package page-break-lines-mode :hook (dashboard-mode . page-break-lines-mode))
 #+end_src
-** icons
+** icons :icon:
 *** TODO [[https://github.com/rainstormstudio/nerd-icons.el][nerd-icons]]
 #+begin_src emacs-lisp
   (use-package nerd-icons
@@ -721,6 +721,49 @@
 **** ibuffer
 #+begin_src emacs-lisp
   (use-package nerd-icons-ibuffer :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
+#+end_src
+** file
+*** dired
+[[https://github.com/Fuco1/dired-hacks][dired-hacks]]
+**** nerd-icons-dired :icon:nerd-icons:
+#+begin_src emacs-lisp :tangle no
+  (use-package nerd-icons-dired :hook (dired-mode . nerd-icons-dired-mode))
+#+end_src
+**** diredfl
+#+begin_src emacs-lisp
+  (use-package diredfl
+    :hook
+    ((dired-mode . diredfl-mode)
+     ;; highlight parent and directory preview as well
+     (dirvish-directory-view-mode . diredfl-mode))
+    :config
+    (set-face-attribute 'diredfl-dir-name nil :bold t))
+#+end_src
+*** [[https://github.com/alexluigit/dirvish/][dirvish]]
+#+begin_src emacs-lisp
+  (use-package dirvish
+    :init
+    (dirvish-override-dired-mode)
+    :custom
+    (dirvish-quick-access-entries ; It's a custom option, `setq' won't work
+     '(("h" "~/"                          "Home")
+       ("e" "~/.emacs.d"                  "Emacs")
+       ("p" "~/Projects/"                 "Projects")
+       ("d" "~/Downloads/"                "Downloads")
+       ("t" "~/.local/share/Trash/files/" "Trash")))
+    :config
+    (setq dirvish-mode-line-format '(:left (sort symlink) :right (omit yank index)))
+    (setq dirvish-mode-line-height 10)
+    (setq dirvish-attributes '(nerd-icons file-time file-size collapse subtree-state vc-state git-msg))
+    (setq dirvish-subtree-state-style 'nerd)
+    (setq delete-by-moving-to-trash t)
+    (setq dirvish-path-separators (list
+                                   (format "  %s " (nerd-icons-codicon "nf-cod-home"))
+                                   (format "  %s " (nerd-icons-codicon "nf-cod-root_folder"))
+                                   (format " %s " (nerd-icons-faicon "nf-fa-angle_right"))))
+    (setq dired-listing-switches "-l --almost-all --human-readable --group-directories-first --no-group")
+    (dirvish-peek-mode)
+    (dirvish-side-follow-mode))
 #+end_src
 * Complete
 ** vertico
@@ -810,6 +853,15 @@
                    nil
                    (window-parameters (mode-line-format . none)))))
 #+end_src
+** nerd-icon-completion :icon:
+#+begin_src emacs-lisp
+  (use-package nerd-icons-completion
+    :after marginalia
+    :config
+    (nerd-icons-completion-mode)
+    (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+#+end_src
+* TODO OrgMode 
 * Tool
 ** keyfreq
 #+BEGIN_SRC emacs-lisp
@@ -836,5 +888,5 @@
   (provide 'init)
   ;;; init.el ends here
 #+END_SRC
-
-
+* Reference
+- [[https://github.com/alycklama/evil-mode-cheat-sheet][evil-cheat-sheet]]

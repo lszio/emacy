@@ -136,3 +136,15 @@
 [submodule "lib/page-break-lines"]
 	path = lib/page-break-lines
 	url = https://github.com/purcell/page-break-lines
+[submodule "lib/nerd-icons-completion"]
+	path = lib/nerd-icons-completion
+	url = https://github.com/rainstormstudio/nerd-icons-completion
+[submodule "lib/nerd-icons-dired"]
+	path = lib/nerd-icons-dired
+	url = https://github.com/rainstormstudio/nerd-icons-dired
+[submodule "lib/dirvish"]
+	path = lib/dirvish
+	url = https://github.com/alexluigit/dirvish
+[submodule "lib/diredfl"]
+	path = lib/diredfl
+	url = https://github.com/purcell/diredfl
