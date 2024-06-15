@@ -267,7 +267,7 @@
       "s q" '(evil-iedit-state/quit-iedit-mode :wk "quit iedit")))
 #+END_SRC
 
-* UI
+* User Interface
 ** default
   禁止展示菜单栏、工具栏和纵向滚动条
   禁止菜单栏、工具栏、滚动条模式，禁止启动屏幕和文件对话框
@@ -765,6 +765,14 @@
     (dirvish-peek-mode)
     (dirvish-side-follow-mode))
 #+end_src
+** workspace
+*** perspective
+#+begin_src emacs-lisp
+  (use-package perspective
+    :custom (persp-mode-prefix-key (kbd "C-c TAB"))
+    :init (persp-mode)
+    :general (tyrant-def "TAB"     (cons "layouts" perspective-map)))
+#+end_src
 * Complete
 ** vertico
 #+BEGIN_SRC emacs-lisp
@@ -825,7 +833,7 @@
     :custom
     (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
 #+end_src
-** TODO consult
+** consult
 [[https://github.com/minad/consult/wiki][Wiki]]
 #+begin_src emacs-lisp
   (use-package consult

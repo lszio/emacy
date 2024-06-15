@@ -154,3 +154,6 @@
 [submodule "lib/embark-consult"]
 	path = lib/embark-consult
 	url = https://github.com/oantolin/embark
+[submodule "lib/perspective"]
+	path = lib/perspective
+	url = https://github.com/nex3/perspective-el
