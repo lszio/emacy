@@ -697,6 +697,18 @@
 #+END_SRC
 
 ** window
+*** transpose-frame
+#+begin_src emacs-lisp
+  (use-package transpose-frame
+    :general
+    (tyrant-def
+      "w [" 'transpose-frame
+      "w ]" 'rotate-frame))
+#+end_src
+*** ace-window
+#+begin_src emacs-lisp
+  (use-package ace-window)
+#+end_src
 *** [[https://depp.brause.cc/shackle/][shackle]]
 #+BEGIN_SRC emacs-lisp
   (use-package shackle
