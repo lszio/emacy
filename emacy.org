@@ -1037,6 +1037,10 @@
         ("b" dumb-jump-back "Back"))
     )
 #+end_src
+** highlight
+#+begin_src emacs-lisp
+  (use-package hl-todo :config (global-hl-todo-mode))
+#+end_src
 * Complete
 ** vertico
 #+BEGIN_SRC emacs-lisp
@@ -1183,6 +1187,10 @@
       "Consult line the synbol where the point is"
       (interactive)
       (consult-line (thing-at-point 'symbol))))
+#+end_src
+*** consult-todo
+#+begin_src emacs-lisp
+  (use-package consult-todo)
 #+end_src
 ** embark
 #+begin_src emacs-lisp
