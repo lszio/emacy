@@ -150,7 +150,7 @@
   (tab-bar-mode -1)
 #+END_SRC
 
-* Binding
+* Binding :binding:
 ** general
 #+BEGIN_SRC emacs-lisp
   (use-package general
@@ -278,6 +278,22 @@
     :demand t)
 #+end_src
 
+** bindings
+*** buffer                                                           :buffer:
+#+begin_src emacs-lisp
+  (tyrant-def
+    "b"       (cons "buffers" (make-sparse-keymap))
+    "bb"      'switch-to-buffer
+    "bc"      'consult-buffer
+    "bi"      'ibuffer
+    "bd"      'kill-current-buffer
+    "bm"      'switch-to-messages-buffer
+    "bs"      'scratch-buffer
+    "bu"      'reopen-killed-buffer
+    "bx"      'kill-buffer-and-window
+    "b TAB"    '("last buffer" . alternate-buffer))
+#+end_src
+
 *** major-mode-hydra
 #+begin_src emacs-lisp
   (use-package major-mode-hydra
@@ -311,6 +327,180 @@
 
   (use-package use-package-hydra :after hydra)
 #+end_src
+*** help                                                               :help:
+#+begin_src emacs-lisp
+  (tyrant-def
+    "h"       (cons "help" (make-sparse-keymap))
+    "ha"      'apropos
+    "hb"      'describe-bindings
+    "hc"      'describe-char
+    "hf"      'describe-function
+    "hF"      'describe-face
+    "hi"      'info-emacs-manual
+    "hI"      'info-display-manual
+    "hk"      'describe-key
+    "hK"      'describe-keymap
+    "hm"      'describe-mode
+    "hM"      'woman
+    "hp"      'describe-package
+    "ht"      'describe-text-properties
+    "hv"      'describe-variable
+    "hP"      (cons "profiler" (make-sparse-keymap))
+    "hPs"     'profiler-start
+    "hPk"     'profiler-stop
+    "hPr"     'profiler-report)
+#+end_src
+*** jump                                                               :jump:
+#+begin_src emacs-lisp
+  (tyrant-def
+    "j"       (cons "jump" (make-sparse-keymap))
+    "ji"      'imenu
+    "jc"      'avy-goto-char
+    "jg"      'avy-goto-char-2)
+#+end_src
+*** file                                                               :file:
+#+begin_src emacs-lisp
+  (tyrant-def
+    "f"       (cons "files" (make-sparse-keymap))
+    "fC"      '("copy-file" . write-file)
+    "fD"      'delete-current-buffer-file
+    "fE"      'sudo-edit
+    "ff"      'find-file
+    "fj"      'dired-jump
+    "fJ"      'dired-jump-other-window
+    "fo"      'open-file-or-directory-in-external-app
+    "fr"      'read-only-mode
+    "fR"      'rename-current-buffer-file
+    "fd"   '((lambda (&optional arg) (interactive "P") (let ((buffer (when arg (current-buffer)))) (diff-buffer-with-file buffer))) :which-key "diff-with-file")
+
+    "fe"   (cons "emacs" (make-sparse-keymap))
+    ;; TODO:
+    "fed"  '((lambda () (interactive) (find-file-existing literate-file) (widen)) :which-key "dotfile")
+    "feR"  '((lambda () (interactive) (load-file user-init-file)) :which-key "reload-init.el")
+    "fet"  '((lambda () (interactive)
+              (save-restriction (widen) (check-parens) (org-babel-tangle-file literate-file))
+              (load-file "~/Projects/Emacy/profiles/emacy/init.el")
+              :which-key "tangle/reload-init.el"))
+    "fp"   'find-function-at-point
+    "fP"   'find-function
+    "fR"   'rename-file-and-buffer
+    "fs"   'save-buffer
+    "fv"   'find-variable-at-point
+    "fV"   'find-variable)
+#+end_src
+*** frame :frame:
+#+begin_src emacs-lisp
+  (tyrant-def
+    "F"       (cons "frame" (make-sparse-keymap))
+    "Fd"      'delete-frame
+    "FD"      'delete-other-frames
+    "Fn"      'make-frame
+    "Fo"      'other-frame
+    "FD" 'delete-other-frames
+    "FF" 'select-frame-by-name
+    "FO" 'other-frame-prefix
+    "Fc" '(:ingore t :which-key "color")
+    "Fcb" 'set-background-color
+    "Fcc" 'set-cursor-color
+    "Fcf" 'set-foreground-color
+    "Ff" 'set-frame-font
+    "Fm" 'make-frame-on-monitor
+    "Fn" 'next-window-any-frame
+    "Fo" 'other-frame
+    "Fp" 'previous-window-any-frame
+    "Fr" 'set-frame-name)
+#+end_src
+*** window
+#+begin_src emacs-lisp
+  (tyrant-def
+    "w"       (cons "windows" (make-sparse-keymap))
+    "w TAB"   'alternate-window
+    "w+"      'window-layout-toggle
+    "w?" 'split-window-vertically
+    "w=" 'balance-windows
+    "w/" 'split-window-horizontally
+    "wO" 'delete-other-windows
+    "wX" '((lambda () (interactive) (call-interactively #'other-window) (kill-buffer-and-window)) :which-key "kill-other-buffer-and-window")
+    "wd" 'delete-window
+    "wh" 'windmove-left
+    "wj" 'windmove-down
+    "wk" 'windmove-up
+    "wl" 'windmove-right
+    "wo" 'other-window
+    "wx" 'kill-buffer-and-window
+
+    "wb"      'switch-to-minibuffer-window
+    "wd"      'delete-window
+    "wD"      'delete-other-windows
+    "wm"      'toggle-maximize-buffer
+    "wf"      'follow-mode
+    "wh"      'evil-window-left
+    "wH"      'evil-window-move-far-left
+    "wj"      'evil-window-down
+    "wJ"      'evil-window-move-very-bottom
+    "wk"      'evil-window-up
+    "wK"      'evil-window-move-very-top
+    "wl"      'evil-window-right
+    "wL"      'evil-window-move-far-right
+    "wr"      'rotate-windows-forward
+    "wR"      'rotate-windows-backward
+    "ws"      'split-window-vertically
+    "wS"      'split-window-vertically-and-focus
+    "wt"      'toggle-current-window-dedication
+    "wu"      'winner-undo
+    "wU"      'winner-redo
+    "wv"      'split-window-horizontally
+    "wV"      'split-window-horizontally-and-focus)
+#+end_src
+*** project :project:
+#+begin_src emacs-lisp
+  (tyrant-def
+    "p"       (cons "projects" project-prefix-map)
+    "pt"      'project-open-in-tab)
+#+end_src
+*** toggle :toggle:
+#+begin_src emacs-lisp
+  (tyrant-def
+    "T"       (cons "toggles" (make-sparse-keymap))
+    "Ta"      'auto-fill-mode
+    ;;"Td"      'toggle-debug-on-error
+    "Tde"     'toggle-debug-on-error
+    "Tdq"     'toggle-debug-on-quit
+    "Tf"      'display-fill-column-indicator-mode
+    "Tl"      'toggle-truncate-lines
+    "Tm"      'flymake-mode
+    "Tn"      'display-line-numbers-mode
+    "Ts"      'flyspell-mode
+    "Tw"      'whitespace-mode
+    "TW"      'toggle-word-wrap)
+#+end_src
+*** layout :layout:
+#+begin_src emacs-lisp
+  (tyrant-def
+    "l"       (cons "layouts" tab-prefix-map)
+    "ld"      'tab-bar-close-tab
+    "lD"      'tab-bar-close-other-tabs
+    "lg"      'tab-bar-change-tab-group
+    "lm"      'tab-bar-move-tab-to
+    "lM"      'tab-bar-move-tab-to-group
+    "ll"      'tab-bar-switch-to-tab
+    "lR"      'tab-bar-rename-tab
+    "lt"      'other-tab-prefix
+    "lu"      'tab-bar-undo-close-tab
+    "l TAB"   'tab-bar-switch-to-last-tab)
+#+end_src
+*** quit :quit:
+#+begin_src emacs-lisp
+  (tyrant-def
+    "q"       (cons "quit" (make-sparse-keymap))
+    "qd"      'restart-emacs-debug-init
+    "qr"      'restart-emacs
+    "qR"      'restart-emacs-without-desktop
+    "qf"      'delete-frame
+    "qq"      'save-buffers-kill-terminal
+    "qQ"      'save-buffers-kill-emacs)
+#+end_src
+
 * User Interface
 ** default
   禁止展示菜单栏、工具栏和纵向滚动条
