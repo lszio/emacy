@@ -157,3 +157,6 @@
 [submodule "lib/perspective"]
 	path = lib/perspective
 	url = https://github.com/nex3/perspective-el
+[submodule "lib/nushell-mode"]
+	path = lib/nushell-mode
+	url = https://github.com/mrkkrp/nushell-mode

@@ -951,7 +951,12 @@
     (nerd-icons-completion-mode)
     (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 #+end_src
-* TODO OrgMode 
+* TODO Org Mode
+* Program
+** nushell
+#+begin_src emacs-lisp
+  (use-package nushell-mode)
+#+end_src
 * Tool
 ** keyfreq
 #+BEGIN_SRC emacs-lisp
