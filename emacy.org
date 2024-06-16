@@ -265,16 +265,31 @@
     (tyrant-def
       "s e" '(evil-iedit-state/iedit-mode :wk "iedit")
       "s q" '(evil-iedit-state/quit-iedit-mode :wk "quit iedit")))
+
+  (use-package evil-goggles
+    :config
+    (evil-goggles-mode)
+    (evil-goggles-use-diff-faces))
 #+END_SRC
 
 ** [[https://github.com/abo-abo/hydra][hydra]]
 #+begin_src emacs-lisp
-  (use-package hydra)
+  (use-package hydra
+    :demand t)
 #+end_src
 
 *** major-mode-hydra
 #+begin_src emacs-lisp
-  (use-package major-mode-hydra)
+  (use-package major-mode-hydra
+    :after hydra
+    :bind ("C-M-<return>" . major-mode-hydra)
+    :config
+    (major-mode-hydra-define emacs-lisp-mode nil
+        ("Eval"
+         (("b" eval-buffer "buffer")
+          ("e" eval-defun "defun")
+          ("r" eval-region "region")
+          ("q" nil)))))
 
   (use-package pretty-hydra
     :init
@@ -293,6 +308,8 @@
                 " "))))
          (propertize title 'face face))))
     ) 
+
+  (use-package use-package-hydra :after hydra)
 #+end_src
 * User Interface
 ** default

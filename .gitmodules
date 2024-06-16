@@ -193,3 +193,9 @@
 [submodule "lib/popup"]
 	path = lib/popup
 	url = https://github.com/auto-complete/popup-el
+[submodule "lib/use-package-hydra"]
+	path = lib/use-package-hydra
+	url = https://gitlab.com/to1ne/use-package-hydra
+[submodule "lib/evil-goggles"]
+	path = lib/evil-goggles
+	url = https://github.com/edkolev/evil-goggles
