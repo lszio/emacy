@@ -12,6 +12,10 @@ def recipes [] {
 	open $recipe | transpose key value | get key
 }
 
+def modules [] {
+    git -C $emacs submodule | lines | parse -r "^(?<type>.)(?<commit>\\w+) (?<path>[^ ]+) ?(?<branch>.+)?"
+}
+
 def add_package [
 	package: string,
 	path?: string
@@ -87,11 +91,24 @@ def "main list" [] {
 def "main remove" [
     package?: string
 ] {
+    let package = if ($package | is-empty) {
+        modules | get path | parse "lib/{name}" | where type != "-" | get name | input list --fuzzy "to remove"
+    } else {
+        $package
+    }
 
+    let path = ("lib/" ++ $package)
+    print ("Removing " ++ $path)
+
+    git -C $emacs rm -f $path
 }
 
 def "main recipes" [] {
 	recipes
+}
+
+def "main libs" [] {
+	modules
 }
 
 def "main sync" [ ] {
