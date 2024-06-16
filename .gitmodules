@@ -178,3 +178,18 @@
 [submodule "lib/tempel-collection"]
 	path = lib/tempel-collection
 	url = https://github.com/Crandel/tempel-collection
+[submodule "lib/hydra"]
+	path = lib/hydra
+	url = https://github.com/abo-abo/hydra
+[submodule "lib/avy"]
+	path = lib/avy
+	url = https://github.com/abo-abo/avy
+[submodule "lib/major-mode-hydra"]
+	path = lib/major-mode-hydra
+	url = https://github.com/jerrypnz/major-mode-hydra.el
+[submodule "lib/dumb-jump"]
+	path = lib/dumb-jump
+	url = https://github.com/jacktasia/dumb-jump
+[submodule "lib/popup"]
+	path = lib/popup
+	url = https://github.com/auto-complete/popup-el

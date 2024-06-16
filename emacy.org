@@ -267,6 +267,33 @@
       "s q" '(evil-iedit-state/quit-iedit-mode :wk "quit iedit")))
 #+END_SRC
 
+** [[https://github.com/abo-abo/hydra][hydra]]
+#+begin_src emacs-lisp
+  (use-package hydra)
+#+end_src
+
+*** major-mode-hydra
+#+begin_src emacs-lisp
+  (use-package major-mode-hydra)
+
+  (use-package pretty-hydra
+    :init
+    (cl-defun pretty-hydra-title (title &optional icon-type icon-name
+                                        &key face height v-adjust)
+      "Add an icon in the hydra title."
+      (let ((face (or face `(:inherit highlight :reverse-video t)))
+            (height (or height 1.2))
+            (v-adjust (or v-adjust 0.0)))
+        (concat
+         (when (and (icons-displayable-p) icon-type icon-name)
+           (let ((f (intern (format "nerd-icons-%s" icon-type))))
+             (when (fboundp f)
+               (concat
+                (apply f (list icon-name :face face :height height :v-adjust v-adjust))
+                " "))))
+         (propertize title 'face face))))
+    ) 
+#+end_src
 * User Interface
 ** default
   禁止展示菜单栏、工具栏和纵向滚动条
@@ -784,6 +811,36 @@
 
   (use-package tempel-collection
     :after tempel)
+#+end_src
+** navigate
+*** avy
+[[https://karthinks.com/software/avy-can-do-anything/][avy-can-do-anything]]
+#+begin_src emacs-lisp
+  (use-package avy
+    :bind (("C-:" . avy-goto-char)
+           ("M-g l" . avy-goto-line)
+           ("M-g w" . avy-goto-word))
+    :hook (after-init . avy-setup-default)
+    :config (setq avy-all-windows nil
+                  avy-all-windows-alt t
+                  avy-background t
+                  avy-style 'pre))
+#+end_src
+*** dumb-jump
+#+begin_src emacs-lisp
+  (use-package dumb-jump
+    :bind (("M-g j" . dumb-jump-hydra/body))
+    :config
+    (defhydra dumb-jump-hydra (:color blue :columns 3)
+        "Dumb Jump"
+        ("j" dumb-jump-go "Go")
+        ("o" dumb-jump-go-other-window "Other window")
+        ("e" dumb-jump-go-prefer-external "Go external")
+        ("x" dumb-jump-go-prefer-external-other-window "Go external other window")
+        ("i" dumb-jump-go-prompt "Prompt")
+        ("l" dumb-jump-quick-look "Quick look")
+        ("b" dumb-jump-back "Back"))
+    )
 #+end_src
 * Complete
 ** vertico
