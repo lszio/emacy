@@ -953,10 +953,38 @@
 #+end_src
 * TODO Org Mode
 * Program
-** nushell
+** treesit
 #+begin_src emacs-lisp
-  (use-package nushell-mode)
+  (use-package treesit
+    :config (setq treesit-font-lock-level 4)
+    :init
+    (setq treesit-language-source-alist
+          '((nu . ("https://github.com/nushell/tree-sitter-nu/")))))
 #+end_src
+*** treesit-auto
+#+begin_src emacs-lisp
+  (use-package treesit-auto
+    :config
+    (global-treesit-auto-mode))
+#+end_src
+** [[https://github.com/herbertjones/nushell-ts-mode][nushell-ts-mode]]
+#+begin_src emacs-lisp
+  (use-package nushell-ts-babel
+    :after org-contrib
+    :config
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((nushell . t))))
+
+  (use-package nushell-ts-mode
+    :hook (nushell-ts-mode-hook . (lambda ()
+                                    (corfu-mode 1)
+                                    (highlight-parentheses-mode 1)
+                                    (electric-pair-local-mode 1)
+                                    (electic-indent-local-mode 1))))
+
+#+end_src
+
 * Tool
 ** keyfreq
 #+BEGIN_SRC emacs-lisp

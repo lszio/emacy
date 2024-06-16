@@ -157,6 +157,12 @@
 [submodule "lib/perspective"]
 	path = lib/perspective
 	url = https://github.com/nex3/perspective-el
-[submodule "lib/nushell-mode"]
-	path = lib/nushell-mode
-	url = https://github.com/mrkkrp/nushell-mode
+[submodule "lib/treesit-auto"]
+	path = lib/treesit-auto
+	url = https://github.com/renzmann/treesit-auto
+[submodule "lib/nushell-ts-mode"]
+	path = lib/nushell-ts-mode
+	url = https://github.com/herbertjones/nushell-ts-mode
+[submodule "lib/nushell-ts-babel"]
+	path = lib/nushell-ts-babel
+	url = https://github.com/herbertjones/nushell-ts-babel
