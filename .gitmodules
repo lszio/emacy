@@ -166,3 +166,15 @@
 [submodule "lib/nushell-ts-babel"]
 	path = lib/nushell-ts-babel
 	url = https://github.com/herbertjones/nushell-ts-babel
+[submodule "lib/yasnippet"]
+	path = lib/yasnippet
+	url = https://github.com/joaotavora/yasnippet
+[submodule "lib/yasnippet-snippets"]
+	path = lib/yasnippet-snippets
+	url = https://github.com/AndreaCrotti/yasnippet-snippets
+[submodule "lib/tempel"]
+	path = lib/tempel
+	url = https://github.com/minad/tempel
+[submodule "lib/tempel-collection"]
+	path = lib/tempel-collection
+	url = https://github.com/Crandel/tempel-collection

@@ -773,6 +773,18 @@
     :init (persp-mode)
     :general (tyrant-def "TAB"     (cons "layouts" perspective-map)))
 #+end_src
+** template
+*** yasnippet
+#+begin_src emacs-lisp
+  (use-package yasnippet :config (yas-global-mode 1))
+#+end_src
+*** [[https://github.com/emacs-straight/tempel/][tempel]]
+#+begin_src emacs-lisp
+  (use-package tempel)
+
+  (use-package tempel-collection
+    :after tempel)
+#+end_src
 * Complete
 ** vertico
 #+BEGIN_SRC emacs-lisp
