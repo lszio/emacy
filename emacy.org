@@ -150,6 +150,15 @@
   (tab-bar-mode -1)
 #+END_SRC
 
+** garbage collect
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
+  (setq gc-cons-threshold most-positive-fixnum)
+  (setq gc-cons-percentage 0.6)
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+  (use-package gcmh :demand t :config (gcmh-mode 1))
+#+END_SRC
+
 * Binding :binding:
 ** general
 #+BEGIN_SRC emacs-lisp
