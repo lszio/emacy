@@ -247,3 +247,39 @@
 [submodule "lib/markdown-mode"]
 	path = lib/markdown-mode
 	url = https://github.com/jrblevin/markdown-mode
+[submodule "lib/less-css-mode"]
+	path = lib/less-css-mode
+	url = https://github.com/purcell/less-css-mode
+[submodule "lib/json-mode"]
+	path = lib/json-mode
+	url = https://github.com/json-emacs/json-mode
+[submodule "lib/prettier"]
+	path = lib/prettier
+	url = https://github.com/jscheid/prettier.el
+[submodule "lib/typescript-mode"]
+	path = lib/typescript-mode
+	url = https://github.com/emacs-typescript/typescript.el
+[submodule "lib/js2-mode"]
+	path = lib/js2-mode
+	url = https://github.com/mooz/js2-mode
+[submodule "lib/jsdoc"]
+	path = lib/jsdoc
+	url = https://github.com/isamert/jsdoc.el
+[submodule "lib/web-mode"]
+	path = lib/web-mode
+	url = https://github.com/fxbois/web-mode
+[submodule "lib/restclient"]
+	path = lib/restclient
+	url = https://github.com/pashky/restclient.el
+[submodule "lib/add-node-modules-path"]
+	path = lib/add-node-modules-path
+	url = https://github.com/codesuki/add-node-modules-path
+[submodule "lib/json-snatcher"]
+	path = lib/json-snatcher
+	url = https://github.com/Sterlingg/json-snatcher
+[submodule "lib/with-editor"]
+	path = lib/with-editor
+	url = https://github.com/magit/with-editor
+[submodule "lib/git-commit"]
+	path = lib/git-commit
+	url = https://github.com/magit/magit

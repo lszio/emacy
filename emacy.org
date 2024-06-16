@@ -43,6 +43,7 @@
                      (not (file-directory-p (concat dir subdir)))
                      ;; 目录匹配下面规则的都移除
                      (member subdir '("." ".." ;Linux 当前目录和父目录
+                                      "tests" "test" "docs"
                                       "dist" "node_modules" "__pycache__" ;语言相关的模块目录
                                       "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ;版本控制目录
                 (directory-files dir)))
@@ -53,7 +54,7 @@
                                   ;; .so .dll 文件指非 Elisp 语言编写的 Emacs 动态库
                                   (member (file-name-extension subdir-file) '("el" "so" "dll"))))
                          (directory-files subdir-path))
-          
+
             ;; 注意： add-to-list 函数的第三个参数必须为 t ， 表示加到列表末尾
             ;; 这样 Emacs 会从父目录到子目录的顺序搜索 Elisp 插件， 顺序反过来会导致 Emacs 无法正常启动
             (add-to-list 'load-path subdir-path t))
@@ -1297,23 +1298,6 @@
     :config
     (global-treesit-auto-mode))
 #+end_src
-** [[https://github.com/herbertjones/nushell-ts-mode][nushell-ts-mode]]
-#+begin_src emacs-lisp
-  (use-package nushell-ts-babel
-    :after org-contrib
-    :config
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((nushell . t))))
-
-  (use-package nushell-ts-mode
-    :hook (nushell-ts-mode-hook . (lambda ()
-                                    (corfu-mode 1)
-                                    (highlight-parentheses-mode 1)
-                                    (electric-pair-local-mode 1)
-                                    (electic-indent-local-mode 1))))
-
-#+end_src
 ** format
 *** TODO apheleia
 #+begin_src emacs-lisp
@@ -1341,6 +1325,66 @@
     (global-lsp-bridge-mode)
     (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs))
 #+end_src
+** languages
+*** [[https://github.com/herbertjones/nushell-ts-mode][nushell-ts-mode]]
+#+begin_src emacs-lisp
+  (use-package nushell-ts-babel
+    :after org-contrib
+    :config
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((nushell . t))))
+
+  (use-package nushell-ts-mode
+    :hook (nushell-ts-mode-hook . (lambda ()
+                                    (corfu-mode 1)
+                                    (highlight-parentheses-mode 1)
+                                    (electric-pair-local-mode 1)
+                                    (electic-indent-local-mode 1))))
+
+#+end_src
+** TODO web
+#+begin_src emacs-lisp
+  (use-package css-mode :ensure nil :init (setq css-indent-offset 2))
+  ;; (use-package scss-mode :init (setq scss-compile-at-save nil))
+  (use-package less-css-mode)
+  (use-package json-mode)
+
+  (use-package js2-mode
+    :mode (("\\.js\\'" . js2-mode)
+           ("\\.jsx\\'" . js2-jsx-mode))
+    :interpreter (("node" . js2-mode)
+                  ("node" . js2-jsx-mode))
+    :hook ((js2-mode . js2-imenu-extras-mode)
+           (js2-mode . js2-highlight-unused-variables-mode)))
+
+  (use-package prettier
+    :diminish
+    :hook ((js-mode js2-mode css-mode sgml-mode web-mode) . prettier-mode)
+    :init (setq prettier-pre-warm 'none))
+
+  (use-package typescript-mode :mode ("\\.ts[x]\\'" . typescript-mode))
+
+  (use-package web-mode
+    :mode "\\.\\(phtml\\|php\\|[gj]sp\\|as[cp]x\\|erb\\|djhtml\\|html?\\|hbs\\|ejs\\|jade\\|swig\\|tm?pl\\|vue\\)$"
+    :config
+    (setq web-mode-markup-indent-offset 2)
+    (setq web-mode-css-indent-offset 2)
+    (setq web-mode-code-indent-offset 2))
+
+  ;; Adds node_modules/.bin directory to `exec_path'
+  (use-package add-node-modules-path :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
+
+  (use-package jsdoc)
+
+  (use-package restclient
+    :mode ("\\.http\\'" . restclient-mode)
+    :config
+    (use-package restclient-test
+      :diminish
+      :hook (restclient-mode . restclient-test-mode)))
+#+end_src
+
 * Tool
 ** keyfreq
 #+BEGIN_SRC emacs-lisp
