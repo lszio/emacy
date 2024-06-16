@@ -629,81 +629,48 @@
 #+END_SRC
 
 ** fonts
+*** utils
+#+begin_src emacs-lisp
+  (defun fonts-installed (&rest font-list) (reverse (cl-intersection font-list (font-family-list) :test #'equal)))
+#+end_src
 *** fontaine
 #+BEGIN_SRC emacs-lisp
   (use-package fontaine
     :when (display-graphic-p)
-    ;; :hook (kill-emacs . fontaine-store-latest-preset)
     :config
-    (setq fontaine-latest-state-file
-          (locate-user-emacs-file "etc/fontaine-latest-state.eld"))
+    (setq fontaine-latest-state-file (locate-user-emacs-file "etc/fontaine-latest-state.eld"))
     (setq fontaine-presets
-          '((regular
-             :default-height 140
-             :default-weight regular
-             :fixed-pitch-height 1.0
-             :variable-pitch-height 1.0
-             )
-            (large
-             :default-height 180
-             :default-weight normal
-             :fixed-pitch-height 1.0
-             :variable-pitch-height 1.05
-             )
-            (t
-             :default-family "Source Code Pro"
-             :fixed-pitch-family "Source Code Pro"
-             :variable-pitch-family "Source Code Pro"
-             :italic-family "Source Code Pro"
-             :variable-pitch-weight normal
-             :bold-weight normal
-             :italic-slant italic
-             :line-spacing 0.1)
-            ))
+      '((regular
+         :default-height 140
+         :default-weight regular
+         :fixed-pitch-height 1.0
+         :variable-pitch-height 1.0)
+        (large
+         :default-height 180
+         :default-weight normal
+         :fixed-pitch-height 1.0
+         :variable-pitch-height 1.05)
+        (t
+         :default-family "Fira Code"
+         :fixed-pitch-family "Fira Code"
+         :variable-pitch-family "Fira Code"
+         :italic-family "Fira Code"
+         :variable-pitch-weight normal
+         :bold-weight normal
+         :italic-slant italic
+         :line-spacing 0.1)))
     ;; (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
     (fontaine-set-preset 'regular)
 
     ;; set emoji font
-    (set-fontset-font
-     t
-     (if (version< emacs-version "28.1")
-         '(#x1f300 . #x1fad0)
-       'emoji)
-     (cond
-      ((member "Noto Emoji" (font-family-list)) "Noto Emoji")
-      ((member "Symbola" (font-family-list)) "Symbola")
-      ((member "Apple Color Emoji" (font-family-list)) "Apple Color Emoji")
-      ((member "Noto Color Emoji" (font-family-list)) "Noto Color Emoji")
-      ((member "Segoe UI Emoji" (font-family-list)) "Segoe UI Emoji")
-      ))
-
+    (set-fontset-font t (if (version< emacs-version "28.1") '(#x1f300 . #x1fad0) 'emoji)
+      (car (fonts-installed "Noto Emoji" "Symbola" "Apple Color Emoji" "Noto Color Emoji" "Segoe UI Emoji")))
     ;; set Chinese font
     (dolist (charset '(kana han symbol cjk-misc bopomofo))
       (set-fontset-font
        (frame-parameter nil 'font)
        charset
-       (font-spec :family
-                  (cond
-                   ((eq system-type 'darwin)
-                    (cond
-                     ((member "Sarasa Mono SC Nerd" (font-family-list)) "Sarasa Mono SC Nerd")
-                     ((member "PingFang SC" (font-family-list)) "PingFang SC")
-                     ((member "WenQuanYi Zen Hei" (font-family-list)) "WenQuanYi Zen Hei")
-                     ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")
-                     ))
-                   ((eq system-type 'gnu/linux)
-                    (cond
-                     ((member "Sarasa Mono SC Nerd" (font-family-list)) "Sarasa Mono SC Nerd")
-                     ((member "WenQuanYi Micro Hei" (font-family-list)) "WenQuanYi Micro Hei")
-                     ((member "WenQuanYi Zen Hei" (font-family-list)) "WenQuanYi Zen Hei")
-                     ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")
-                     ))
-                   (t
-                    (cond
-                     ((member "Sarasa Mono SC Nerd" (font-family-list)) "Sarasa Mono SC Nerd")
-                     ((member "Microsoft YaHei" (font-family-list)) "Microsoft YaHei")
-                     )))
-                  )))
+       (font-spec :family (car (fonts-installed "LXGW Wenkai" "霞鹜文楷" "Sarasa Gothic SC" "更纱黑体 SC")))))
 
     ;; set Chinese font scale
     (setq face-font-rescale-alist `(
@@ -715,9 +682,9 @@
                                     ("Lantinghei SC"       . 1.16)
                                     ("Kaiti SC"            . 1.16)
                                     ("Yuanti SC"           . 1.16)
-                                    ("Apple Color Emoji"   . 0.91)
-                                    ))
-    )
+                                    ("Apple Color Emoji"   . 0.91))))
+
+  (use-package fontify-face)
 #+END_SRC
 
 ** window
@@ -1087,7 +1054,10 @@
     ;; useful beyond Vertico.
     (setq read-extended-command-predicate #'command-completion-default-include-p))
 #+END_SRC
-
+** pinyinlib
+#+begin_src emacs-lisp
+  (use-package pinyinlib)
+#+end_src
 ** orderless
 #+begin_src emacs-lisp
   ;; Optionally use the `orderless' completion style.
@@ -1096,9 +1066,13 @@
     ;; Configure a custom style dispatcher (see the Consult wiki)
     ;; (setq orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch)
     ;;       orderless-component-separator #'orderless-escapable-split-on-space)
-    (setq completion-styles '(orderless basic)
-          completion-category-defaults nil
-          completion-category-overrides '((file (styles partial-completion)))))
+    (setq completion-styles '(orderless partial-completion basic))
+    (setq orderless-component-separator "[ &]") ; & is for company because space will break completion
+    (setq completion-category-defaults nil)
+    (setq completion-category-overrides '((file (styles partial-completion))))
+    :config
+    (defun completion--regex-pinyin (str) (orderless-regexp (pinyinlib-build-regexp-string str)))
+    (add-to-list 'orderless-matching-styles 'completion--regex-pinyin))
 #+end_src
 ** marginalia
 插件给迷你缓冲区的补全候选条目添加一些提示。
@@ -1219,6 +1193,8 @@
 #+begin_src emacs-lisp
   (use-package embark-consult :hook (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
+** TODO cape
+** TODO corfu
 ** nerd-icon-completion :icon:
 #+begin_src emacs-lisp
   (use-package nerd-icons-completion

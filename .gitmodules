@@ -199,3 +199,6 @@
 [submodule "lib/evil-goggles"]
 	path = lib/evil-goggles
 	url = https://github.com/edkolev/evil-goggles
+[submodule "lib/fontify-face"]
+	path = lib/fontify-face
+	url = https://github.com/Fuco1/fontify-face
