@@ -1040,6 +1040,10 @@
 ** highlight
 #+begin_src emacs-lisp
   (use-package hl-todo :config (global-hl-todo-mode))
+  (use-package highlight-indent-guides
+    :hook (prog-mode . highlight-indent-guides-mode)
+    :custom (highlight-indent-guides-method 'fill))
+  (use-package rainbow-delimiters :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
 * Complete
 ** vertico
@@ -1240,7 +1244,52 @@
     :config (setq treesit-font-lock-level 4)
     :init
     (setq treesit-language-source-alist
-          '((nu . ("https://github.com/nushell/tree-sitter-nu/")))))
+          '((nu . ("https://github.com/nushell/tree-sitter-nu/"))
+            (bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
+            (c . ("https://github.com/tree-sitter/tree-sitter-c"))
+            (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+            (css . ("https://github.com/tree-sitter/tree-sitter-css"))
+            (cmake . ("https://github.com/uyha/tree-sitter-cmake"))
+            (csharp     . ("https://github.com/tree-sitter/tree-sitter-c-sharp.git"))
+            (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
+            (elisp . ("https://github.com/Wilfred/tree-sitter-elisp"))
+            (go . ("https://github.com/tree-sitter/tree-sitter-go"))
+            (gomod      . ("https://github.com/camdencheek/tree-sitter-go-mod.git"))
+            (html . ("https://github.com/tree-sitter/tree-sitter-html"))
+            (java       . ("https://github.com/tree-sitter/tree-sitter-java.git"))
+            (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+            (json . ("https://github.com/tree-sitter/tree-sitter-json"))
+            (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
+            (make . ("https://github.com/alemuller/tree-sitter-make"))
+            (markdown . ("https://github.com/MDeiml/tree-sitter-markdown" nil "tree-sitter-markdown/src"))
+            (ocaml . ("https://github.com/tree-sitter/tree-sitter-ocaml" nil "ocaml/src"))
+            (org . ("https://github.com/milisims/tree-sitter-org"))
+            (python . ("https://github.com/tree-sitter/tree-sitter-python"))
+            (php . ("https://github.com/tree-sitter/tree-sitter-php"))
+            (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "typescript/src"))
+            (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "tsx/src"))
+            (ruby . ("https://github.com/tree-sitter/tree-sitter-ruby"))
+            (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
+            (sql . ("https://github.com/m-novikov/tree-sitter-sql"))
+            (vue . ("https://github.com/merico-dev/tree-sitter-vue"))
+            (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))
+            (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
+            (zig . ("https://github.com/GrayJack/tree-sitter-zig"))
+            ))
+
+    (setq major-mode-remap-alist
+          '((c-mode          . c-ts-mode)
+            (c++-mode        . c++-ts-mode)
+            (cmake-mode      . cmake-ts-mode)
+            (conf-toml-mode  . toml-ts-mode)
+            (css-mode        . css-ts-mode)
+            (js-mode         . js-ts-mode)
+            (js-json-mode    . json-ts-mode)
+            (python-mode     . python-ts-mode)
+            (sh-mode         . bash-ts-mode)
+            (typescript-mode . typescript-ts-mode)))
+    (add-hook 'emacs-lisp-mode-hook #'(lambda () (treesit-parser-create 'elisp)))
+    (setq treesit-extra-load-path (list (expand-file-name "var/treesit" user-emacs-directory))))
 #+end_src
 *** treesit-auto
 #+begin_src emacs-lisp
@@ -1265,7 +1314,33 @@
                                     (electic-indent-local-mode 1))))
 
 #+end_src
+** format
+*** TODO apheleia
+#+begin_src emacs-lisp
+  (use-package apheleia :config (apheleia-global-mode 1))
+#+end_src
+** magit
+#+begin_src emacs-lisp
+  (use-package magit
+   :general
+   (tyrant-def "g g" 'magit))
 
+  (use-package git-timemachine)
+#+end_src
+** misc
+#+begin_src 
+  (use-package editorconfig :config (editorconfig-mode 1))
+  (use-package lentic :config (global-lentic-mode))
+#+end_src
+** lsp
+*** lsp-bridge
+#+begin_src emacs-lisp
+  (use-package markdown-mode)
+  (use-package lsp-bridge
+    :config
+    (global-lsp-bridge-mode)
+    (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs))
+#+end_src
 * Tool
 ** keyfreq
 #+BEGIN_SRC emacs-lisp
@@ -1319,4 +1394,29 @@
   ;;; init.el ends here
 #+END_SRC
 * Reference
+** cheat-sheets
 - [[https://github.com/alycklama/evil-mode-cheat-sheet][evil-cheat-sheet]]
+
+** configs
+- [[https://github.com/redguardtoo/emacs.d][redguardtoo]]
+https://remacs.fun/
+https://github.com/Ethanlinyf/General-Pure-Emacs
+https://github.com/HerculeWu/HubbleEmacs/blob/main/Emacs.org
+https://github.com/Eason0210/.emacs.d
+https://github.com/MatthewZMD/.emacs.d
+https://github.com/willbchang/ward-emacs
+https://github.com/condy0919/.emacs.d
+https://github.com/seagle0128/.emacs.d
+https://github.com/nowislewis/nowisemacs/blob/master/init.org
+https://github.com/purcell/emacs.d/tree/master
+https://github.com/nasyxx/emacs.d
+
+** tips
+https://swsnr.de/emacs-script-pitfalls
+
+** collections
+https://github.com/lujun9972/emacs-document
+https://github.com/caisah/emacs.dz
+
+** query
+https://github.com/search?utf8=%E2%9C%93&q=emacs+configuration&type=repositories&p=1

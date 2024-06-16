@@ -220,3 +220,30 @@
 [submodule "lib/rime"]
 	path = lib/rime
 	url = https://github.com/DogLooksGood/emacs-rime
+[submodule "lib/lentic"]
+	path = lib/lentic
+	url = https://github.com/phillord/lentic
+[submodule "lib/editorconfig"]
+	path = lib/editorconfig
+	url = https://github.com/editorconfig/editorconfig-emacs
+[submodule "lib/apheleia"]
+	path = lib/apheleia
+	url = https://github.com/radian-software/apheleia
+[submodule "lib/rainbow-delimiters"]
+	path = lib/rainbow-delimiters
+	url = https://github.com/Fanael/rainbow-delimiters
+[submodule "lib/magit"]
+	path = lib/magit
+	url = https://github.com/magit/magit
+[submodule "lib/highlight-indent-guides"]
+	path = lib/highlight-indent-guides
+	url = https://github.com/DarthFennec/highlight-indent-guides
+[submodule "lib/lsp-bridge"]
+	path = lib/lsp-bridge
+	url = https://github.com/manateelazycat/lsp-bridge
+[submodule "lib/git-timemachine"]
+	path = lib/git-timemachine
+	url = https://github.com/emacsmirror/git-timemachine
+[submodule "lib/markdown-mode"]
+	path = lib/markdown-mode
+	url = https://github.com/jrblevin/markdown-mode
