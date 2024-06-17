@@ -70,8 +70,8 @@
 
 ** exec-path
 #+BEGIN_SRC emacs-lisp
-  (setq exec-path (append '("~/.emacs.d/python/.venv/bin"
-                            "~/.emacs.d/node/node_modules/.bin"
+  (setq exec-path (append '("~/.emacs.d/env/python/.venv/bin"
+                            "~/.emacs.d/env/node/node_modules/.bin"
                             "~/.bun/bin"
                             "~/.local/bin") exec-path))
 #+END_SRC

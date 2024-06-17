@@ -1,9 +1,9 @@
 [project]
-name = "emacy"
-version = "0.0.1"
-description = "python environment for emacy"
+name = "emapy"
+version = "0.1.0"
+description = "Add your description here"
 authors = [
-    {name = "liszt21", email = "liszt21@qq.com"},
+    { name = "lszio", email = "lszio@qq.com" }
 ]
 dependencies = [
     "epc>=0.0.5",
@@ -23,10 +23,24 @@ dependencies = [
     "PyQt6-WebEngine-Qt6>=6.6.1",
     "pysocks>=1.7.1",
 ]
-requires-python = ">=3.8"
-readme = """emacy"""
 license = {text = "MIT"}
+requires-python = ">= 3.8"
+
+[project.scripts]
+"emapy" = "emacy:main"
 
 [build-system]
-requires = ["setuptools>=61", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "setuptools>=70.0.0",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/emacy"]
