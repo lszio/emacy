@@ -283,3 +283,36 @@
 [submodule "lib/git-commit"]
 	path = lib/git-commit
 	url = https://github.com/magit/magit
+[submodule "lib/org-roam"]
+	path = lib/org-roam
+	url = https://github.com/org-roam/org-roam
+[submodule "lib/mpvi"]
+	path = lib/mpvi
+	url = https://github.com/lorniu/mpvi
+[submodule "lib/org-appear"]
+	path = lib/org-appear
+	url = https://github.com/awth13/org-appear
+[submodule "lib/elfeed"]
+	path = lib/elfeed
+	url = https://github.com/skeeto/elfeed
+[submodule "lib/elfeed-org"]
+	path = lib/elfeed-org
+	url = https://github.com/remyhonig/elfeed-org
+[submodule "lib/org-roam-ui"]
+	path = lib/org-roam-ui
+	url = https://github.com/org-roam/org-roam-ui
+[submodule "lib/emms"]
+	path = lib/emms
+	url = https://git.savannah.gnu.org/git/emms.git
+[submodule "lib/simple-httpd"]
+	path = lib/simple-httpd
+	url = https://github.com/skeeto/emacs-web-server
+[submodule "lib/org-contrib"]
+	path = lib/org-contrib
+	url = https://github.com/emacsmirror/org-contrib
+[submodule "lib/emacsql"]
+	path = lib/emacsql
+	url = https://github.com/magit/emacsql
+[submodule "lib/websocket"]
+	path = lib/websocket
+	url = https://github.com/ahyatt/emacs-websocket

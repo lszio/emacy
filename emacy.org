@@ -1241,6 +1241,130 @@
     (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 #+end_src
 * TODO Org Mode
+** default
+#+begin_src emacs-lisp
+  (setq org-directory  "~/Notes/"
+        org-archive-location (concat org-directory "/archive/%s::")
+        org-contacts-files (list (concat org-directory "/archive/contacts.org"))
+        org-agenda-files (list org-directory (concat org-directory "work/"))
+        deft-directory org-directory
+        org-roam-directory org-directory
+        org-brain-path org-directory
+        org-roam-file-exclude-regexp ".*/bak/.*"
+        org-brain-visualize-default-choices 'all
+        rmh-elfeed-org-files (list (concat org-directory "content/feeds.org")))
+
+  (setq org-fontify-whole-heading-line t
+        org-fontify-quote-and-verse-blocks t
+        org-hide-macro-markers t
+        org-startup-indented t
+        org-adapt-indentation t
+        org-startup-with-inline-images t
+        org-startup-with-latex-preview t)
+
+  (setq org-log-done 'time)
+  ;; (setq org-priority-lowest ?E)
+  (setq org-contacts-icon-use-gravatar nil)
+  (setq org-superstar-headline-bullets-list '("☯", "☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷"))
+  (setq org-todo-keywords
+        '((sequence "NEXT(n)" "TODO(t)" "PEND(p)" "WILL(w@/!)" "|" "DONE(d)" "QUIT(q@)")
+          (sequence "[-](N)" "[ ](T)" "[:](P)" "[?](W)" "|" "[X](D)" "[Q](Q)")))
+  (setq org-todo-keyword-faces
+        '(("TODO" :foreground "orange"       :weight bold)
+          ("[ ]"  :foreground "orange"       :weight bold)
+          ("NEXT" :foreground "yellow"       :weight bold)
+          ("[-]"  :foreground "yellow"       :weight bold)
+          ("PEND" :foreground "pink"         :weight bold)
+          ("[:]"  :foreground "pink"         :weight bold)
+          ("WILL" :foreground "purple"       :weight bold)
+          ("[?]"  :foreground "purple"       :weight bold)
+          ("DONE" :foreground "forest green" :weight bold)
+          ("[X]"  :foreground "forest green" :weight bold)
+          ("QUIT" :foreground "grey"         :weight bold)
+          ("[Q]"  :foreground "grey"         :weight bold)))
+
+  (use-package org-contrib)
+#+end_src
+** agenda
+#+begin_src emacs-lisp
+  (setq org-agenda-archives-mode t)
+  (setq org-export-select-tags '("Publish" "Public" "export")
+        org-publish-project-alist
+        '(("content"
+            :base-directory "~/Notes/content/"
+            :publishing-directory "~/Notes/publish/"
+            ;; :publishing-function (org-org-publish-to-org org-md-publish-to-md)
+            :publishing-function org-org-publish-to-org
+            :select-tags ("Publish" "Public" "Export" "export" "publish" "public")
+            :exclude-tags ("Private" "Secret" "noexport")
+            :recursive t
+            :with-broken-links t
+            :with-toc nil)))
+#+end_src
+** elfeed
+#+begin_src emacs-lisp
+  (use-package elfeed)
+
+  (use-package elfeed-org
+    :config
+    (setq rmh-elfeed-org-files (list "~/Notes/feeds.org"))
+    (elfeed-org))
+#+end_src
+** appear
+#+begin_src emacs-lisp
+  (use-package org-appear
+    :hook (org-mode . org-appear-mode)
+    :config
+    (setq org-appear-autolinks t)
+    (setq org-appear-autosubmarkers t)
+    (setq org-appear-autoentities t)
+    (setq org-appear-autokeywords t)
+    (setq org-appear-inside-latex t))
+#+end_src
+** TODO deft
+** TODO [[https://github.com/minad/org-modern][org-modern]]
+** roam
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :after org
+    :init
+    (setq org-roam-directory org-directory
+          org-roam-v2-ack t)
+    :config
+    (org-roam-setup)
+    (add-to-list 'display-buffer-alist
+                  '(("*org-roam*"
+                    (display-buffer-in-direcion)
+                    (direction . right)
+                    (window-width . 0.33)
+                    (window-height . fit-window-to-buffer))))
+    :general
+    (tyrant-def
+      "n" (cons "Notes" (make-sparse-keymap))
+      "n b" 'org-roam-buffer-toggle
+      "n f" 'org-roam-node-find
+      "n g" 'org-roam-graph
+      "n i" 'org-roam-node-insert
+      "n c" 'org-roam-capture
+      "n t" 'org-roam-tag-add
+      "n r" 'org-roam-ref-add
+      "n a" 'org-roam-alias-add))
+
+  (use-package org-roam-ui)
+#+end_src
+** misc
+#+begin_src emacs-lisp
+  (setq deft-recursive t
+        deft-recursive-ignore-dir-regexp (rx (or "." ".." "logseq") eol))
+
+  ;; (use-package org-fragtog :hook (org-mode . org-fragtog-mode))
+
+  ;; (use-package tex :elpaca auctex)
+
+  (use-package mpvi 
+    :general
+    (tyrant-def))
+#+end_src
 * Program
 ** treesit
 #+begin_src emacs-lisp
