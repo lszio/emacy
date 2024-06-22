@@ -322,3 +322,15 @@
 [submodule "lib/symbol-overlay"]
 	path = lib/symbol-overlay
 	url = https://github.com/wolray/symbol-overlay
+[submodule "lib/vterm"]
+	path = lib/vterm
+	url = https://github.com/akermu/emacs-libvterm
+[submodule "lib/multi-vterm"]
+	path = lib/multi-vterm
+	url = https://github.com/suonlight/multi-vterm
+[submodule "lib/vterm-toggle"]
+	path = lib/vterm-toggle
+	url = https://github.com/jixiuf/vterm-toggle
+[submodule "lib/aweshell"]
+	path = lib/aweshell
+	url = https://github.com/manateelazycat/aweshell

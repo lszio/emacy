@@ -200,7 +200,11 @@
         "m"       (cons "files" (make-sparse-keymap))
         "m"       (cons "major mode" (make-sparse-keymap))
         "s"       (cons "search" (make-sparse-keymap))
-        "u"       '("universal arg" . universal-argument)))
+        "t"       (cons "terminal" (make-sparse-keymap))
+
+        "u"       (cons "universal arg" 'universal-argument)
+        )
+    )
 #+END_SRC
 
 ** evil
@@ -1058,6 +1062,126 @@
      ("M-n" . 'symbol-overlay-switch-forward)
      ("M-p" . 'symbol-overlay-switch-backward)
      ("M-S-i" . 'symbol-overlay-remove-all)))
+#+end_src
+** terminal
+*** eshell
+#+begin_src emacs-lisp
+  (use-feature eshell
+    :functions eshell/alias
+    :hook ((eshell-mode . (lambda () (term-mode-common-init) (visual-line-mode 1))))
+    :config
+    (defun term-mode-common-init ()
+      (setq-local scroll-margin 0)
+      (setq-local truncate-lines t))
+
+    (defalias 'eshell/vi 'find-file)
+    (defalias 'eshell/vim 'find-file)
+
+    (defun eshell/bat (file)
+      "cat FILE with syntax highlight."
+      (with-temp-buffer
+        (insert-file-contents file)
+        (let ((buffer-file-name file))
+          (delay-mode-hooks
+            (set-auto-mode)
+            (font-lock-ensure)))
+        (buffer-string)))
+    (defalias 'eshell/cat 'eshell/bat)
+
+    ;; 交互式进入目录
+    (defun eshell/z ()
+      "cd to directory with completion."
+      (let ((dir (completing-read "Directory: " (ring-elements eshell-last-dir-ring) nil t)))
+        (eshell/cd dir)))
+
+    ;; 查找文件
+    (defun eshell/f (filename &optional dir)
+      "Search for files matching FILENAME in either DIR or the
+  current directory."
+      (let ((cmd (concat
+                  ;; using find
+                  (executable-find "find")
+                  " " (or dir ".")
+                  " -not -path '*/.git*'"            ; ignore .git directory
+                  " -and -not -path 'build'"         ; ignore cmake build directory
+                  " -and -not -path '*/eln-cache*'"  ; ignore eln cache
+                  " -and -type f -and -iname "
+                  "'*" filename "*'")))
+        (eshell-command-result cmd)))
+
+    :custom
+    (eshell-banner-message
+     '(format "%s %s\n"
+              (propertize (format " %s " (string-trim (buffer-name)))
+                          'face 'mode-line-highlight)
+              (propertize (current-time-string)
+                          'face 'font-lock-keyword-face)))
+    (eshell-scroll-to-bottom-on-input 'all)
+    (eshell-scroll-to-bottom-on-output 'all)
+    (eshell-kill-on-exit t)
+    (eshell-kill-processes-on-exit t)
+    ;; Don't record command in history if starts with whitespace
+    (eshell-input-filter 'eshell-input-filter-initial-space)
+    (eshell-error-if-no-glob t)
+    (eshell-glob-case-insensitive t)
+    ;; set scripts
+    (eshell-rc-script (locate-user-emacs-file "etc/eshell/profile"))
+    (eshell-login-script (locate-user-emacs-file "etc/eshell/login")))
+
+  (use-feature em-hist
+    :defer t
+    :custom
+    (eshell-history-size 1024)
+    (eshell-hist-ignoredups t)
+    (eshell-save-history-on-exit t))
+
+  (use-feature em-rebind
+    :commands eshell-delchar-or-maybe-eof)
+
+  (use-feature esh-mode
+    :bind (:map eshell-mode-map
+                ("C-d" . eshell-delchar-or-maybe-eof)
+                ("C-r" . consult-history)
+                ("C-l" . eshell/clear)))
+
+  ;; (use-package eshell-syntax-highlighting
+  ;;   :after esh-mode
+  ;;   :ensure t
+  ;;   :hook (eshell-mode . eshell-syntax-highlighting-global-mode)
+  ;;   :custom-face
+  ;;   (eshell-syntax-highlighting-shell-command-face ((t (:foreground "#7cc77f" :bold t)))))
+
+  (use-package aweshell
+    :general
+    (tyrant-def
+      "t e" 'aweshell-dedicated-toggle
+      "t a" 'aweshell-new
+      "t s" 'aweshell-sudo-toggle
+      "t j" 'aweshell-prev
+      "t k" 'aweshell-next
+      "t x" 'aweshell-dedicated-close))
+#+end_src
+*** vterm
+#+begin_src emacs-lisp
+  (use-package vterm
+    :unless windows?)
+
+  (use-package multi-vterm
+    :after vterm
+    :unless windows?)
+
+  (use-package vterm-toggle
+    :after vterm
+    :general
+    (tyrant-def
+      "t t" 'vterm-toggle
+      "t c" 'multi-vterm
+      "t p" 'multi-vterm-project
+      "t d" 'multi-vterm-dedicated-toggle
+      "t n" 'vterm-toggle-forward
+      "t p" 'vterm-toggle-backward
+      )
+    )
 #+end_src
 * Complete
 ** vertico
