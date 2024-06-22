@@ -287,8 +287,7 @@
 
 ** [[https://github.com/abo-abo/hydra][hydra]]
 #+begin_src emacs-lisp
-  (use-package hydra
-    :demand t)
+  (use-package hydra :demand t)
 #+end_src
 
 ** bindings
@@ -1049,6 +1048,17 @@
     :custom (highlight-indent-guides-method 'fill))
   (use-package rainbow-delimiters :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
+*** symbol-overlay
+#+begin_src emacs-lisp
+  (use-package symbol-overlay
+    :config
+    (symbol-overlay-mode +1)
+    :bind
+    (("M-i" . 'symbol-overlay-put)
+     ("M-n" . 'symbol-overlay-switch-forward)
+     ("M-p" . 'symbol-overlay-switch-backward)
+     ("M-S-i" . 'symbol-overlay-remove-all)))
+#+end_src
 * Complete
 ** vertico
 #+BEGIN_SRC emacs-lisp
@@ -1427,8 +1437,13 @@
 #+end_src
 ** format
 *** TODO apheleia
-#+begin_src emacs-lisp
-  (use-package apheleia :config (apheleia-global-mode 1))
+#+begin_src emacs-lisp :tangle no
+  (use-package apheleia
+    :config
+    (apheleia-global-mode 1)
+    (push '(biome . ("bunx" "\@biomejs/biome format")) apheleia-formatters)
+    (setf (alist-get 'typescript-ts-mode apheleia-mode-alist) '(biome))
+    )
 #+end_src
 ** magit
 #+begin_src emacs-lisp
@@ -1450,7 +1465,12 @@
   (use-package lsp-bridge
     :config
     (global-lsp-bridge-mode)
-    (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs))
+    (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs)
+    :general
+    (tyrant-def
+      "c d" 'lsp-bridge-find-def
+      "c D" 'lsp-bridge-find-references
+      "c l" 'lsp-bridge-diagnostic-list))
 #+end_src
 ** languages
 *** [[https://github.com/herbertjones/nushell-ts-mode][nushell-ts-mode]]

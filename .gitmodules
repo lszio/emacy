@@ -1,3 +1,6 @@
+[submodule "mod/doomemacs"]
+	path = mod/doomemacs
+	url = https://github.com/doomemacs/doomemacs
 [submodule "lib/general"]
 	path = lib/general
 	url = https://github.com/noctuid/general.el
@@ -316,3 +319,6 @@
 [submodule "lib/websocket"]
 	path = lib/websocket
 	url = https://github.com/ahyatt/emacs-websocket
+[submodule "lib/symbol-overlay"]
+	path = lib/symbol-overlay
+	url = https://github.com/wolray/symbol-overlay
