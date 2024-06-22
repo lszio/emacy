@@ -1559,6 +1559,12 @@
     :config
     (global-treesit-auto-mode))
 #+end_src
+*** treesit-fold
+#+begin_src emacs-lisp
+  (use-package treesit-fold
+    :hook
+    ((prog-mode . treesit-fold-mode)))
+#+end_src
 ** format
 *** TODO apheleia
 #+begin_src emacs-lisp :tangle no

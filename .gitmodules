@@ -334,3 +334,6 @@
 [submodule "lib/aweshell"]
 	path = lib/aweshell
 	url = https://github.com/manateelazycat/aweshell
+[submodule "lib/treesit-fold"]
+	path = lib/treesit-fold
+	url = https://github.com/emacs-tree-sitter/treesit-fold.git
