@@ -7,6 +7,18 @@
 #+PROPERTY: header-args :tangle init.el :noweb yes :session init
 #+AUTO_TANGLE: t
 
+* Inbox
+** TODO holo-layer
+** TODO denote
+   https://poview.org/posts/emacs-with-denote-and-logseq-for-note-taking/
+** misc
+https://github.com/jdtsmith/indent-bars
+https://github.com/bbatsov/prelude
+https://github.com/drym-org/symex.el
+https://github.com/manateelazycat/fingertip
+https://github.com/Eason0210/.emacs.d
+
+https://emacs-china.org/t/topic/21079
 * Header
 ** early-init.el :early-init:
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
@@ -137,8 +149,9 @@
   (set-buffer-file-coding-system 'utf-8)
   (prefer-coding-system 'utf-8)
   (modify-coding-system-alist 'process "*" 'utf-8)
-  (modify-coding-system-alist 'file "\\.org" 'utf-8)
+  (modify-coding-system-alist 'file "\\.org\\'" 'utf-8)
   (when (display-graphic-p) (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+  (when windows? (set-w32-system-coding-system 'utf-8))
 #+END_SRC
 
 ** modes
@@ -207,6 +220,7 @@
 #+END_SRC
 
 ** evil
+[[https://evil.readthedocs.io/en/latest/index.html][docs]]
 #+BEGIN_SRC emacs-lisp
   (use-package evil
     :demand t
@@ -1044,8 +1058,7 @@
         ("x" dumb-jump-go-prefer-external-other-window "Go external other window")
         ("i" dumb-jump-go-prompt "Prompt")
         ("l" dumb-jump-quick-look "Quick look")
-        ("b" dumb-jump-back "Back"))
-    )
+        ("b" dumb-jump-back "Back")))
 #+end_src
 ** highlight
 #+begin_src emacs-lisp
@@ -1763,13 +1776,21 @@
   ;;; init.el ends here
 #+END_SRC
 * Reference
+  [[https://emacsdocs.org/][emacs docs]]
+https://github.com/lujun9972/emacs-document
+[[https://swsnr.de/emacs-script-pitfalls][tips]]
+
 ** cheat-sheets
 - [[https://github.com/alycklama/evil-mode-cheat-sheet][evil-cheat-sheet]]
 
 ** configs
-- [[https://github.com/redguardtoo/emacs.d][redguardtoo]]
+*** [[https://github.com/redguardtoo/emacs.d][redguardtoo]] :org:literal:
+*** [[https://github.com/tecosaur/emacs-config][tecosaur]] :org:doom:
+*** [[https://github.com/caisah/emacs.dz][emacs.dz]] :collection:
+*** [[https://github.com/purcell/emacs.d/tree/master][purcell]]
+*** [[https://github.com/Ethanlinyf/General-Pure-Emacs][General Pure Emacs]]
+*** TODO misc
 https://remacs.fun/
-https://github.com/Ethanlinyf/General-Pure-Emacs
 https://github.com/HerculeWu/HubbleEmacs/blob/main/Emacs.org
 https://github.com/Eason0210/.emacs.d
 https://github.com/MatthewZMD/.emacs.d
@@ -1777,15 +1798,12 @@ https://github.com/willbchang/ward-emacs
 https://github.com/condy0919/.emacs.d
 https://github.com/seagle0128/.emacs.d
 https://github.com/nowislewis/nowisemacs/blob/master/init.org
-https://github.com/purcell/emacs.d/tree/master
 https://github.com/nasyxx/emacs.d
-
-** tips
-https://swsnr.de/emacs-script-pitfalls
-
-** collections
-https://github.com/lujun9972/emacs-document
-https://github.com/caisah/emacs.dz
 
 ** query
 https://github.com/search?utf8=%E2%9C%93&q=emacs+configuration&type=repositories&p=1
+
+** tutorial
+https://github.com/redguardtoo/mastering-emacs-in-one-year-guide
+
+http://doc.norang.ca/org-mode.html#AgendaSetup
