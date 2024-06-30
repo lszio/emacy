@@ -238,9 +238,6 @@
 [submodule "lib/magit"]
 	path = lib/magit
 	url = https://github.com/magit/magit
-[submodule "lib/highlight-indent-guides"]
-	path = lib/highlight-indent-guides
-	url = https://github.com/DarthFennec/highlight-indent-guides
 [submodule "lib/lsp-bridge"]
 	path = lib/lsp-bridge
 	url = https://github.com/manateelazycat/lsp-bridge
@@ -343,3 +340,6 @@
 [submodule "lib/diff-hl"]
 	path = lib/diff-hl
 	url = https://github.com/dgutov/diff-hl
+[submodule "lib/indent-bars"]
+	path = lib/indent-bars
+	url = https://github.com/jdtsmith/indent-bars

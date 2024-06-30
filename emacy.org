@@ -12,13 +12,17 @@
 ** TODO denote
    https://poview.org/posts/emacs-with-denote-and-logseq-for-note-taking/
 ** misc
-https://github.com/jdtsmith/indent-bars
 https://github.com/bbatsov/prelude
 https://github.com/drym-org/symex.el
 https://github.com/manateelazycat/fingertip
-https://github.com/Eason0210/.emacs.d
 
 https://emacs-china.org/t/topic/21079
+** TODO email
+   mu
+   wanderlust
+   notmuch
+** TODO jira
+   ox-confluence
 * Header
 ** early-init.el :early-init:
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
@@ -1063,11 +1067,24 @@ https://emacs-china.org/t/topic/21079
 ** highlight
 #+begin_src emacs-lisp
   (use-package hl-todo :config (global-hl-todo-mode))
+  (use-package rainbow-delimiters :hook (prog-mode . rainbow-delimiters-mode))
+#+end_src
+*** indent
+**** QUIT highlight-indent-guides
+#+begin_src emacs-lisp :tangle no
   (use-package highlight-indent-guides
     :hook (prog-mode . highlight-indent-guides-mode)
     :custom (highlight-indent-guides-method 'fill))
-  (use-package rainbow-delimiters :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
+**** [[https://github.com/jdtsmith/indent-bars][indent-bars]]                                                    :treesit:
+#+begin_src emacs-lisp
+  (use-package indent-bars
+    :hook (prog-mode . indent-bars-mode)
+    :custom
+    (indent-bars-treesit-support t)
+    (indent-bars-treesit-scope '((python function_definition class_definition for_statement if_statement with_statement while_statement))))
+#+end_src
+
 *** symbol-overlay
 #+begin_src emacs-lisp
   (use-package symbol-overlay
@@ -1789,6 +1806,8 @@ https://github.com/lujun9972/emacs-document
 *** [[https://github.com/caisah/emacs.dz][emacs.dz]] :collection:
 *** [[https://github.com/purcell/emacs.d/tree/master][purcell]]
 *** [[https://github.com/Ethanlinyf/General-Pure-Emacs][General Pure Emacs]]
+*** [[https://github.com/sachac/.emacs.d/][sachac]] :org:
+*** [[https://github.com/Eason0210/.emacs.d][Eason0210]] :borg:eglot:
 *** TODO misc
 https://remacs.fun/
 https://github.com/HerculeWu/HubbleEmacs/blob/main/Emacs.org
