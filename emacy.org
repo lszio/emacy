@@ -8,14 +8,11 @@
 #+AUTO_TANGLE: t
 
 * Inbox
-** TODO holo-layer
 ** TODO denote
    https://poview.org/posts/emacs-with-denote-and-logseq-for-note-taking/
 ** misc
 https://github.com/bbatsov/prelude
 https://github.com/drym-org/symex.el
-https://github.com/manateelazycat/fingertip
-
 https://emacs-china.org/t/topic/21079
 ** TODO email
    mu
@@ -23,6 +20,7 @@ https://emacs-china.org/t/topic/21079
    notmuch
 ** TODO jira
    ox-confluence
+** WILL [[https://github.com/manateelazycat/fingertip][fingertip]] :lazycat:treesit:
 * Header
 ** early-init.el :early-init:
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
@@ -39,8 +37,8 @@ https://emacs-china.org/t/topic/21079
 ** constant :early-init:
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (defconst windows? (memq system-type '(cygwin windows-nt ms-dos)) "are we on windows")
-  (defconst macos? (eq system-type 'darwin) "are we on macos")
   (defconst linux? (memq system-type '(gnu gnu/linux gnu/kfreebds berkeley-unix)) "are we on linux")
+  (defconst macos? (eq system-type 'darwin) "are we on macos")
   (defconst bsd? (memq system-type '(darwin berkeley-unix gnu/kfreebsd)) "are we on bsd")
   (defconst wsl? (and linux? (string-match-p "microsoft" operating-system-release)) "are we on wsl")
 #+END_SRC
@@ -86,13 +84,10 @@ https://emacs-china.org/t/topic/21079
 
 ** exec-path
 #+BEGIN_SRC emacs-lisp
-  (setq exec-path (append '("~/.emacs.d/env/python/.venv/bin"
-                            "~/.emacs.d/env/node/node_modules/.bin"
-                            "~/.bun/bin"
-                            "~/.local/bin") exec-path))
+  (setq exec-path (append '("~/.emacs.d/env/python/.venv/bin" "~/.emacs.d/env/node/node_modules/.bin" "~/.bun/bin" "~/.local/bin") exec-path))
 #+END_SRC
 
-** configs
+** no-littering
 #+BEGIN_SRC emacs-lisp
   (use-package no-littering
     :demand
@@ -158,23 +153,12 @@ https://emacs-china.org/t/topic/21079
   (when windows? (set-w32-system-coding-system 'utf-8))
 #+END_SRC
 
-** modes
-#+BEGIN_SRC emacs-lisp
-  (display-time-mode)
-  (toggle-frame-maximized)
-  (global-auto-revert-mode)
-  (global-display-line-numbers-mode)
-  (toggle-word-wrap)
-  (global-word-wrap-whitespace-mode 1)
-
-  (tab-bar-mode -1)
-#+END_SRC
-
 ** garbage collect
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (setq gc-cons-threshold most-positive-fixnum)
   (setq gc-cons-percentage 0.6)
 #+END_SRC
+
 #+BEGIN_SRC emacs-lisp
   (use-package gcmh :demand t :config (gcmh-mode 1))
 #+END_SRC
@@ -542,6 +526,15 @@ https://emacs-china.org/t/topic/21079
   禁止自动缩放窗口先
   在这个阶段不编译
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
+  (display-time-mode)
+  (toggle-frame-maximized)
+  (global-auto-revert-mode)
+  (global-display-line-numbers-mode)
+  (toggle-word-wrap)
+  (global-word-wrap-whitespace-mode 1)
+  (electric-pair-mode 1)
+
+  (tab-bar-mode -1)
   (menu-bar-mode -1)
   (tool-bar-mode -1)
   (scroll-bar-mode -1)
@@ -950,10 +943,10 @@ https://emacs-china.org/t/topic/21079
     :config
     (dashboard-setup-startup-hook)
     (setq dashboard-center-content t
-          dashboard-items '((recents . 5)
+          dashboard-items '((recents . 9)
                             (bookmarks . 6)
-                            (projects . 3)
-                            (agenda . 6))
+                            (projects . 6)
+                            (agenda . 9))
           dashboard-set-file-icons t
           dashboard-set-heading-icons t))
 #+end_src
@@ -975,7 +968,7 @@ https://emacs-china.org/t/topic/21079
 ** file
 *** dired
 [[https://github.com/Fuco1/dired-hacks][dired-hacks]]
-**** nerd-icons-dired :icon:nerd-icons:
+**** nerd-icons-dired  :icon:nerdicons:
 #+begin_src emacs-lisp :tangle no
   (use-package nerd-icons-dired :hook (dired-mode . nerd-icons-dired-mode))
 #+end_src
@@ -1593,6 +1586,24 @@ https://emacs-china.org/t/topic/21079
     (tyrant-def))
 #+end_src
 * Program
+** languages
+*** [[https://github.com/herbertjones/nushell-ts-mode][nushell-ts-mode]]
+#+begin_src emacs-lisp
+  (use-package nushell-ts-babel
+    :after org-contrib
+    :config
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((nushell . t))))
+
+  (use-package nushell-ts-mode
+    :hook (nushell-ts-mode-hook . (lambda ()
+                                    (corfu-mode 1)
+                                    (highlight-parentheses-mode 1)
+                                    (electric-pair-local-mode 1)
+                                    (electic-indent-local-mode 1))))
+
+#+end_src
 ** treesit
 #+begin_src emacs-lisp
   (use-package treesit
@@ -1665,19 +1676,18 @@ https://emacs-china.org/t/topic/21079
     :config
     (apheleia-global-mode 1)
     (push '(biome . ("bunx" "\@biomejs/biome format")) apheleia-formatters)
-    (setf (alist-get 'typescript-ts-mode apheleia-mode-alist) '(biome))
-    )
+    (setf (alist-get 'typescript-ts-mode apheleia-mode-alist) '(biome)))
 #+end_src
 ** magit
 #+begin_src emacs-lisp
   (use-package magit
-   :general
-   (tyrant-def "g g" 'magit))
+    :general
+    (tyrant-def "g g" 'magit))
 
   (use-package git-timemachine)
 #+end_src
 ** misc
-#+begin_src 
+#+begin_src emacs-lisp
   (use-package editorconfig :config (editorconfig-mode 1))
   (use-package lentic :config (global-lentic-mode))
 #+end_src
@@ -1685,6 +1695,7 @@ https://emacs-china.org/t/topic/21079
 *** lsp-bridge :lazycat:
 #+begin_src emacs-lisp
   (use-package markdown-mode)
+
   (use-package lsp-bridge
     :config
     (global-lsp-bridge-mode)
@@ -1694,24 +1705,6 @@ https://emacs-china.org/t/topic/21079
       "c d" 'lsp-bridge-find-def
       "c D" 'lsp-bridge-find-references
       "c l" 'lsp-bridge-diagnostic-list))
-#+end_src
-** languages
-*** [[https://github.com/herbertjones/nushell-ts-mode][nushell-ts-mode]]
-#+begin_src emacs-lisp
-  (use-package nushell-ts-babel
-    :after org-contrib
-    :config
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((nushell . t))))
-
-  (use-package nushell-ts-mode
-    :hook (nushell-ts-mode-hook . (lambda ()
-                                    (corfu-mode 1)
-                                    (highlight-parentheses-mode 1)
-                                    (electric-pair-local-mode 1)
-                                    (electic-indent-local-mode 1))))
-
 #+end_src
 ** TODO web
 #+begin_src emacs-lisp
@@ -1816,23 +1809,20 @@ https://github.com/lujun9972/emacs-document
 - [[https://github.com/alycklama/evil-mode-cheat-sheet][evil-cheat-sheet]]
 
 ** configs
-*** [[https://github.com/redguardtoo/emacs.d][redguardtoo]] :org:literal:
+*** [[https://github.com/redguardtoo/emacs.d][redguardtoo]] :org:
 *** [[https://github.com/tecosaur/emacs-config][tecosaur]] :org:doom:
 *** [[https://github.com/caisah/emacs.dz][emacs.dz]] :collection:
 *** [[https://github.com/purcell/emacs.d/tree/master][purcell]]
 *** [[https://github.com/Ethanlinyf/General-Pure-Emacs][General Pure Emacs]]
 *** [[https://github.com/sachac/.emacs.d/][sachac]] :org:
 *** [[https://github.com/Eason0210/.emacs.d][Eason0210]] :borg:eglot:
-*** TODO misc
-https://remacs.fun/
-https://github.com/HerculeWu/HubbleEmacs/blob/main/Emacs.org
-https://github.com/Eason0210/.emacs.d
-https://github.com/MatthewZMD/.emacs.d
-https://github.com/willbchang/ward-emacs
-https://github.com/condy0919/.emacs.d
-https://github.com/seagle0128/.emacs.d
-https://github.com/nowislewis/nowisemacs/blob/master/init.org
-https://github.com/nasyxx/emacs.d
+*** [[https://github.com/HerculeWu/HubbleEmacs/blob/main/Emacs.org][HerculeWu]] :org:
+*** [[https://github.com/nowislewis/nowisemacs/blob/master/init.org][nowisemacs]] :org:
+*** [[https://github.com/seagle0128/.emacs.d][centaur emacs]]
+*** [[https://github.com/nasyxx/emacs.d][nasyxx]]
+*** [[https://github.com/MatthewZMD/.emacs.d][MatthewZMD]]
+*** [[https://github.com/condy0919/.emacs.d][condy0919]]
+*** [[https://remacs.fun/][remacs]] :org:blog:
 
 ** query
 https://github.com/search?utf8=%E2%9C%93&q=emacs+configuration&type=repositories&p=1
