@@ -343,3 +343,6 @@
 [submodule "lib/indent-bars"]
 	path = lib/indent-bars
 	url = https://github.com/jdtsmith/indent-bars
+[submodule "lib/holo-layer"]
+	path = lib/holo-layer
+	url = https://github.com/manateelazycat/holo-layer

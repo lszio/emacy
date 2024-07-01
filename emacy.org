@@ -1261,6 +1261,21 @@ https://emacs-china.org/t/topic/21079
       )
     )
 #+end_src
+** modern
+*** TODO [[https://github.com/manateelazycat/holo-layer][holo-layer]] :lazycat:
+#+begin_src emacs-lisp :tangle no
+  ;; FIXME: scale & focus
+  (use-package holo-layer
+    :config
+    (setq holo-layer-enable-cursor-animation t)
+    (setq holo-layer-enable-type-animation t)
+    ;; (setq holo-layer-cursor-alpha 255)
+    ;; (setq holo-layer-cursor-animation-interval 10)
+    ;; (setq holo-layer-cursor-animation-type "jelly easing")
+    ;; (setq holo-layer-enable-place-info t)
+
+    (holo-layer-enable))
+#+end_src
 * Complete
 ** vertico
 #+BEGIN_SRC emacs-lisp
@@ -1667,7 +1682,7 @@ https://emacs-china.org/t/topic/21079
   (use-package lentic :config (global-lentic-mode))
 #+end_src
 ** lsp
-*** lsp-bridge
+*** lsp-bridge :lazycat:
 #+begin_src emacs-lisp
   (use-package markdown-mode)
   (use-package lsp-bridge
