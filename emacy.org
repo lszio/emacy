@@ -10,6 +10,9 @@
 * Inbox
 ** TODO denote
    https://poview.org/posts/emacs-with-denote-and-logseq-for-note-taking/
+** TODO [[https://github.com/emacs-sideline/sideline][sideline]]
+** TODO flymake
+** TODO elgot
 ** misc
 https://github.com/bbatsov/prelude
 https://github.com/drym-org/symex.el
@@ -1261,11 +1264,12 @@ https://emacs-china.org/t/topic/21079
   (use-package holo-layer
     :config
     (setq holo-layer-enable-cursor-animation t)
+    (setq holo-layer-cursor-alpha 255)
+    (setq holo-layer-cursor-animation-interval 10)
+    (setq holo-layer-cursor-animation-type "jelly easing")
+    (setq holo-layer-enable-place-info t)
     (setq holo-layer-enable-type-animation t)
-    ;; (setq holo-layer-cursor-alpha 255)
-    ;; (setq holo-layer-cursor-animation-interval 10)
-    ;; (setq holo-layer-cursor-animation-type "jelly easing")
-    ;; (setq holo-layer-enable-place-info t)
+    (setq holo-layer-type-animation-style "matrix")
 
     (holo-layer-enable))
 #+end_src
@@ -1689,7 +1693,6 @@ https://emacs-china.org/t/topic/21079
 ** misc
 #+begin_src emacs-lisp
   (use-package editorconfig :config (editorconfig-mode 1))
-  (use-package lentic :config (global-lentic-mode))
 #+end_src
 ** lsp
 *** lsp-bridge :lazycat:

@@ -223,9 +223,6 @@
 [submodule "lib/rime"]
 	path = lib/rime
 	url = https://github.com/DogLooksGood/emacs-rime
-[submodule "lib/lentic"]
-	path = lib/lentic
-	url = https://github.com/phillord/lentic
 [submodule "lib/editorconfig"]
 	path = lib/editorconfig
 	url = https://github.com/editorconfig/editorconfig-emacs
