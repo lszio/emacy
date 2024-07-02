@@ -1659,6 +1659,24 @@ https://emacs-china.org/t/topic/21079
                                     (electic-indent-local-mode 1))))
 
 #+end_src
+*** scheme
+**** geiser
+#+begin_src emacs-lisp
+  (use-package geiser)
+  (use-package geiser-guile :after 'geiser)
+#+end_src
+*** racket
+#+begin_src emacs-lisp
+  (use-package racket-mode)
+
+  (use-package ob-racket
+    :after org
+    :config
+    (add-hook 'ob-racket-pre-runtime-library-load-hook #'ob-racket-raco-make-runtime-library)
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((racket . t))))
+#+end_src
 ** markdown
 #+begin_src 
   (use-package markdown-mode)

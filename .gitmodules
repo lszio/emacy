@@ -343,6 +343,15 @@
 [submodule "lib/holo-layer"]
 	path = lib/holo-layer
 	url = https://github.com/manateelazycat/holo-layer
+[submodule "lib/geiser"]
+	path = lib/geiser
+	url = https://gitlab.com/emacs-geiser/geiser
+[submodule "lib/geiser-guile"]
+	path = lib/geiser-guile
+	url = https://gitlab.com/emacs-geiser/guile
+[submodule "lib/racket-mode"]
+	path = lib/racket-mode
+	url = https://github.com/greghendershott/racket-mode
 [submodule "lib/consult-eglot"]
 	path = lib/consult-eglot
 	url = https://github.com/mohkale/consult-eglot
@@ -358,3 +367,6 @@
 [submodule "lib/eglot-booster"]
 	path = lib/eglot-booster
 	url = https://github.com/jdtsmith/eglot-booster
+[submodule "lib/ob-racket"]
+	path = lib/ob-racket
+	url = https://github.com/hasu/emacs-ob-racket
