@@ -1454,8 +1454,52 @@ https://emacs-china.org/t/topic/21079
 #+begin_src emacs-lisp
   (use-package embark-consult :hook (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
-** TODO cape
-** TODO corfu
+** corfu
+#+begin_src emacs-lisp
+  (use-package corfu
+    :custom
+    (corfu-cycle t)
+    (corfu-auto t)
+    (corfu-separator ?\s)
+    (corfu-preview-current nil)
+    (corfu-popupinfo-delay '(0.4 . 0.2))
+    :hook ((prog-mode . corfu-mode)
+           (shell-mode . corfu-mode)
+           (eshell-mode . corfu-mode))
+
+    :init
+    (global-corfu-mode))
+
+  (use-feature emacs
+    :init
+    (setq completion-cycle-threshold 3)
+    (setq tab-always-indent 'complete)
+    (setq read-extended-command-predicate #'command-completion-default-include-p))
+#+end_src
+** cape
+#+begin_src emacs-lisp
+  (use-package cape
+    :init
+    ;; Add to the global default value of `completion-at-point-functions' which is
+    ;; used by `completion-at-point'.  The order of the functions matters, the
+    ;; first function returning a result wins.  Note that the list of buffer-local
+    ;; completion functions takes precedence over the global list.
+    (add-hook 'completion-at-point-functions #'cape-dabbrev)
+    (add-hook 'completion-at-point-functions #'cape-file)
+    (add-hook 'completion-at-point-functions #'cape-elisp-block)
+    (add-hook 'completion-at-point-functions #'cape-history)
+    ;; (add-hook 'completion-at-point-functions #'cape-keyword)
+    ;;(add-hook 'completion-at-point-functions #'cape-tex)
+    ;;(add-hook 'completion-at-point-functions #'cape-sgml)
+    ;;(add-hook 'completion-at-point-functions #'cape-rfc1345)
+    (add-hook 'completion-at-point-functions #'cape-abbrev)
+    ;;(add-hook 'completion-at-point-functions #'cape-dict)
+    ;;(add-hook 'completion-at-point-functions #'cape-elisp-symbol)
+    ;;(add-hook 'completion-at-point-functions #'cape-line)
+
+    (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+    )
+#+end_src
 ** nerd-icon-completion :icon:
 #+begin_src emacs-lisp
   (use-package nerd-icons-completion
@@ -1463,6 +1507,13 @@ https://emacs-china.org/t/topic/21079
     :config
     (nerd-icons-completion-mode)
     (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+#+end_src
+** nerd-icon-corfu :icon:
+#+begin_src emacs-lisp
+  (use-package nerd-icons-corfu
+    :after corfu
+    :config
+    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 #+end_src
 * TODO Org Mode
 ** default
@@ -1608,6 +1659,10 @@ https://emacs-china.org/t/topic/21079
                                     (electic-indent-local-mode 1))))
 
 #+end_src
+** markdown
+#+begin_src 
+  (use-package markdown-mode)
+#+end_src
 ** treesit
 #+begin_src emacs-lisp
   (use-package treesit
@@ -1696,9 +1751,7 @@ https://emacs-china.org/t/topic/21079
 #+end_src
 ** lsp
 *** lsp-bridge :lazycat:
-#+begin_src emacs-lisp
-  (use-package markdown-mode)
-
+#+begin_src emacs-lisp :tangle no
   (use-package lsp-bridge
     :config
     (global-lsp-bridge-mode)
@@ -1708,6 +1761,28 @@ https://emacs-china.org/t/topic/21079
       "c d" 'lsp-bridge-find-def
       "c D" 'lsp-bridge-find-references
       "c l" 'lsp-bridge-diagnostic-list))
+#+end_src
+*** eglot
+#+begin_src emacs-lisp
+  (use-package eglot
+    :hook ((prog-mode . (lambda () (unless (derived-mode-p 'emacs-lisp-mode 'lisp-mode) (eglot-ensure)))))
+    :init
+    (setq read-process-output-max (* 1024 1024))
+    (setq eglot-autoshutdown t
+          eglot-send-changes-idle-time 0.5))
+
+  (use-package consult-eglot
+    :bind
+    (:map eglot-mode-map
+          ("C-M-." . consult-eglot-symbols)))
+#+end_src
+**** eglot-booster
+#+begin_src emacs-lisp
+  (when (executable-find "emacs-lsp-booster")
+    (use-package eglot-booster
+      :after eglot
+      :autoload eglot-booster-mode
+      :init (eglot-booster-mode 1)))
 #+end_src
 ** TODO web
 #+begin_src emacs-lisp
@@ -1750,7 +1825,19 @@ https://emacs-china.org/t/topic/21079
       :diminish
       :hook (restclient-mode . restclient-test-mode)))
 #+end_src
-
+** check
+#+begin_src emacs-lisp
+  (use-package flymake
+    :hook (prog-mode . flymake-mode)
+    ;; :hook (flymake-mode . (lambda ()
+    ;;                         (setq eldoc-documentation-functions
+    ;;                               (cons 'flymake-eldoc-function
+    ;;                                     (delq 'flymake-eldoc-function
+    ;;                                           eldoc-documentation-functions)))))
+    ;; :init (setq elisp-flymake-byte-compile-load-path (cons "./" load-path))
+    :config
+    (setq flymake-fringe-indicator-position 'right-fringe))
+#+end_src
 * Tool
 ** keyfreq
 #+BEGIN_SRC emacs-lisp

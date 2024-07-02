@@ -343,3 +343,18 @@
 [submodule "lib/holo-layer"]
 	path = lib/holo-layer
 	url = https://github.com/manateelazycat/holo-layer
+[submodule "lib/consult-eglot"]
+	path = lib/consult-eglot
+	url = https://github.com/mohkale/consult-eglot
+[submodule "lib/corfu"]
+	path = lib/corfu
+	url = https://github.com/minad/corfu
+[submodule "lib/cape"]
+	path = lib/cape
+	url = https://github.com/minad/cape
+[submodule "lib/nerd-icons-corfu"]
+	path = lib/nerd-icons-corfu
+	url = https://github.com/LuigiPiucco/nerd-icons-corfu
+[submodule "lib/eglot-booster"]
+	path = lib/eglot-booster
+	url = https://github.com/jdtsmith/eglot-booster
