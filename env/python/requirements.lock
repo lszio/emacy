@@ -11,15 +11,21 @@
 -e file:.
 bcrypt==4.1.3
     # via paramiko
+certifi==2024.6.2
+    # via requests
 cffi==1.16.0
     # via cryptography
     # via pynacl
+charset-normalizer==3.3.2
+    # via requests
 cryptography==42.0.8
     # via paramiko
 epc==0.0.5
     # via emapy
 evdev==1.7.1
     # via pynput
+idna==3.7
+    # via requests
 inflect==7.3.0
     # via emapy
 lxml==5.2.2
@@ -55,10 +61,17 @@ pyqt6-webenginesubwheel-qt6==6.7.1
     # via pyqt6-webengine-qt6
 pysocks==1.7.1
     # via emapy
+python-gitlab==4.7.0
+    # via emapy
 python-xlib==0.33
     # via pynput
 rapidfuzz==3.9.3
     # via emapy
+requests==2.32.3
+    # via python-gitlab
+    # via requests-toolbelt
+requests-toolbelt==1.0.0
+    # via python-gitlab
 sexpdata==1.0.0
     # via emapy
     # via epc
@@ -72,3 +85,5 @@ typeguard==4.3.0
     # via inflect
 typing-extensions==4.12.2
     # via typeguard
+urllib3==2.2.2
+    # via requests
