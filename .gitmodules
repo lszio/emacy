@@ -370,3 +370,21 @@
 [submodule "lib/ob-racket"]
 	path = lib/ob-racket
 	url = https://github.com/hasu/emacs-ob-racket
+[submodule "lib/sideline"]
+	path = lib/sideline
+	url = https://github.com/emacs-sideline/sideline
+[submodule "lib/sideline-eglot"]
+	path = lib/sideline-eglot
+	url = https://github.com/emacs-sideline/sideline-eglot
+[submodule "lib/ht"]
+	path = lib/ht
+	url = https://github.com/Wilfred/ht.el
+[submodule "lib/sideline-flymake"]
+	path = lib/sideline-flymake
+	url = https://github.com/emacs-sideline/sideline-flymake
+[submodule "lib/blamer"]
+	path = lib/blamer
+	url = https://github.com/Artawower/blamer.el
+[submodule "lib/posframe"]
+	path = lib/posframe
+	url = https://github.com/tumashu/posframe

@@ -1273,6 +1273,30 @@ https://emacs-china.org/t/topic/21079
 
     (holo-layer-enable))
 #+end_src
+** sideline
+#+begin_src emacs-lisp
+  (use-package sideline
+    :hook
+    ((prog-mode . sideline-mode))
+    :custom
+    ;; (sideline-backends-left-skip-current-line t)
+    ;; (sideline-backends-right-skip-current-line t)
+    ;; (sideline-order-left 'down)
+    ;; (sideline-order-right 'up)
+    (sideline-display-backend-name t))
+#+end_src
+*** sideline-eglot :eglot:
+#+begin_src emacs-lisp
+  (use-package sideline-eglot
+    :init
+    (setq sideline-backends-left '(sideline-eglot)))
+#+end_src
+*** sideline-flymake :flymake:
+#+begin_src emacs-lisp
+  (use-package sideline-eglot
+    :init
+    (setq sideline-backends-right '(sideline-flymake)))
+#+end_src
 * Complete
 ** vertico
 #+BEGIN_SRC emacs-lisp
