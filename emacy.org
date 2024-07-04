@@ -10,9 +10,6 @@
 * Inbox
 ** TODO denote
    https://poview.org/posts/emacs-with-denote-and-logseq-for-note-taking/
-** TODO [[https://github.com/emacs-sideline/sideline][sideline]]
-** TODO flymake
-** TODO elgot
 ** misc
 https://github.com/bbatsov/prelude
 https://github.com/drym-org/symex.el
@@ -1296,6 +1293,24 @@ https://emacs-china.org/t/topic/21079
   (use-package sideline-eglot
     :init
     (setq sideline-backends-right '(sideline-flymake)))
+#+end_src
+** blamer
+#+begin_src emacs-lisp
+  (use-package blamer
+    :defer 20
+    :custom
+    (blamer-view 'overlay)
+    (blamer-idle-time 0.3)
+    (blamer-min-offset 21)
+    (blamer-show-avatar-p nil)
+    (blamer-smart-background-p t)
+    ;; :custom-face
+    ;; (blamer-face ((t :foreground "#7a88cf"
+    ;;                   :background nil
+    ;;                   :height 140
+    ;;                   :italic t)))
+    :config
+    (global-blamer-mode 1))
 #+end_src
 * Complete
 ** vertico

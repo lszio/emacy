@@ -111,6 +111,11 @@ def "main libs" [] {
 	modules
 }
 
+def "main fix" [] {
+	modules | get path | each {|p| 
+	}
+}
+
 def "main sync" [ ] {
 	if ($melpa | path exists) {
 		echo ("Melpa exists, pull...")
