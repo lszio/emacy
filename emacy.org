@@ -1698,9 +1698,9 @@ https://emacs-china.org/t/topic/21079
                                     (electic-indent-local-mode 1))))
 
 #+end_src
-*** scheme
+*** TODO scheme
 **** geiser
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package geiser)
   (use-package geiser-guile :after 'geiser)
 #+end_src
