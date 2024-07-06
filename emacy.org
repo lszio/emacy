@@ -10,17 +10,17 @@
 * Inbox
 ** TODO denote
    https://poview.org/posts/emacs-with-denote-and-logseq-for-note-taking/
-** misc
-https://github.com/bbatsov/prelude
-https://github.com/drym-org/symex.el
-https://emacs-china.org/t/topic/21079
 ** TODO email
    mu
    wanderlust
    notmuch
+** WILL symex
+   tree-sitter
 ** TODO jira
    ox-confluence
 ** WILL [[https://github.com/manateelazycat/fingertip][fingertip]] :lazycat:treesit:
+** misc
+   https://emacs-china.org/t/topic/21079
 * Header
 ** early-init.el :early-init:
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
@@ -1344,6 +1344,14 @@ https://emacs-china.org/t/topic/21079
 
     (holo-layer-enable))
 #+end_src
+** combobulate :treesit:
+#+begin_src emacs-lisp
+  (use-package combobulate
+    :preface
+    (setq combobulate-key-prefix "C-c o")
+    :hook
+    (((python-ts-mode js-ts-mode typescript-ts-mode tsx-ts-mode json-ts-mode html-ts-mode css-ts-mode) . combobulate-mode)))
+#+end_src
 * Complete
 ** vertico
 #+BEGIN_SRC emacs-lisp
@@ -1989,6 +1997,7 @@ https://github.com/lujun9972/emacs-document
 *** [[https://github.com/condy0919/.emacs.d][condy0919]]
 *** [[https://remacs.fun/][remacs]] :org:blog:
 
+*** [[https://github.com/bbatsov/prelude][prelude]]
 ** query
 https://github.com/search?utf8=%E2%9C%93&q=emacs+configuration&type=repositories&p=1
 

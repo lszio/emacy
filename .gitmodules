@@ -394,3 +394,6 @@
 [submodule "lib/casual-dired"]
 	path = lib/casual-dired
 	url = https://github.com/kickingvegas/casual-dired
+[submodule "lib/combobulate"]
+	path = lib/combobulate
+	url = https://github.com/mickeynp/combobulate
