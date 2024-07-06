@@ -961,9 +961,24 @@ https://emacs-china.org/t/topic/21079
     :custom
     (nerd-icons-font-family "Symbols Nerd Font Mono"))
 #+end_src
-**** ibuffer
+**** nerd-icons-ibuffer                                             :ibuffer:
 #+begin_src emacs-lisp
   (use-package nerd-icons-ibuffer :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
+#+end_src
+**** nerd-icon-completion                                              :completion:
+#+begin_src emacs-lisp
+  (use-package nerd-icons-completion
+    :after marginalia
+    :config
+    (nerd-icons-completion-mode)
+    (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+#+end_src
+**** nerd-icon-corfu                                                   :corfu:
+#+begin_src emacs-lisp
+  (use-package nerd-icons-corfu
+    :after corfu
+    :config
+    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 #+end_src
 ** file
 *** dired
@@ -1254,22 +1269,6 @@ https://emacs-china.org/t/topic/21079
       )
     )
 #+end_src
-** modern
-*** TODO [[https://github.com/manateelazycat/holo-layer][holo-layer]] :lazycat:
-#+begin_src emacs-lisp :tangle no
-  ;; FIXME: scale & focus
-  (use-package holo-layer
-    :config
-    (setq holo-layer-enable-cursor-animation t)
-    (setq holo-layer-cursor-alpha 255)
-    (setq holo-layer-cursor-animation-interval 10)
-    (setq holo-layer-cursor-animation-type "jelly easing")
-    (setq holo-layer-enable-place-info t)
-    (setq holo-layer-enable-type-animation t)
-    (setq holo-layer-type-animation-style "matrix")
-
-    (holo-layer-enable))
-#+end_src
 ** sideline
 #+begin_src emacs-lisp
   (use-package sideline
@@ -1311,6 +1310,22 @@ https://emacs-china.org/t/topic/21079
     ;;                   :italic t)))
     :config
     (global-blamer-mode 1))
+#+end_src
+** misc
+*** TODO [[https://github.com/manateelazycat/holo-layer][holo-layer]] :lazycat:
+#+begin_src emacs-lisp :tangle no
+  ;; FIXME: scale & focus
+  (use-package holo-layer
+    :config
+    (setq holo-layer-enable-cursor-animation t)
+    (setq holo-layer-cursor-alpha 255)
+    (setq holo-layer-cursor-animation-interval 10)
+    (setq holo-layer-cursor-animation-type "jelly easing")
+    (setq holo-layer-enable-place-info t)
+    (setq holo-layer-enable-type-animation t)
+    (setq holo-layer-type-animation-style "matrix")
+
+    (holo-layer-enable))
 #+end_src
 * Complete
 ** vertico
@@ -1539,21 +1554,6 @@ https://emacs-china.org/t/topic/21079
     (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
     )
 #+end_src
-** nerd-icon-completion :icon:
-#+begin_src emacs-lisp
-  (use-package nerd-icons-completion
-    :after marginalia
-    :config
-    (nerd-icons-completion-mode)
-    (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
-#+end_src
-** nerd-icon-corfu :icon:
-#+begin_src emacs-lisp
-  (use-package nerd-icons-corfu
-    :after corfu
-    :config
-    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
-#+end_src
 * TODO Org Mode
 ** default
 #+begin_src emacs-lisp
@@ -1615,6 +1615,7 @@ https://emacs-china.org/t/topic/21079
             :with-broken-links t
             :with-toc nil)))
 #+end_src
+** TODO brain
 ** elfeed
 #+begin_src emacs-lisp
   (use-package elfeed)
