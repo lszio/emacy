@@ -163,7 +163,7 @@ https://emacs-china.org/t/topic/21079
   (use-package gcmh :demand t :config (gcmh-mode 1))
 #+END_SRC
 
-* Binding :binding:
+* Binding :binds:
 ** general
 #+BEGIN_SRC emacs-lisp
   (use-package general
@@ -519,6 +519,23 @@ https://emacs-china.org/t/topic/21079
     "qQ"      'save-buffers-kill-emacs)
 #+end_src
 
+** casual
+*** casual-calc                                                        :calc:
+#+begin_src emacs-lisp
+  (use-package casual-calc
+    :general
+    (:states 'normal
+     :keymaps '(calc-mode-map calc-alg-map)
+     "C-m" 'casual-calc-tmenu))
+#+end_src
+*** casual-dired                                                      :dired:
+#+begin_src emacs-lisp
+  (use-package casual-dired
+    :general
+    (:states 'normal
+     :keymaps 'dired-mode-map
+     "C-o" 'casual-dired-tmenu))
+#+end_src
 * User Interface
 ** default
   禁止展示菜单栏、工具栏和纵向滚动条

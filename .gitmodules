@@ -385,3 +385,12 @@
 [submodule "lib/posframe"]
 	path = lib/posframe
 	url = https://github.com/tumashu/posframe
+[submodule "lib/casual-calc"]
+	path = lib/casual-calc
+	url = https://github.com/kickingvegas/casual-calc
+[submodule "lib/casual-lib"]
+	path = lib/casual-lib
+	url = https://github.com/kickingvegas/casual-lib
+[submodule "lib/casual-dired"]
+	path = lib/casual-dired
+	url = https://github.com/kickingvegas/casual-dired
