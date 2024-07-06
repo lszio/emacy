@@ -5,3 +5,6 @@ tangle:
 
 minie: 
 	emacs --batch minie.org --eval "(org-babel-tangle)"
+
+defs:
+	nu bin/epm gen defs
