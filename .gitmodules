@@ -397,3 +397,9 @@
 [submodule "lib/combobulate"]
 	path = lib/combobulate
 	url = https://github.com/mickeynp/combobulate
+[submodule "lib/org-super-agenda"]
+	path = lib/org-super-agenda
+	url = https://github.com/alphapapa/org-super-agenda
+[submodule "lib/ts"]
+	path = lib/ts
+	url = https://github.com/alphapapa/ts.el
