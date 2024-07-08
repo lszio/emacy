@@ -403,3 +403,9 @@
 [submodule "lib/ts"]
 	path = lib/ts
 	url = https://github.com/alphapapa/ts.el
+[submodule "lib/org-modern"]
+	path = lib/org-modern
+	url = https://github.com/minad/org-modern
+[submodule "lib/org-brain"]
+	path = lib/org-brain
+	url = https://github.com/Kungsgeten/org-brain

@@ -8,6 +8,7 @@
 #+AUTO_TANGLE: t
 
 * Inbox
+☯ ⚋ ⚊ ⚌ ⚍ ⚎ ⚏
 ** TODO denote
    https://poview.org/posts/emacs-with-denote-and-logseq-for-note-taking/
 ** TODO email
@@ -1623,6 +1624,14 @@
           ("QUIT" :foreground "grey"         :weight bold)
           ("[Q]"  :foreground "grey"         :weight bold)))
 
+  (setq org-capture-templates
+        '(("t" "Todo" entry (file "~/Notes/inbox.org")
+           "* TODO %^{Name}")
+          ("w" "Work" entry (file "~/Notes/work/task.org")
+           "* TODO %^{Name}")
+          ("j" "Journal" entry (file+datetree "~/Notes/journal/index.org")
+           "* %U - %^{heading} %^g\n %?\n")))
+
   (use-package org-contrib)
 #+end_src
 ** agenda
@@ -1651,6 +1660,28 @@
             :with-toc nil)))
 #+end_src
 ** TODO brain
+#+begin_src emacs-lisp
+  (use-package org-brain
+    :init
+    (setq org-brain-path org-directory)
+    ;; For Evil users
+    (with-eval-after-load 'evil (evil-set-initial-state 'org-brain-visualize-mode 'emacs))
+    :config
+    (bind-key "C-c b" 'org-brain-prefix-map org-mode-map)
+    ;; (setq org-id-track-globally t)
+    (setq org-id-locations-file "~/Notes/.org-id-locations")
+    (add-hook 'before-save-hook #'org-brain-ensure-ids-in-buffer)
+    (push '("b" "Brain" plain (function org-brain-goto-end) "* %i%?" :empty-lines 1) org-capture-templates)
+    (setq org-brain-visualize-default-choices 'all)
+    (setq org-brain-title-max-length 12)
+    (setq org-brain-include-file-entries nil
+          org-brain-file-entries-use-title nil))
+
+  ;; Allows you to edit entries directly from org-brain-visualize
+  ;; (use-package polymode
+  ;;   :config
+  ;;   (add-hook 'org-brain-visualize-mode-hook #'org-brain-polymode))
+#+end_src
 ** TODO org-super-agenda
 #+begin_src emacs-lisp
   (use-package org-super-agenda
@@ -1683,6 +1714,41 @@
 #+end_src
 ** TODO deft
 ** TODO [[https://github.com/minad/org-modern][org-modern]]
+#+begin_src emacs-lisp
+  (use-package org-modern
+    :hook
+    (org-mode . org-modern-mode)
+    (org-agenda-finalize . org-modern-agenda)
+    :config
+    (setq org-auto-align-tags nil)
+    (setq org-tags-column 0)
+    (setq org-hide-emphasis-markers t)
+    (setq org-pretty-entities t)
+    (setq org-modern-star 'replace)
+    (setq org-modern-replace-stars "☰☱☲☳☴☵☶☷")
+
+    ;; (setq org-modern-fold-stars '(("☯" . "☰ ") ("☯" . "☱ ") ("☯" . "☲ ") ("☯" . "☳") ("☯" . "☴") ("☯" . "☵") ("☯" . "☶") ("☯" . "☷")))
+
+    (setq org-agenda-tags-column 0
+          org-agenda-block-separator ?-
+          org-agenda-time-grid '((daily today require-timed) (800 1000 1200 1400 1600 1800 2000) " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+          org-agenda-current-time-string "◀── now ─────────────────────────────────────────────────")
+
+    (setq org-ellipsis "…")
+    (set-face-attribute 'org-ellipsis nil :inherit 'default :box nil)
+
+    ;; ;; Add frame borders and window dividers
+    ;; (modify-all-frames-parameters
+    ;;   '((right-divider-width . 40)
+    ;;     (internal-border-width . 40)))
+    ;; (dolist (face '(window-divider
+    ;;                 window-divider-first-pixel
+    ;;                 window-divider-last-pixel))
+    ;;   (face-spec-reset-face face)
+    ;;   (set-face-foreground face (face-attribute 'default :background)))
+    ;; (set-face-background 'fringe (face-attribute 'default :background))
+    )
+#+end_src
 ** roam
 #+begin_src emacs-lisp
   (use-package org-roam
