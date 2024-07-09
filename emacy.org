@@ -770,8 +770,8 @@
             )))
 #+END_SRC
 
-*** [[https://github.com/karthink/popper][popper]]
-#+BEGIN_SRC emacs-lisp
+*** QUIT [[https://github.com/karthink/popper][popper]]
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package popper
     :demand
     :bind (("M-`"     . popper-toggle-latest)
