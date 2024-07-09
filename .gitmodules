@@ -406,3 +406,9 @@
 [submodule "lib/org-brain"]
 	path = lib/org-brain
 	url = https://github.com/Kungsgeten/org-brain
+[submodule "lib/parinfer-rust-mode"]
+	path = lib/parinfer-rust-mode
+	url = https://github.com/justinbarclay/parinfer-rust-mode
+[submodule "lib/track-changes"]
+	path = lib/track-changes
+	url = https://github.com/emacs-straight/track-changes.git

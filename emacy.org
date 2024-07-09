@@ -95,8 +95,7 @@
     :demand
     :config
     (setq custom-file (no-littering-expand-var-file-name "custom.el")
-          whisper-install-directory (no-littering-expand-var-file-name "whisper")
-          parinfer-rust-library-directory (no-littering-expand-var-file-name "parinfer-rust/")))
+          whisper-install-directory (no-littering-expand-var-file-name "whisper")))
 #+END_SRC
 
 ** which-key
@@ -1918,6 +1917,17 @@
 #+begin_src emacs-lisp
   (use-package editorconfig :config (editorconfig-mode 1))
 #+end_src
+** parinfer-rust
+#+begin_src emacs-lisp
+  (use-package parinfer-rust-mode
+    :hook ((emacs-lisp-mode lisp-mode) . parinfer-rust-mode)
+    :hook ((emacs-lisp-mode lisp-mode) . (lambda () (electric-pair-mode -1)))
+
+    :init
+    (setq parinfer-rust-auto-download t
+          parinfer-rust-library-directory (no-littering-expand-var-file-name "parinfer-rust/")))
+#+end_src
+*** TODO use buildin track-changes
 ** lsp
 *** lsp-bridge :lazycat:
 #+begin_src emacs-lisp :tangle no
