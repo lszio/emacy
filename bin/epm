@@ -1,4 +1,5 @@
 #!/usr/bin/env -S nu --stdin
+# -*- mode: nushell; -*-
 
 let emacs = "~/.emacs.d" | path expand
 let melpa = "~/.local/share/emacs/melpa/" | path expand

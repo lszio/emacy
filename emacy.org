@@ -1801,13 +1801,14 @@
      'org-babel-load-languages
      '((nushell . t))))
 
+  (define-derived-mode nushell-mode prog-mode "nusehll mode")
+
   (use-package nushell-ts-mode
     :hook (nushell-ts-mode-hook . (lambda ()
                                     (corfu-mode 1)
                                     (highlight-parentheses-mode 1)
                                     (electric-pair-local-mode 1)
                                     (electic-indent-local-mode 1))))
-
 #+end_src
 *** TODO scheme
 **** geiser
@@ -1879,6 +1880,7 @@
             (js-mode         . js-ts-mode)
             (js-json-mode    . json-ts-mode)
             (python-mode     . python-ts-mode)
+            (nushell-mode    . nushell-ts-mode)
             (sh-mode         . bash-ts-mode)
             (typescript-mode . typescript-ts-mode)))
     (add-hook 'emacs-lisp-mode-hook #'(lambda () (treesit-parser-create 'elisp)))
