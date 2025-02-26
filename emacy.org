@@ -95,7 +95,10 @@
     :demand
     :config
     (setq custom-file (no-littering-expand-var-file-name "custom.el")
-          whisper-install-directory (no-littering-expand-var-file-name "whisper")))
+          whisper-install-directory (no-littering-expand-var-file-name "whisper"))
+    (let ((dir (no-littering-expand-var-file-name "locks")))
+      (make-directory dir t)
+      (setq lock-file-name-transforms `((".*" ,dir t)))))
 #+END_SRC
 
 ** which-key
