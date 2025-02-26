@@ -1,0 +1,25 @@
+{
+  "lockfileVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "emacy",
+      "devDependencies": {
+        "bun-types": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^5.0.0",
+      },
+    },
+  },
+  "packages": {
+    "@types/node": ["@types/node@22.13.5", "http://10.25.7.18:4873/@types%2fnode/-/node-22.13.5.tgz", { "dependencies": { "undici-types": "~6.20.0" } }, "sha512-+lTU0PxZXn0Dr1NBtC7Y8cR21AJr87dLLU953CWA6pMxxv/UDc7jYAY90upcrie1nRcD6XNG5HOYEDtgW5TxAg=="],
+
+    "@types/ws": ["@types/ws@8.5.14", "http://10.25.7.18:4873/@types%2fws/-/ws-8.5.14.tgz", { "dependencies": { "@types/node": "*" } }, "sha512-bd/YFLW+URhBzMXurx7lWByOu+xzU9+kb3RboOteXYDfW+tr+JZa99OyNmPINEGB/ahzKrEuc8rcv4gnpJmxTw=="],
+
+    "bun-types": ["bun-types@1.2.3", "http://10.25.7.18:4873/bun-types/-/bun-types-1.2.3.tgz", { "dependencies": { "@types/node": "*", "@types/ws": "~8.5.10" } }, "sha512-P7AeyTseLKAvgaZqQrvp3RqFM3yN9PlcLuSTe7SoJOfZkER73mLdT2vEQi8U64S1YvM/ldcNiQjn0Sn7H9lGgg=="],
+
+    "typescript": ["typescript@5.7.3", "http://10.25.7.18:4873/typescript/-/typescript-5.7.3.tgz", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw=="],
+
+    "undici-types": ["undici-types@6.20.0", "http://10.25.7.18:4873/undici-types/-/undici-types-6.20.0.tgz", {}, "sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg=="],
+  }
+}
