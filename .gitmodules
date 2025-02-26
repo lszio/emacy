@@ -1,6 +1,3 @@
-[submodule "mod/doomemacs"]
-	path = mod/doomemacs
-	url = https://github.com/doomemacs/doomemacs
 [submodule "lib/general"]
 	path = lib/general
 	url = https://github.com/noctuid/general.el
