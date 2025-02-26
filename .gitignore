@@ -23,3 +23,6 @@ parinfer-rust
 *.egg-info
 .pdm-python
 .venv
+
+.clj-kondo
+.lsp
