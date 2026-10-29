@@ -1,5 +1,53 @@
 #+TITLE: Emacy
 
+* Configuration
+The tracked Elisp sources are loaded directly:
+- =early-init.el=: OS/runtime detection and startup settings.
+- =init.el=: Elpaca bootstrap.
+- =lisp/base.el=: existing editor configuration.
+- =lisp/platform/=: Linux, macOS, and Windows profile files.
+- =lisp/envs.el=: managed external tools and language-server integration.
+- =lisp/packages.el=: explicit upstream recipes for packages with missing or nonstandard archive recipes.
+
+=emacy.org= is not loaded or tangled during startup; the source-managed Elisp files above are authoritative.
+Legacy =lib/= submodules are no longer tracked; existing local checkouts are ignored and preserved, while Elpaca manages the packages.
+
+* Layout
+Everything the configuration *generates* lives under =var/= (gitignored); the configuration root only holds sources and package checkouts.
+
+| Path | Contents |
+|------|----------|
+| =lisp/= | tracked Elisp sources (authoritative) |
+| =elpaca/= | package manager checkouts and builds (gitignored) |
+| =env/= | managed Python/Node runtimes |
+| =var/treesit/= | compiled tree-sitter grammar libraries |
+| =var/parinfer-rust/= | parinfer-rust native library |
+| =var/modules/= | native modules (e.g. =vterm-module.so=), on =load-path= |
+| =var/eln-cache/= | byte-compilation cache (=startup-redirect-eln-cache=) |
+| =var/project-list.el= | remembered projects (=project-list-file=) |
+| =var/org/, =var/elfeed/, … | databases and other runtime state |
+
+Emacs writes auto-save files next to the edited file and only falls back to =auto-save-list/= in the configuration root when that directory is not writable; that one path is a symlink into =var/auto-save-list/=.
+
+* Native modules
+Native modules live in =var/modules/= (gitignored) which is on =load-path=. Run =make vterm-module= to compile the vterm module from the Elpaca source checkout into it; =vterm.el= then loads it without prompting to compile. The terminal leader bindings (=SPC t t=, =SPC t c=, …) are installed at startup and load =vterm-toggle=/=multi-vterm= on demand through autoloads.
+
+* Fonts
+GUI font setup (Fira Code for Latin/code, LXGW WenKai for CJK, applied by =fontaine=) lives in =lisp/base.el= and runs when the first graphic frame appears — daemon-safe, after all themes load, skipped on Neomacs. Install the expected fonts into =~/.local/share/fonts=:
+
+- [[https://github.com/tonsky/FiraCode][Fira Code]]
+- [[https://github.com/lxgw/LxgwWenKai][LXGW WenKai]] (霞鹜文楷)
+
+Run =fc-cache -f= after adding them; a running Emacs must be restarted to see newly installed fonts.
+
+* External runtimes and RPC
+The existing =env/= directory remains the runtime root. Run =make envs= to synchronize the Python environment with =uv= and the Node environment with =bun=.
+
+Python's =lsp= extra installs =python-lsp-server= into =env/python/.venv=. The Node environment installs =typescript-language-server= and TypeScript into =env/node/node_modules=. =lisp/envs.el= discovers those managed executables and registers them with Eglot for Python and JavaScript/TypeScript modes. Eglot uses LSP JSON-RPC over stdio.
+
+The Linux/macOS profiles use =.venv/bin=; Windows uses =.venv/Scripts=. Neomacs is detected at startup and continues to skip the native-module-based =vterm= packages while retaining the Eglot path.
+
+
 * Reference
 ** configs
 https://remacs.fun/

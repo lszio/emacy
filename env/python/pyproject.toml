@@ -29,3 +29,5 @@ dependencies = [
     "inflect>=7.3.0",
     "python-gitlab>=4.7.0",
 ]
+[project.optional-dependencies]
+lsp = ["python-lsp-server>=1.12"]

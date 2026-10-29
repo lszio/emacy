@@ -1270,15 +1270,18 @@
 #+end_src
 *** vterm
 #+begin_src emacs-lisp
+  (defconst neomacs? (fboundp 'neovm--internal-panic) "are we running neomacs")
+
   (use-package vterm
-    :unless windows?)
+    :unless (or windows? neomacs?))
 
   (use-package multi-vterm
     :after vterm
-    :unless windows?)
+    :unless (or windows? neomacs?))
 
   (use-package vterm-toggle
     :after vterm
+    :unless (or windows? neomacs?)
     :general
     (tyrant-def
       "t t" 'vterm-toggle
@@ -1480,7 +1483,7 @@
      :preview-key '(:debounce 0.2 any)
      consult-ripgrep consult-git-grep consult-grep
      consult-bookmark consult-recent-file consult-xref
-     consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
+     consult-source-recent-file consult-source-project-recent-file consult-source-bookmark
      :preview-key '(:debounce 0.4 any))
 
     ;; Optionally configure the narrowing key.

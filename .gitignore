@@ -6,19 +6,20 @@ __pycache__
 /libraries
 /history
 /library
+/lib/
 
-/init.el
+/elpaca/
 /init-dev.el
-/early-init.el
 
 tmp
-var
 temp
 local
-eln-cache
-tree-sitter
+
+# All generated artifacts and runtime state live in var/ (treesit grammars,
+# native modules, eln cache, project list, databases, ...).
+var
+# Emacs hard-codes this directory name; it is a symlink into var/.
 auto-save-list
-parinfer-rust
 
 *.egg-info
 .pdm-python
