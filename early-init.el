@@ -4,8 +4,10 @@
 
 ;; Keep the byte-compilation cache with the other runtime state instead
 ;; of the configuration root.  `startup-redirect-eln-cache' is meant to
-;; be called from the early init file.
-(startup-redirect-eln-cache "var/eln-cache")
+;; be called from the early init file.  Neomacs has no native compiler
+;; (`native-comp-eln-load-path' is unbound), so skip it there.
+(when (boundp 'native-comp-eln-load-path)
+  (startup-redirect-eln-cache "var/eln-cache"))
 
 (defconst windows? (memq system-type '(cygwin windows-nt ms-dos))
   "Non-nil when running on Windows.")
