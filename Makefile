@@ -18,6 +18,6 @@ defs:
 # Compile the vterm native module from the Elpaca source checkout into
 # var/modules/ (on `load-path'); vterm.el then loads it without prompting.
 vterm-module:
-	cd elpaca/builds/vterm && mkdir -p build && cd build && cmake .. && make
+	cd var/elpaca/builds/vterm && mkdir -p build && cd build && cmake .. && make
 	mkdir -p var/modules
-	cp elpaca/builds/vterm/vterm-module.so var/modules/vterm-module.so
+	cp var/elpaca/builds/vterm/vterm-module.so var/modules/vterm-module.so

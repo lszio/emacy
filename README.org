@@ -13,13 +13,13 @@ The tracked Elisp sources are loaded directly:
 Legacy =lib/= submodules are no longer tracked; existing local checkouts are ignored and preserved, while Elpaca manages the packages.
 
 * Layout
-Everything the configuration *generates* lives under =var/= (gitignored); the configuration root only holds sources and package checkouts.
+The configuration root holds only tracked sources; everything the configuration *generates* — package checkouts, compiled artifacts, databases — lives under =var/= (gitignored).
 
 | Path | Contents |
 |------|----------|
 | =lisp/= | tracked Elisp sources (authoritative) |
-| =elpaca/= | package manager checkouts and builds (gitignored) |
 | =env/= | managed Python/Node runtimes |
+| =var/elpaca/= | package manager checkouts, builds and cache |
 | =var/treesit/= | compiled tree-sitter grammar libraries |
 | =var/parinfer-rust/= | parinfer-rust native library |
 | =var/modules/= | native modules (e.g. =vterm-module.so=), on =load-path= |
