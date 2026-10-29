@@ -48,6 +48,7 @@ JSON-RPC transport over stdio."
   (dolist (directory (list emacy-python-venv-bin-directory
                            emacy-node-modules-bin-directory
                            (expand-file-name "~/.bun/bin")
+                           (expand-file-name "~/.opencode/bin")
                            (expand-file-name "~/.local/bin")))
     (emacy-env--add-exec-path directory)))
 

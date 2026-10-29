@@ -2,6 +2,9 @@
 
 (defconst emacy-package-recipes
   '((aweshell :host github :repo "manateelazycat/aweshell")
+    (ecss :host github :repo "emacs-taf/ecss")
+    (ebox :host github :repo "emacs-taf/ebox")
+    (etaf :host github :repo "emacs-taf/etaf")
     (mpvi :host github :repo "lorniu/mpvi")
     (nushell-ts-babel :host github :repo "herbertjones/nushell-ts-babel")
     (nushell-ts-mode :host github :repo "herbertjones/nushell-ts-mode")

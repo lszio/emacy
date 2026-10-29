@@ -88,6 +88,7 @@
   (tyrant-def
       "SPC"     '("M-x" . execute-extended-command)
       "!"       '("shell cmd" . shell-command)
+      "a"       '("agent shell" . agent-shell)
       "m"       (cons "files" (make-sparse-keymap))
       "m"       (cons "major mode" (make-sparse-keymap))
       "s"       (cons "search" (make-sparse-keymap))
@@ -1708,6 +1709,31 @@ generated grammars with the other artifacts instead."
                              rime-predicate-tex-math-or-command-p));; 在 (La)TeX 数学环境中或者输入 (La)TeX 命令时
   :bind
   (:map rime-mode-map ("C-," . 'rime-force-enable)))
+
+;; AI agents over the Agent Client Protocol --------------------------------
+;; `agent-shell' talks to agents such as OpenCode, Claude Code, Gemini CLI
+;; and Codex.  Each agent ships a CLI; the list below keeps only the agents
+;; whose CLI is actually installed.
+(use-package agent-shell
+  :after shell-maker
+  :config
+  (setq agent-shell-agent-configs
+        (lambda ()
+          (seq-filter
+           (lambda (maker)
+             (when-let* ((config (funcall maker))
+                         (client-maker (map-elt config :client-maker))
+                         (client (ignore-errors
+                                   (funcall client-maker (current-buffer))))
+                         (command (map-elt client :command)))
+               (executable-find command)))
+           (agent-shell-default-agent-config-makers)))))
+
+;; Text application framework ----------------------------------------------
+;; ETAF builds Emacs text applications out of retained components; it needs
+;; the `ecss' and `ebox' packages, which Elpaca installs from GitHub
+;; (see lisp/packages.el).
+(use-package etaf)
 
 (provide 'emacy-base)
 ;;; base.el ends here

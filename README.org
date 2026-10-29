@@ -48,6 +48,12 @@ Python's =lsp= extra installs =python-lsp-server= into =env/python/.venv=. The N
 The Linux/macOS profiles use =.venv/bin=; Windows uses =.venv/Scripts=. Neomacs is detected at startup and continues to skip the native-module-based =vterm= packages while retaining the Eglot path.
 
 
+* AI agents and text applications
+Two package families are installed through Elpaca:
+
+- =agent-shell= (MELPA, together with =acp= and =shell-maker=) drives AI coding agents over the Agent Client Protocol. =SPC a= starts or reuses a session. The offered agents are filtered to the CLIs that are actually installed; OpenCode is picked up from =~/.opencode/bin/=, which =lisp/envs.el= adds to =exec-path=.
+- =etaf= (GitHub: =emacs-taf/etaf=, with the =ecss= and =ebox= dependencies) provides the ETAF text-application framework. These three are not published to MELPA, so their upstream sources are pinned in =lisp/packages.el=.
+
 * Reference
 ** configs
 https://remacs.fun/
